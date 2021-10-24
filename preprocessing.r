@@ -97,48 +97,49 @@ AB_DE_FH<-merge(x=AB_DE,y=FH,by="MRN",all.x=T)#2801*277
 
 #Visit_Treatment 用"Mrn_Vis"merge
 VT <- read_csv("Visit_Treatment.csv")#6998*65
-#清完的資料叫cVT
+
 #1.移除不必要變數 unique刪除重複
 drop_col <- colnames(VT) %in% c("Test/Battery", "Version")
 VT <- VT[,!drop_col]
 VT <- unique(VT)#6998*63
-#2.duplicate 每個ID
-VT <- arrange(VT,"MRN","Visit Date")
+#2.duplicate 每個ID visit treatment相同的保留最後一筆
+VT <- arrange(VT,"MRN","Visit Date","Order Filled Out")
 VT <- as.data.frame(VT)
 VT$MRN <- as.factor(VT$MRN)
 length(levels(VT[,1]))#2744
+VTrenum=NULL
 for(i in 1:length(levels(VT[,"MRN"]))){
   eachid<-VT[VT[,"MRN"]==levels(VT[,"MRN"])[i],]
-  
+  keepvis<-which(duplicated(eachid[,"visit_treatment"],fromLast = T)==FALSE)#保留false的
+  eachid<-eachid[keepvis,]
+  #3.對visit重新編號
+  eachid[, "visit_treatment"] <- rep(1:dim(eachid)[1])
+  eachid[, "visit_treatment"] <-as.character(eachid[, "visit_treatment"])
+  VTrenum <- rbind(VTrenum, eachid)#VTrenum 6913*63
 }
-
-
-
-for (i in 1:length(levels(temp[, "MRN"]))) {
-  vnumber <- temp[temp[, "MRN"] == levels(temp[, "MRN"])[i], ]
-  vnumber[, "Visit_24Hrs_cloud"] <- rep(1:dim(vnumber)[1])
-  vnumber[, "Visit_24Hrs_cloud"] <-
-    as.character(vnumber[, "Visit_24Hrs_cloud"])
-  renumberd <- rbind(renumberd, vnumber)
-}
-#4.對visit重新編號
+#去掉order filled out
+VTrenum<-VTrenum[,-which(colnames(VTrenum)=="Order Filled Out")]
 #new一個key=MRN+VIS 確定每個Visit只有一筆資料
+VTMrn_Vis <- VTrenum[, c("MRN", "visit_treatment")]#6913*2
+#mapply=multi apply 
+VTMrn_Vis$"VTMrn_Vis" <-mapply(VTMrn_Vis$MRN,VTMrn_Vis$visit_treatment,FUN=paste0)
+#清完的資料叫cVT
+cVT<-cbind(VTMrn_Vis[,3],VTrenum)#6913*63
+names(cVT)[1]<-c("VTMrn_Vis")
+cVT<-as.data.frame(cVT)
+write.csv(cVT,file="VT.csv")
 
 
 #Visit_Vital signs 用"Mrn_Vis"merge
 VVs <- read_csv("Visit_Vital signs.csv")#7452*61
 #清完的資料叫cVVs
+"visit_vital_signs"
+
+
 
 #OUTCOME 計算NA比例
 OC <- read_csv("OUTCOME.scv")
 #清完的資料叫uOC
-
-
-
-fdergeagreger
-
-
-
 
 
 
