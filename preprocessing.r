@@ -129,17 +129,115 @@ names(cVT)[1]<-c("VTMrn_Vis")
 cVT<-as.data.frame(cVT)
 write.csv(cVT,file="VT.csv")
 
-
+###################
 #Visit_Vital signs 用"Mrn_Vis"merge
 VVs <- read_csv("Visit_Vital signs.csv")#7452*61
 #清完的資料叫cVVs
 "visit_vital_signs"
+VVs<-as.data.frame(VVs)
+colna<-lapply(lapply(lapply(VVs,is.na),sum),FUN = function(x) x/7452*100)#每一col NA的數量
+drop_col <- colnames(VVs) %in% c("Test/Battery", "Version")
+VVs <- VVs[,!drop_col]
+VVs <- unique(VVs)#7451*59
+#2.duplicate 每個ID visit treatment相同的保留最後一筆
+VVs <- arrange(VVs,"MRN","Visit Date","Order Filled Out")
+VVs$MRN <- as.factor(VVs$MRN)
+length(levels(VVs[,1]))#2706
+VVsrenum=NULL
+for(i in 1:length(levels(VVs[,"MRN"]))){
+  eachid<-VVs[VVs[,"MRN"]==levels(VVs[,"MRN"])[i],]
+  keepvis<-which(duplicated(eachid[,"visit_vital_signs"],fromLast = T)==FALSE)#保留false的
+  eachid<-eachid[keepvis,]
+  #3.對visit重新編號
+  eachid[, "visit_vital_signs"] <- rep(1:dim(eachid)[1])
+  eachid[, "visit_vital_signs"] <-as.character(eachid[, "visit_vital_signs"])
+  VVsrenum <- rbind(VVsrenum, eachid)#VVsrenum 6645*59
+}
+#去掉order filled out
+VVsrenum<-VVsrenum[,-which(colnames(VVsrenum)=="Order Filled Out")]
+#new一個key=MRN+VIS 確定每個Visit只有一筆資料
+VVsMrn_Vis <- VVsrenum[, c("MRN", "visit_vital_signs")]#6913*2
+#mapply=multi apply 
+VVsMrn_Vis$"Mrn_Vis" <-mapply(VVsMrn_Vis$MRN,VVsMrn_Vis$visit_vital_signs,FUN=paste0)
+#清完的資料叫cVT
+cVVs<-cbind(VVsMrn_Vis[,3],VVsrenum)#6645*59
+names(cVVs)[1]<-c("Mrn_Vis")
+cVVs<-as.data.frame(cVVs)
+write.csv(cVVs,file="VVs.csv")
+AB_DE <- read_csv("AB_DE_newkey.csv")
+AB_DE<-AB_DE[,-1]
+AB_DE_VVS<-merge(AB_DE,cVVs,by="Mrn_Vis",all.x = T)#1671*322
+write.csv(AB_DE_VVS,file="aa.csv")
+which(colnames(AB_DE_VVS)=="office_peri_L_sys")
+#算268:322的NA比例
+couna<-AB_DE_VVS[,268:322]
+colna<-lapply(lapply(couna,is.na),sum)#每一col NA的數量
+narario<-sort(unlist(colna))
+print(colna)
+C<-as.data.frame(unlist(colna))
 
 
 
+
+####################
 #OUTCOME 計算NA比例
-OC <- read_csv("OUTCOME.scv")
+OC <- read_csv("OUTCOME.csv")
+#刪掉 OT_visit_vital_signs
+dim(unique(OC))
+colna<-lapply(lapply(lapply(OC,is.na),sum),FUN = function(x) x/972*100)#每一col NA的數量
 #清完的資料叫uOC
+library(VIM)#畫missing比例圖
+OC.aggrplot <- aggr(OC, col=c('lightblue','red'), numbers=TRUE, prop = TRUE, sortVars=TRUE, labels=names(OC), cex.axis=.7, gap=3)
+sort(unlist(colna))
+drop_col <-
+  colnames(OC) %in% c("Test/Battery", "Order Filled Out", "Version", "ABPM_cloud")
+Cleaning <- OC[, !drop_col]
+#把MRN變factor讓他可以有levels
+Cleaning$MRN <- as.factor(Cleaning$MRN)
+level <- levels(Cleaning$MRN)
+#資料是{}的取代成NA
+Cleaning[Cleaning == "{}"] <- NA
+str(Cleaning)
+#因為有"VisitDate"不同但後面資料完全相同的case，所以保留但不參考這個變數
+temp <- Cleaning[, -which(colnames(Cleaning) == "Visit Date")]
+repeatdata <- Cleaning[which(duplicated(temp) == TRUE), ]#dim=1 32
+temp <- Cleaning[-which(duplicated(temp) == TRUE), ]#dim=971 312
+dim(unique(temp))#dim=971 31 確定清掉重複row
+length(levels(temp[, "MRN"]))#people = 1333
+temp<-as.data.frame(temp)
+#先按照ID Visit date sort過temp
+sort(temp, by = c("MRN", "Visit Date"))
+#重新給Visit編號 後續csv的Visit編號用visit date當key去對
+#如果有ID的visit date都一樣=>先撈出來再看要不要刪
+renumberd = NULL
+for (i in 1:length(levels(temp[, "MRN"]))) {
+  vnumber <- temp[temp[, "MRN"] == levels(temp[, "MRN"])[i], ]
+  vnumber[, "OT_visit_vital_signs"] <- rep(1:dim(vnumber)[1])
+  vnumber[, "OT_visit_vital_signs"] <-
+    as.character(vnumber[, "OT_visit_vital_signs"])
+  renumberd <- rbind(renumberd, vnumber)
+}
+write.csv(renumberd, file = "cOC.csv")
+#合併資料集們=>把key名字改一樣再merge
+#merge cOC with AB_DE 
+#new一個key=MRN+VIS 確定每個Visit只有一筆資料
+OCMrn_Vis <- renumberd[, c("MRN", "OT_visit_vital_signs")]#6913*2
+#mapply=multi apply 
+OCMrn_Vis$"Mrn_Vis" <-mapply(OCMrn_Vis$MRN,OCMrn_Vis$OT_visit_vital_signs,FUN=paste0)
+COC<-cbind(OCMrn_Vis[,3],renumberd)
+names(COC)[1]<-c("Mrn_Vis")
+COC<-as.data.frame(COC)
+write.csv(COC,file="nkeyOC.csv")
+AB_DE <- read_csv("AB_DE_newkey.csv")
+AB_DE <- AB_DE[,-1]
+AB_DE_OC <- merge(AB_DE,COC,by="Mrn_Vis",all.x = T)#1671*296
+write.csv(AB_DE_OC,file="bb.csv")
+which(colnames(AB_DE_OC)=="OT_GOT")
+#算268:322的NA比例
+couna<-AB_DE_OC[,268:296]
+colna<-lapply(lapply(couna,is.na),sum)#每一col NA的數量
+D<-as.data.frame(unlist(colna))
+
 
 
 
