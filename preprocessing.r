@@ -12,6 +12,7 @@ library(dplyr)
 library(tidyr)
 library(tidyverse)
 setwd("C://Users//hsu//Desktop//master//TCHCData")
+#####
 #清ABPM
 raw <- fread("Cloud_ABPM.csv")
 raw <- as.data.frame(raw)
@@ -50,6 +51,7 @@ which(renumberd[, "Visit_24Hrs_cloud"] == " ")
 setwd("C://Users//hsu//Desktop//master//TCHCData")
 write.csv(renumberd, file = "abpm.csv")
 
+######
 #Demographics基本資料
 #清除重複 確認每個ID只有一筆 =>和ABPM MERGE
 Demographics <- read_csv("Demographics.csv")
@@ -57,6 +59,8 @@ uDe <- Demographics[row.names(unique(Demographics[, "MRN"])), ]
 uDe <- uDe[!duplicated(uDe[, "MRN"]), ]
 dim(uDe)
 write.csv(uDe,"uDE.csv")#2806*79
+
+
 ab_de <- merge(x = renumberd,
                y = uDe,
                by = "MRN",
@@ -76,12 +80,13 @@ Mrn_Vis <- AB_DE[, c("MRN", "Visit_24Hrs_cloud")]
 #apply(data,1=by row;2=by col,FUN)
 str(Mrn_Vis)
 #mapply=multi apply 
-Mrn_Vis$"Mrn_Vis" <-mapply(Mrn_Vis$MRN,Mrn_Vis$Visit_24Hrs_cloud,FUN=paste0)
+Mrn_Vis$"Mrn_Vis" <- mapply(Mrn_Vis$MRN,Mrn_Vis$Visit_24Hrs_cloud,FUN=paste0)
 AB_DE <- cbind(Mrn_Vis[,3],AB_DE)
 write.csv(AB_DE,file="AB_DE_newkey.csv")#1671*264
 
 AB_DE <- read_csv("AB_DE_newkey.csv")
 
+#######
 #Family history 一個人可以填很多家人的病史
 #清和資料無關的變數
 FH <- as.data.frame(fread("Family history.csv"))
@@ -94,7 +99,7 @@ AB_DE_FH<-merge(x=AB_DE,y=FH,by="MRN",all.x=T)#2801*277
 #ex丟所有V0的資料=>一人多筆合理
 #清完的資料叫FH
 
-
+########
 #Visit_Treatment 用"Mrn_Vis"merge
 VT <- read_csv("Visit_Treatment.csv")#6998*65
 
@@ -128,8 +133,10 @@ cVT<-cbind(VTMrn_Vis[,3],VTrenum)#6913*63
 names(cVT)[1]<-c("VTMrn_Vis")
 cVT<-as.data.frame(cVT)
 write.csv(cVT,file="VT.csv")
-
-###################
+VT<-read_csv("VT.csv")
+names(VT)[2]<-"Mrn_Vis"
+write.csv(VT,file="cVT.csv")
+#########
 #Visit_Vital signs 用"Mrn_Vis"merge
 VVs <- read_csv("Visit_Vital signs.csv")#7452*61
 #清完的資料叫cVVs
@@ -155,6 +162,7 @@ for(i in 1:length(levels(VVs[,"MRN"]))){
 }
 #去掉order filled out
 VVsrenum<-VVsrenum[,-which(colnames(VVsrenum)=="Order Filled Out")]
+
 #new一個key=MRN+VIS 確定每個Visit只有一筆資料
 VVsMrn_Vis <- VVsrenum[, c("MRN", "visit_vital_signs")]#6913*2
 #mapply=multi apply 
@@ -179,7 +187,7 @@ C<-as.data.frame(unlist(colna))
 
 
 
-####################
+##########
 #OUTCOME 計算NA比例
 OC <- read_csv("OUTCOME.csv")
 #刪掉 OT_visit_vital_signs
@@ -237,6 +245,71 @@ which(colnames(AB_DE_OC)=="OT_GOT")
 couna<-AB_DE_OC[,268:296]
 colna<-lapply(lapply(couna,is.na),sum)#每一col NA的數量
 D<-as.data.frame(unlist(colna))
+
+
+
+
+
+
+
+###########
+#HBP
+HBP<-read_csv("Cloud_HOME BP_Dmode.csv")
+HBP<-as.data.frame(HBP)#3088*124
+
+#把不會用到的變數刪掉，叫CleanHBP 
+drop_col <-
+  colnames(HBP) %in% c("Test/Battery", "Order Filled Out", "Version")
+CleanHBP <- HBP[, !drop_col]#3088*121
+CleanHBP <- as.data.frame(CleanHBP)
+CleanHBP <- arrange(CleanHBP,"MRN","Visit Date")
+
+#把MRN變factor讓他可以有levels
+CleanHBP$MRN <- as.factor(CleanHBP$MRN)
+level <- levels(CleanHBP$MRN)#1507人
+
+#因為有"VisitDate"不同但後面資料完全相同的case，所以保留但不參考這個變數
+temp <- CleanHBP[, -which(colnames(CleanHBP) == "Visit Date")]
+repeatdata <- CleanHBP[which(duplicated(temp) == TRUE), ]#dim=56*121
+temp <- CleanHBP[-which(duplicated(temp) == TRUE), ]#dim=3032*121
+dim(unique(temp))
+length(levels(temp[, 1]))#1507
+#a<-temp[temp$MRN=="NCKU0251",]
+
+#重新給Visit編號 後續csv的Visit編號用visit date當key去對
+#如果有ID的visit date都一樣=>先撈出來再看要不要刪
+hrenumberd = NULL
+for (i in 1:length(levels(temp[, "MRN"]))) {
+  hnumber <- temp[temp[, "MRN"] == levels(temp[, "MRN"])[i], ]
+  hnumber[, "visit_HBP_Dmode"] <- rep(1:dim(hnumber)[1])
+  hnumber[, "visit_HBP_Dmode"] <-
+    as.character(hnumber[, "visit_HBP_Dmode"])
+  hrenumberd <- rbind(hrenumberd, hnumber)
+}
+which(hrenumberd[, "visit_HBP_Dmode"] == " ")
+#integer(0) 檢查完Visit_24Hrs_cloud沒有空白
+hrenumberd[hrenumberd == "{}"] <- NA
+setwd("C://Users//hsu//Desktop//master//TCHCData")
+write.csv(hrenumberd, file = "hbp.csv")#3032*121 1507人
+
+Hbp <- read_csv("hbp.csv")
+colnames(Hbp)[1:5]
+Hbp <- Hbp[, -1]
+Mrn_Vis <- Hbp[, c("MRN", "visit_HBP_Dmode")]
+#apply(data,1=by row;2=by col,FUN)
+str(Mrn_Vis)
+#mapply=multi apply 
+Mrn_Vis$"Mrn_Vis" <- mapply(Mrn_Vis$MRN,Mrn_Vis$visit_HBP_Dmode,FUN=paste0)
+Hbp <- cbind(Mrn_Vis[,3],Hbp)
+write.csv(Hbp,file="hbpnewkey.csv")#
+
+
+
+
+
+
+
+
 
 
 
