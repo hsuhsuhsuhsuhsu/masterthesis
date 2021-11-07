@@ -176,13 +176,14 @@ AB_DE <- read_csv("AB_DE_newkey.csv")
 AB_DE<-AB_DE[,-1]
 AB_DE_VVS<-merge(AB_DE,cVVs,by="Mrn_Vis",all.x = T)#1671*322
 write.csv(AB_DE_VVS,file="aa.csv")
+AB_DE_VVS<-read_csv("aa.csv",col_select = -1)
 which(colnames(AB_DE_VVS)=="office_peri_L_sys")
 #算268:322的NA比例
 couna<-AB_DE_VVS[,268:322]
 colna<-lapply(lapply(couna,is.na),sum)#每一col NA的數量
 narario<-sort(unlist(colna))
 print(colna)
-C<-as.data.frame(unlist(colna))
+abpmna<-as.data.frame(unlist(colna))
 
 
 
@@ -304,9 +305,28 @@ Hbp <- cbind(Mrn_Vis[,3],Hbp)
 write.csv(Hbp,file="hbpnewkey.csv")#
 
 
+############
+#hbpnewkey+uDE+cVT+VVs
+hbp <- read_csv("hbpnewkey.csv", col_select = -1)
+ude <- read_csv("uDE.csv", col_select = -1)
+cvt <- read_csv("cVT.csv", col_select = -c(1, 2))
+vvs <- read_csv("VVs.csv", col_select = -1)
 
 
+hbp_de <- merge(hbp, ude, by = "MRN", all.x = T)
+hbp_de_vt <- merge(hbp_de, cvt, by = "Mrn_Vis", all.x = T)
+hbp_de_vt_vs <- merge(hbp_de_vt, vvs, by = "Mrn_Vis", all.x = T)
+#hbp_de_vt_vs = 3032*320
+which(colnames(hbp_de_vt_vs)=="office_peri_L_sys")
+#算266:320的NA比例
+counh<-hbp_de_vt_vs[,266:320]
+colnh<-lapply(lapply(counh,is.na),sum)#每一col NA的數量
+narario<-sort(unlist(colnh))
+print(colnh)
+hbpna<-as.data.frame(unlist(colnh))
 
+
+dim(complete.cases(AB_DE_VVS))
 
 
 
