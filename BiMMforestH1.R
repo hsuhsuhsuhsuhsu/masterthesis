@@ -1,12 +1,10 @@
 #################
 #load libraries
-library(rpart)
-library(blme)
-library(randomForest)
+
 library(joineR)
 hv<-joineR::heart.valve#988*25
 
-#刪log.lvmi na用
+#刪log.lvmi na用平均插補
 hv <- hv[,-which(colnames(hv)=="log.lvmi")]
 sum(complete.cases(hv))#629
 for(i in 1:ncol(hv)) {
@@ -15,6 +13,7 @@ for(i in 1:ncol(hv)) {
 sum(complete.cases(hv))#988
 #help(heart.valve)
 #install.packages("lme4")
+
 #用 lvmi分類 男的>134=>positive(1) 女的>110=>positive
 hv$lvmica<-""
 
@@ -24,12 +23,26 @@ hv[hv$sex==1 & hv$lvmi>=110,"lvmica"]<-"1"
 hv[hv$sex==1 & hv$lvmi<110,"lvmica"]<-"0"
 sum(is.na(hv$lvmica))
 
-smp_size<-round(nrow(hv)*0.7,0)
+#刪掉lvmi lvmica是Y
+hv <- hv[,-which(colnames(hv)=="lvmi")]
+#把類別變數挑出來 看有沒有排列組合人數是0
+str(hv)
+#類別:sex status prenyha lv emergenc hc sten.reg.mix hs
+#ftable(hv$sex,hv$status,hv$prenyha,hv$lv,hv$hs)
+
+hv$sex<-as.factor(hv$sex)
+hv$lvmica <- as.factor(hv$lvmica)
+ftable(hv$sex,hv$lvmica)
+#分訓練測試
+smp_size <- round(nrow(hv) * 0.7, 0)
 set.seed(123)
 train_ind <- sample(seq_len(nrow(hv)), size = smp_size)
-train <- hv[train_ind, ]
-test<-hv[-train_ind,]
+train <- hv[train_ind,]
+test <- hv[-train_ind, ]
 
+library(rpart)
+library(blme)
+library(randomForest)
 ###############################################################################
 #variable names
 #traindata: name of the training dataset
@@ -72,11 +85,11 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
                            data = data, method = "class")
     forestprob<-predict(forest,type="prob")[,2]
     ## Estimate New Random Effects and Errors using BLMER
-    lmefit <-
-      tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                            collapse="~"), "+(1|random)",sep=""))),
+    lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                      collapse="~"), "+(1|random)",sep=""))),
                       data=data,family=binomial,control=glmerControl(optCtrl=list(maxfun=20000)
                       )),error=function(cond)"skip")
+    
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
       newlik <- logLik(lmefit)
@@ -85,58 +98,45 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
       oldlik <- newlik
       # Extract random effects to make the new adjusted target
       logit<-forestprob
-      logit2<-
-        exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
+      logit2<-exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
       #population level effects
       AllEffects <- (logit+logit2)/2 #average them
       #h1 update
       AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects1>.5,1,0)
-    }
-    else{ ContinueCondition<-FALSE }
+    }else{ ContinueCondition<-FALSE }
     #if all of the binary outcomes are the same then get out of loop
     if(min(AdjustedTarget)==max(AdjustedTarget)){
-      140 
       ContinueCondition<-FALSE
       shouldpredict=FALSE
     }
   }
   if(class(lmefit)[1]=="character" | shouldpredict==FALSE){
     #return train and test confusion matrices
-    return(list(
-      c(NA,NA,NA,NA),
-      c(NA,NA,NA,NA),
-      NA,
-      NA
-    ))
-  }
-  else if(!(class(lmefit)[1]=="character")){
+    return(list(c(NA,NA,NA,NA),c(NA,NA,NA,NA),NA,NA))
+  }else if(!(class(lmefit)[1]=="character")){
     #predictions
-    test.preds<-predict(forest,testdata)
-    traindata1<-cbind(traindata,random)
-    train.preds<-
-      ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
+    test.preds <- predict(forest,testdata)
+    traindata1 <- cbind(traindata,random)
+    train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
-t1<-table(traindata$ys,train.preds)
-t4<-table(testdata$ys,test.preds)
-if(ncol(t1)==1 & train.preds[1]==1){
-t1<-c(0,0,t1[1,1],t1[2,1])
-}
-else if(ncol(t1)==1 & train.preds[1]==0){
-t1<-c(t1[1,1],t1[2,1],0,0)
-}
-if(ncol(t4)==1 & test.preds[1]==1){
-t4<-c(0,0,t4[1,1],t4[2,1])
-}
-else if(ncol(t4)==1 & test.preds[1]==0){
-t4<-c(t4[1,1],t4[2,1],0,0)
-}
-#return train and test confusion matrices, # iterations, and RF
-OOBER
-return(list(
-c(t1),
-c(t4),
-iterations,
-mean(forest$err.rate[,1])
-))
-}
+    t1 <- table(traindata$ys,train.preds)
+    t4 <- table(testdata$ys,test.preds)
+    
+    if(ncol(t1)==1 & train.preds[1]==1){
+      t1<-c(0,0,t1[1,1],t1[2,1])
+    }else if(ncol(t1)==1 & train.preds[1]==0){
+      t1<-c(t1[1,1],t1[2,1],0,0)
+    }
+    
+    if(ncol(t4)==1 & test.preds[1]==1){
+      t4<-c(0,0,t4[1,1],t4[2,1])
+      }else if(ncol(t4)==1 & test.preds[1]==0){
+        t4<-c(t4[1,1],t4[2,1],0,0)
+      }
+    
+    #return train and test confusion matrices, 
+    # iterations, and RF OOBER
+  return(list(c(t1), c(t4), iterations, mean(forest$err.rate[,1])))
+  }
+  
 }
