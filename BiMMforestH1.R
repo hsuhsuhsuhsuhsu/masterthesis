@@ -1,7 +1,35 @@
+#################
 #load libraries
 library(rpart)
 library(blme)
 library(randomForest)
+library(joineR)
+hv<-joineR::heart.valve#988*25
+
+#刪log.lvmi na用
+hv <- hv[,-which(colnames(hv)=="log.lvmi")]
+sum(complete.cases(hv))#629
+for(i in 1:ncol(hv)) {
+  hv[ , i][is.na(hv[ , i])] <- mean(hv[ , i], na.rm = TRUE)
+}
+sum(complete.cases(hv))#988
+#help(heart.valve)
+#install.packages("lme4")
+#用 lvmi分類 男的>134=>positive(1) 女的>110=>positive
+hv$lvmica<-""
+
+hv[hv$sex==0 & hv$lvmi>=134,"lvmica"]<-"1"
+hv[hv$sex==0 & hv$lvmi<134,"lvmica"]<-"0"
+hv[hv$sex==1 & hv$lvmi>=110,"lvmica"]<-"1"
+hv[hv$sex==1 & hv$lvmi<110,"lvmica"]<-"0"
+sum(is.na(hv$lvmica))
+
+smp_size<-round(nrow(hv)*0.7,0)
+set.seed(123)
+train_ind <- sample(seq_len(nrow(hv)), size = smp_size)
+train <- hv[train_ind, ]
+test<-hv[-train_ind,]
+
 ###############################################################################
 #variable names
 #traindata: name of the training dataset
