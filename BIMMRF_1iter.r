@@ -53,10 +53,9 @@ lets+ammonia+inr+pressors+rrt
 ###############################################################################
 #BiMM forest with one iteration
 #note: requires training and test data with no missing values
-random<-c("age","time")
-paste(colnames(hv),"+")
-f <- lvmica~sex+age+time+grad+ef+bsa
-BiMMforest1(train,test,f,random,123)
+#random<-c("age","time")
+#f <- lvmica~sex+age+time+grad+ef+bsa
+#BiMMforest1(train,test,f,random,123)
 BiMMforest1<-function(traindata,testdata,formula,random,seed){
   #set up variables for Bimm method
   #先把原本的井字號 

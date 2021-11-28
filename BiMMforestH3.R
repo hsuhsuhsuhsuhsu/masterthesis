@@ -29,7 +29,7 @@ BiMMforestH3 <- function(traindata, testdata, formula, random, seed) {
   ContinueCondition <- TRUE
   iterations <- 0
   #initial values
-  AdjustedTarget <- as.numeric(Target) - initialRandomEffects
+  AdjustedTarget <- as.numeric(levels(Target)) - initialRandomEffects
   oldlik <- -Inf
   # Make a new data frame to include all the new variables
   newdata <- data
@@ -52,7 +52,7 @@ BiMMforestH3 <- function(traindata, testdata, formula, random, seed) {
         bglmer(
           formula(c(paste(
             paste(c(toString(TargetName), "forestprob"),
-                  collapse = "~"), "+(1|random)", sep =
+                  collapse = "~"), "(1+time|age)", sep =
               ""
           ))),
           data = data,
@@ -75,9 +75,9 @@ BiMMforestH3 <- function(traindata, testdata, formula, random, seed) {
       AllEffects <- (logit + logit2) / 2 #average them
       #split function h3
       for (k in 1:length(AllEffects)) {
-        if (as.numeric(Target[k]) + AllEffects[k] - 1 < .5) {
+        if (as.numeric(levels(Target[k])) + AllEffects[k] - 1 < .5) {
           AdjustedTarget[k] = 0
-        }else if (as.numeric(Target[k]) + AllEffects[k] - 1 > 1.5) {
+        }else if (as.numeric(levels(Target[k])) + AllEffects[k] - 1 > 1.5) {
           AdjustedTarget[k] = 1
         }else{
           #generate random probability coin flip based on AllEffects (q notation in paper)
@@ -117,11 +117,7 @@ BiMMforestH3 <- function(traindata, testdata, formula, random, seed) {
     else if (ncol(t4) == 1 & test.preds[1] == 0) {
       t4 <- c(t4[1, 1], t4[2, 1], 0, 0)
     }
-    #return train and test confusion matrices, # iterations, and RF
-    OOBER
-    return(list(c(t1),
-                c(t4),
-                iterations,
-                mean(forest$err.rate[, 1])))
+    #return train and test confusion matrices, # iterations, and RF OOBER
+    return(list(c(t1), c(t4), iterations, mean(forest$err.rate[, 1])))
   }
 } 

@@ -55,7 +55,11 @@ lets+ammonia
 #random: name of the random clustering variable
 ###############################################################################
 #BiMM forest with H1 updates
+formula <- lvmica~sex+age+time+grad+ef+bsa
+traindata1 <- train
+testdata1 <- test
 BiMMforestH1<-function(traindata,testdata,formula,random,seed){
+  
   #set up variables for Bimm method
   data=traindata1
   initialRandomEffects=rep(0,length(data[,1]))
@@ -69,58 +73,81 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
   ContinueCondition<-TRUE
   iterations<-0
   #initial values
-  AdjustedTarget<-as.numeric(Target)-initialRandomEffects
+  AdjustedTarget<-as.numeric(levels(Target))-initialRandomEffects
   oldlik<- -Inf
+
   # Make a new data frame to include all the new variables
   newdata <- data
   shouldpredict=TRUE
+  starttime <-Sys.time()
   while(ContinueCondition){
     # Current values of variables
     newdata[,"AdjustedTarget"] <- AdjustedTarget
-    iterations <- iterations+1
+    iterations <- iterations + 1
+    print(iterations)
     #build tree
-    set.seed(seed)
+    set.seed(123)
     forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
                                            Predictors),collapse = "~")),
                            data = data, method = "class")
     forestprob<-predict(forest,type="prob")[,2]
+    RFpredprob <- as.data.frame(forestprob)
     ## Estimate New Random Effects and Errors using BLMER
     lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                      collapse="~"), "+(1|random)",sep=""))),
-                      data=data,family=binomial,control=glmerControl(optCtrl=list(maxfun=20000)
-                      )),error=function(cond)"skip")
+                      collapse="~"), "+(1+time|age)",sep=""))),
+                      data=data,family=binomial,
+                      control=glmerControl(optCtrl=list(maxfun=20000))),
+                      error=function(cond)"skip")
     
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
-      newlik <- logLik(lmefit)
-      ContinueCondition <- (abs(newlik-oldlik)>ErrorTolerance &
-                              iterations < MaxIterations)
-      oldlik <- newlik
+      newlik <- logLik(lmefit)#loglikelihood
+      
+      ContinueCondition <- (abs(newlik-oldlik)>ErrorTolerance & iterations < MaxIterations)
+      oldlik <- newlik #abs 絕對值
+    
       # Extract random effects to make the new adjusted target
-      logit<-forestprob
-      logit2<-exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
+      logit <- forestprob #rf機率
+      logit2 <- exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
+      # logit ()
       #population level effects
       AllEffects <- (logit+logit2)/2 #average them
+      
       #h1 update
-      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects1>.5,1,0)
+      AdjustedTarget <- ifelse(as.numeric(levels(Target)) + AllEffects >0.5,1,0)
+      
     }else{ ContinueCondition<-FALSE }
+    
     #if all of the binary outcomes are the same then get out of loop
     if(min(AdjustedTarget)==max(AdjustedTarget)){
       ContinueCondition<-FALSE
       shouldpredict=FALSE
     }
   }
+  endtime <- Sys.time()
+  endtime-starttime
   if(class(lmefit)[1]=="character" | shouldpredict==FALSE){
     #return train and test confusion matrices
     return(list(c(NA,NA,NA,NA),c(NA,NA,NA,NA),NA,NA))
   }else if(!(class(lmefit)[1]=="character")){
     #predictions
-    test.preds <- predict(forest,testdata)
-    traindata1 <- cbind(traindata,random)
+    test.preds <- predict(forest,testdata1)
+    table(traindata1$lvmica)
+    table(test.preds)
+    table(testdata1$lvmica)
+    random<-c("age","time")
+    traindata2 <- cbind(traindata1,random)
     train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
-    t1 <- table(traindata$ys,train.preds)
-    t4 <- table(testdata$ys,test.preds)
+    t1 <- table(traindata1$lvmica,train.preds)
+    trainacc <- (t1[1]+t1[4]) / sum(t1)
+    train0acc <- t1[1]/(t1[1]+t1[3])
+    train1acc <- t1[4]/(t1[2]+t1[4])
+    
+    t4 <- table(testdata1$lvmica,test.preds)
+    testacc <- (t4[1]+t4[4]) / sum(t4)
+    test0acc <- t4[1]/(t4[1]+t4[3])
+    test1acc <- t4[4]/(t4[2]+t4[4])
     
     if(ncol(t1)==1 & train.preds[1]==1){
       t1<-c(0,0,t1[1,1],t1[2,1])
