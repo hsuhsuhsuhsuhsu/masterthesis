@@ -95,10 +95,10 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   RFpredictprob <- as.data.frame(forestprob)
   ## Estimate New Random Effects and Errors using GLMER
   options(warn=-1)
-  random<-"time"
-  #(1|random) 要放隨機效應變數進去
+  random<-c("time","age")
+  #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-          collapse="~"), "+(1+time|age)",sep=""))),data=data,family=binomial,
+          collapse="~"), "+(1|time) +(1|age)",sep=""))),data=data,family=binomial,
           control = glmerControl(optCtrl=list(maxfun=20000)
            )),
           error = function(cond)"skip")
@@ -111,8 +111,8 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   else if(!(class(lmefit)[1]=="character")){
     #test.preds<-predict(forest,testdata)
     #traindata<-cbind(traindata,random)
-    test.preds<-predict(forest,test)
-    traindata<-cbind(train,random)
+    test.preds<- predict(forest,test)
+    train <- cbind(train,random)
     train.preds <- ifelse(predict(lmefit,train,type="response")<.5,0,1)
     
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
