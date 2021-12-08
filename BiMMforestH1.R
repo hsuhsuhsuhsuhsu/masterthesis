@@ -58,13 +58,16 @@ lets+ammonia
 formula <- lvmica~sex+age+time+grad+ef+bsa
 traindata1 <- train
 testdata1 <- test
+table(test$lvmica)
+table(train$lvmica)
 BiMMforestH1<-function(traindata,testdata,formula,random,seed){
   
   #set up variables for Bimm method
   data=traindata1
   initialRandomEffects=rep(0,length(data[,1]))
   ErrorTolerance=0.006
-  MaxIterations=1000
+  MaxIterations=100 #原本是1000
+  
   #parse formula
   Predictors<-paste(attr(terms(formula),"term.labels"),collapse="+")
   TargetName<-formula[[2]]
@@ -79,7 +82,7 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
   # Make a new data frame to include all the new variables
   newdata <- data
   shouldpredict=TRUE
-  starttime <-Sys.time()
+  starttime <- Sys.time()
   while(ContinueCondition){
     # Current values of variables
     newdata[,"AdjustedTarget"] <- AdjustedTarget
@@ -94,7 +97,7 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
     RFpredprob <- as.data.frame(forestprob)
     ## Estimate New Random Effects and Errors using BLMER
     lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                      collapse="~"), "+(1+time|age)",sep=""))),
+                      collapse="~"), "+(1|time) +(1|age)",sep=""))),
                       data=data,family=binomial,
                       control=glmerControl(optCtrl=list(maxfun=20000))),
                       error=function(cond)"skip")
@@ -137,18 +140,18 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
     table(testdata1$lvmica)
     random<-c("age","time")
     traindata2 <- cbind(traindata1,random)
-    train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
+    train.preds <- ifelse(predict(lmefit,traindata2,type="response")<.5,0,1)
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
     t1 <- table(traindata1$lvmica,train.preds)
     trainacc <- (t1[1]+t1[4]) / sum(t1)
     train0acc <- t1[1]/(t1[1]+t1[3])
     train1acc <- t1[4]/(t1[2]+t1[4])
-    
+    t1
     t4 <- table(testdata1$lvmica,test.preds)
     testacc <- (t4[1]+t4[4]) / sum(t4)
     test0acc <- t4[1]/(t4[1]+t4[3])
     test1acc <- t4[4]/(t4[2]+t4[4])
-    
+    t4
     if(ncol(t1)==1 & train.preds[1]==1){
       t1<-c(0,0,t1[1,1],t1[2,1])
     }else if(ncol(t1)==1 & train.preds[1]==0){

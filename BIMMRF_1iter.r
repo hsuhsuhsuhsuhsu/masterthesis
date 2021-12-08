@@ -120,11 +120,12 @@ t1<-table(train$lvmica,train.preds)
 trainacc <- (t1[1]+t1[4]) / sum(t1)
 train0acc <- t1[1]/(t1[1]+t1[3])
 train1acc <- t1[4]/(t1[2]+t1[4])
-
+t1
 t4<-table(test$lvmica,test.preds)
 testacc <- (t4[1]+t4[4]) / sum(t4)
 test0acc <- t4[1]/(t4[1]+t4[3])
 test1acc <- t4[4]/(t4[2]+t4[4])
+t4
 if(ncol(t1)==1 & train.preds[1]==1){
   t1<-c(0,0,t1[1,1],t1[2,1])
   }else if(ncol(t1)==1 & train.preds[1]==0){
