@@ -62,3 +62,5 @@ DNColnTime1 <- DNColnTime1[-which(DNColnTime1[,"night count"] >16),]
 
 
 #在windows上 隨便加一行 看會不會在MAC出現
+
+#在MAC上 隨便加一行 看會不會出現在windows
