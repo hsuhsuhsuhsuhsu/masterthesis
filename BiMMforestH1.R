@@ -96,7 +96,7 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
     forestprob<-predict(forest,type="prob")[,2]
     RFpredprob <- as.data.frame(forestprob)
     ## Estimate New Random Effects and Errors using BLMER
-    lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+    lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                       collapse="~"), "+(1|time) +(1|age)",sep=""))),
                       data=data,family=binomial,
                       control=glmerControl(optCtrl=list(maxfun=20000))),
@@ -134,7 +134,8 @@ BiMMforestH1<-function(traindata,testdata,formula,random,seed){
     return(list(c(NA,NA,NA,NA),c(NA,NA,NA,NA),NA,NA))
   }else if(!(class(lmefit)[1]=="character")){
     #predictions
-    test.preds <- predict(forest,testdata1)
+    test.preds <- predict(forest,testdata1)#為甚麼測試只有丟森林
+    #test.preds <- predict(lmefit,testdata1)
     table(traindata1$lvmica)
     table(test.preds)
     table(testdata1$lvmica)
