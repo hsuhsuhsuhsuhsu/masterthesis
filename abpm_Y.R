@@ -18,7 +18,9 @@ asTime <-lapply(abp[, timeS:timeE] ,
 asTime <- as.data.frame(asTime)
 ten <- strptime("22:00", "%H:%M")
 six <- strptime("06:00", "%H:%M")
+
 asTime[1,1]<=ten&asTime[1,1]>=six
+#####
 #白天6-22
 #以row為單位檢查每一格 如果介在6-22之間 就屬於白天
 Day=NULL
@@ -44,7 +46,7 @@ for(r in 1:dim(asTime)[1]){
       Night <- cbind(Night,asTime[r,c])
     }
     if(dim(Day)[1]<36){
-      <-dim(Day)[1]+1
+      d<-dim(Day)[1]+1
       Day[dim(Day)[1]+1:36,]
     }
     D <- rbind(D,Day)
@@ -54,7 +56,7 @@ for(r in 1:dim(asTime)[1]){
   
 }
 
-
+#####
 #算時間差異
 TimeDifften <-lapply(asTime ,FUN = function(x)
       abs(as.numeric(difftime(x, ten, units = "secs"))))
@@ -63,6 +65,9 @@ TimeDifften <- as.data.frame(TimeDifften)
 TimeDiffsix <-lapply(asTime ,FUN = function(x)
       abs(as.numeric(difftime(x, six, units = "secs"))))
 TimeDiffsix <- as.data.frame(TimeDiffsix)
+
+#A<-lapply(asTime,FUN = function(x) x-six)
+#A<-as.data.frame(A)
 
 ClosestTenCol <- apply(TimeDifften , 1 ,FUN = function(x)
                            which(x == min(x,na.rm = T))[1])
@@ -86,14 +91,42 @@ DNColnTime[,4] <- ClosestSixCol
 colnames(DNColnTime) <- c("day Start","day End","night Start","night End")
 #如果是36 +1就要變成1
 DNColnTime[DNColnTime[,]==37] <- 1
-#要處理 沒有晚上 或是不符合白天測量至少20次(夜間 < 17)及夜間測量至少7次
+#看要不要處理 沒有晚上 或是不符合白天測量至少20次(夜間 < 17)及夜間測量至少7次
 DNColnTime[,"night count"] <- abs(DNColnTime[,3]-DNColnTime[,4])
 length(which(DNColnTime[,"night count"] < 7))
 DNColnTime1 <- DNColnTime[-which(DNColnTime[,"night count"] < 7),] 
 DNColnTime1 <- DNColnTime1[-which(DNColnTime1[,"night count"] >16),] 
 
 #DNColnTime找晚上和白天區間 看哪一個可以是連續區段
+colnames(DNColnTime)
+
+sys<-abp[,10:45]
+time<-abp[,118:153]
+
+#如果白天頭<白天尾 => 白天是連續 晚上是其他 
+if(DNColnTime[7, "day Start"] < DNColnTime[7, "day End"]){
+  ds <- DNColnTime[7, "day Start"]
+  de <- DNColnTime[7, "day End"]
+  dTime <- time[7, ds:de]
+  dSbp <- sys[7, ds:de]
+  avgdSbp <- mean(as.numeric(dSbp))
+  nTime <- time[7, -c(ds:de)]
+  nSbp <- sys[7, -c(ds:de)]
+  avgnSbp <- mean(as.numeric(nSbp))
+}else if(DNColnTime[7, "night Start"] < DNColnTime[7, "night End"]){
+  
+}
 
 
-#用欄位差距 用時間去找數值
+#如果晚上頭<晚上尾 => 晚上是連續 白天是其他
+
+
+
+
+
+
+
+
+
+
 
