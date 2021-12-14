@@ -25,6 +25,13 @@ Day=NULL
 Night = NULL
 D=NULL
 N=NULL
+D<-as.data.frame(D)
+Day<-as.data.frame(Day)
+Night<-as.data.frame(Night)
+N<-as.data.frame(N)
+
+D[1,1:36]<-NA
+N[1,1:36]<-NA
 asTime[is.na(asTime)]<-as.POSIXlt("2022-1-1")
 
 for(r in 1:dim(asTime)[1]){
@@ -36,6 +43,12 @@ for(r in 1:dim(asTime)[1]){
     }else{
       Night <- cbind(Night,asTime[r,c])
     }
+    if(dim(Day)[1]<36){
+      <-dim(Day)[1]+1
+      Day[dim(Day)[1]+1:36,]
+    }
+    D <- rbind(D,Day)
+    N <- rbind(N,Night)
   }
   #不能直接合併因為長度不一樣
   
