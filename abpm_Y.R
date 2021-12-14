@@ -18,6 +18,31 @@ asTime <-lapply(abp[, timeS:timeE] ,
 asTime <- as.data.frame(asTime)
 ten <- strptime("22:00", "%H:%M")
 six <- strptime("06:00", "%H:%M")
+asTime[1,1]<=ten&asTime[1,1]>=six
+#白天6-22
+#以row為單位檢查每一格 如果介在6-22之間 就屬於白天
+Day=NULL
+Night = NULL
+D=NULL
+N=NULL
+asTime[is.na(asTime)]<-as.POSIXlt("2022-1-1")
+
+for(r in 1:dim(asTime)[1]){
+  for(c in 1:dim(asTime)[2]){
+    if(as.character(asTime[r,c])=="2022-01-01"){
+      
+    }else if(asTime[r,c]<=ten & asTime[r,c]>=six){
+      Day <- cbind(Day,asTime[r,c]) 
+    }else{
+      Night <- cbind(Night,asTime[r,c])
+    }
+  }
+  #不能直接合併因為長度不一樣
+  
+}
+
+
+#算時間差異
 TimeDifften <-lapply(asTime ,FUN = function(x)
       abs(as.numeric(difftime(x, ten, units = "secs"))))
 TimeDifften <- as.data.frame(TimeDifften)
@@ -59,8 +84,3 @@ DNColnTime1 <- DNColnTime1[-which(DNColnTime1[,"night count"] >16),]
 
 #用欄位差距 用時間去找數值
 
-
-
-#在windows上 隨便加一行 看會不會在MAC出現
-
-#在MAC上 隨便加一行 看會不會出現在windows
