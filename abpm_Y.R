@@ -10,7 +10,7 @@ abp <- ab
 #row 1041 數值都是NA
 abp <- abp[-1041,]
 
-#找每一row最靠近0600 2200的時間點
+#所有元素變時間格式
 timeS <- which(colnames(abp) %in% "ABPM_time_1")
 timeE <- which(colnames(abp) %in% "ABPM_time_36")
 asTime <-lapply(abp[, timeS:timeE] ,
@@ -22,21 +22,52 @@ six <- strptime("06:00", "%H:%M")
 #***用時間差異算會是錯的
 #要用每個時間判斷是白天還是晚上=>另一個data frame都是白天晚上
 #然後再算白天晚上的col範圍 像DNColnTime
-#####
 DN <- data.frame(matrix(NA,nrow=1670,ncol=36))
 for(x in 1:dim(asTime)[2]){
   DN[which(asTime[,x] <ten & asTime[,x]>=six),x] <- "D" #白天
   DN[which(asTime[,x] >=ten | asTime[,x]<six),x] <- "N"
   DN[which(asTime[,x]==as.POSIXct("2022-1-1")),x] <- "na"#晚上
 } 
+sys<-abp[,10:45]
+time<-abp[,118:153]
+
+final =NULL
+for(i in 1:dim(DN)[1]){
+  Davg <- mean(as.numeric(sys[i,which(DN[i,]=="D")]),na.rm = T)
+  Navg <- mean(as.numeric(sys[i,which(DN[i,]=="N")]),na.rm = T)
+  avg <- cbind(Davg,Navg)
+  avg <- as.data.frame(avg)
+  final <- rbind(final,avg)
+}
+
+#dipping ratio = (davg-navg)/davg*100
+final[,"dipping ratio"] <- (final[,"Davg"] - final[,"Navg"] )/final[,"Davg"] * 100
+length(which(is.na(final[,"dipping ratio"])))
+for(i in 1:dim(final)[1]){
+  if(is.na(final[i,"dipping ratio"])){
+    final[i,"dipping status"] <- NA
+  }else if(final[i,"dipping ratio"]<0){
+    final[i,"dipping status"] <- "Reverse dipper"
+  }else if(final[i,"dipping ratio"]<10 & final[i,"dipping ratio"]>=0){
+    final[i,"dipping status"] <- "Non dipper"
+  }else if(final[i,"dipping ratio"]>= 10 & final[i,"dipping ratio"]<20 ){
+    final[i,"dipping status"] <- "Dipper"
+  }else{
+    final[i,"dipping status"] <- "Extreme dipper"
+  }
+}
+length(which(final[,"dipping status"]=="Extreme dipper"))#24
+length(which(final[,"dipping status"]=="Dipper"))#327
+length(which(final[,"dipping status"]=="Non dipper"))#759
+length(which(final[,"dipping status"]=="Reverse dipper"))#385
+
+ABP <- cbind(abp,final)
+write.csv(ABP,file="TCHCData/abpm_Y.csv")
 
 
+#把hbp和ABPM ID Visit ..."dipping status" merge
 
-
-#####
-
-
-#砍
+#以下都是錯的
 #####
 #算時間差異 可砍
 TimeDifften <-lapply(asTime ,FUN = function(x)
@@ -59,7 +90,7 @@ ClosestSixCol <- apply(TimeDiffsix , 1 ,FUN = function(x)
   which(x == min(x,na.rm = T))[1])
 #有2格一樣靠近6點的=>取前面的=>晚上的尾巴
 ClosestSixCol <-as.data.frame(ClosestSixCol)
-#####
+
 #day開始col =>ClosestSixCol+1  day結束col => ClosestTenCol
 #night開始col =>ClosestTenCol+1  night結束col=> ClosestSixCol
 DNColnTime = NULL
@@ -119,8 +150,8 @@ for(r in 1: dim(DNColnTime)[1]){
 DNColnTime[1034,]
 
 ABP <- cbind(abp,final)
-write.csv(ABP,file="TCHCData/abpm_Y.csv")
-#如果晚上頭<晚上尾 => 晚上是連續 白天是其他
+
+
 
 
 
