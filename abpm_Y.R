@@ -19,46 +19,19 @@ asTime <- as.data.frame(asTime)
 ten <- strptime("22:00", "%H:%M")
 six <- strptime("06:00", "%H:%M")
 
-asTime[1,1]<=ten&asTime[1,1]>=six
-
 #***用時間差異算會是錯的
 #要用每個時間判斷是白天還是晚上=>另一個data frame都是白天晚上
 #然後再算白天晚上的col範圍 像DNColnTime
 #####
-#白天6-22
-#以row為單位檢查每一格 如果介在6-22之間 就屬於白天
-Day=NULL
-Night = NULL
-D=NULL
-N=NULL
-D<-as.data.frame(D)
-Day<-as.data.frame(Day)
-Night<-as.data.frame(Night)
-N<-as.data.frame(N)
+DN <- data.frame(matrix(NA,nrow=1670,ncol=36))
+for(x in 1:dim(asTime)[2]){
+  DN[which(asTime[,x] <ten & asTime[,x]>=six),x] <- "D" #白天
+  DN[which(asTime[,x] >=ten | asTime[,x]<six),x] <- "N"
+  DN[which(asTime[,x]==as.POSIXct("2022-1-1")),x] <- "na"#晚上
+} 
 
-D[1,1:36]<-NA
-N[1,1:36]<-NA
-asTime[is.na(asTime)]<-as.POSIXct(Sys.Date())
 
-for(r in 1:dim(asTime)[1]){
-  for(c in 1:dim(asTime)[2]){
-    if(as.character(asTime[r,c])==as.POSIXct(Sys.Date())){
-      
-    }else if(asTime[r,c]<=ten & asTime[r,c]>=six){
-      Day <- cbind(Day,asTime[r,c]) 
-    }else{
-      Night <- cbind(Night,asTime[r,c])
-    }
-    if(dim(Day)[1]<36){
-      d<-dim(Day)[1]+1
-      Day[dim(Day)[1]+1:36,]
-    }
-    D <- rbind(D,Day)
-    N <- rbind(N,Night)
-  }
-  #不能直接合併因為長度不一樣
-  
-}
+
 
 #####
 
