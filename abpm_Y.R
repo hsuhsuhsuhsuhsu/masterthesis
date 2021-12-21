@@ -9,7 +9,7 @@ abp <- ab
 
 #row 1041 數值都是NA
 abp <- abp[-1041,]
-
+ab[1041,]
 #所有元素變時間格式
 timeS <- which(colnames(abp) %in% "ABPM_time_1")
 timeE <- which(colnames(abp) %in% "ABPM_time_36")
@@ -66,6 +66,33 @@ write.csv(ABP,file="TCHCData/abpm_Y.csv")
 
 
 #把hbp和ABPM ID Visit ..."dipping status" merge
+hbp <- read.csv("TCHCData/hbpnewkey.csv")
+abpm <- read.csv("TCHCData/abpm_Y.csv")
+abpm <- abpm[,-1]
+newkey <-as.data.frame(paste0(abpm$MRN,abpm$Visit_24Hrs_cloud))
+abnkey<-cbind(newkey,abpm)
+colnames(abnkey)[1] <- "Mrn_Vis"
+abdip<-as.data.frame(cbind(abnkey$Mrn_Vis,abnkey$dipping.status))
+length(which(is.na(abdip[,2])))#175
+colnames(abdip)[1] <- "Mrn_Vis"
+mydata <- merge(x = hbp,y = abdip,by = "Mrn_Vis",all.y = T)
+colnames(mydata)[124] <- "dipping.status"
+write.csv(mydata,file="TCHCData/hbp_dip.csv")
+mydata1 <- merge(x = hbp,y = abdip,by = "Mrn_Vis",all.x = T)
+colnames(mydata1)[124] <- "dipping.status"
+write.csv(mydata1,file="TCHCData/hbp_dip_byx.csv")
+#看hbp_dip_byx 各個訪視的dipping status ＮＡ數量
+
+
+#dipping status 4類 在各個訪視的數量
+#沒有Ｙ的人很多 想對策
+#可以參考bimmrf 還有元蔚上次的paper
+
+
+
+
+
+
 
 #以下都是錯的
 #####
