@@ -1,3 +1,4 @@
+library(dplyr)
 #讓日期時間讀進來就是字串 read.csv (colClass = c("colname" ="class type"))
 ab <- read.csv("TCHCData/abpm.csv", header = T)
 abp <- ab
@@ -82,12 +83,28 @@ mydata1 <- merge(x = hbp,y = abdip,by = "Mrn_Vis",all.x = T)
 colnames(mydata1)[124] <- "dipping.status"
 write.csv(mydata1,file="TCHCData/hbp_dip_byx.csv")
 #看hbp_dip_byx 各個訪視的dipping status ＮＡ數量
-
-
+table(hbpdip_byX$dipping.status)
+sum(is.na(hbpdip_byX$dipping.status))
+hbpdip_byX<-read.csv("TCHCData/hbp_dip_byx.csv")
+aa<-read.csv("TCHCData/hbp_dip.csv")
 #dipping status 4類 在各個訪視的數量
-#沒有Ｙ的人很多 想對策
-#可以參考bimmrf 還有元蔚上次的paper
+v1<-filter(hbpdip_byX,visit_HBP_Dmode=="1")
+table(v1$dipping.status)
+sum(is.na(v1$dipping.status))
+v2<-filter(hbpdip_byX,visit_HBP_Dmode=="2")
+table(v2$dipping.status)
+sum(is.na(v2$dipping.status))
+v3<-filter(hbpdip_byX,visit_HBP_Dmode=="3")
+table(v3$dipping.status)
+sum(is.na(v3$dipping.status))
+v4<-filter(hbpdip_byX,visit_HBP_Dmode=="4")
+table(v4$dipping.status)
+sum(is.na(v4$dipping.status))
 
+#看已經可以分析的complete case有多少個
+sum(complete.cases(hbpdip_byX))#245
+okcases<-hbpdip_byX[which(complete.cases(hbpdip_byX)),]
+table(okcases$dipping.status)
 
 
 
