@@ -82,6 +82,7 @@ write.csv(mydata,file="TCHCData/hbp_dip.csv")
 mydata1 <- merge(x = hbp,y = abdip,by = "Mrn_Vis",all.x = T)
 colnames(mydata1)[124] <- "dipping.status"
 write.csv(mydata1,file="TCHCData/hbp_dip_byx.csv")
+
 #看hbp_dip_byx 各個訪視的dipping status ＮＡ數量
 table(hbpdip_byX$dipping.status)
 sum(is.na(hbpdip_byX$dipping.status))
