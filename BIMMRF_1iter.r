@@ -95,6 +95,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   RFpredictprob <- as.data.frame(forestprob)
   ## Estimate New Random Effects and Errors using GLMER
   options(warn=-1)
+  
   random<-c("time","age")
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
@@ -109,19 +110,17 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
     return(list(c(NA,NA,NA,NA),c(NA,NA,NA,NA),NA))
   }
   else if(!(class(lmefit)[1]=="character")){
-    #test.preds<-predict(forest,testdata)
-    #traindata<-cbind(traindata,random)
-    test.preds<- predict(forest,test)
-    train <- cbind(train,random)
-    train.preds <- ifelse(predict(lmefit,train,type="response")<.5,0,1)
+    test.preds <- predict(forest,testdata)
+    traindata <- cbind(traindata,random)
+    train.preds <- ifelse(predict(lmefit,traindata,type="response")<.5,0,1)
     
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
-t1<-table(train$lvmica,train.preds)
+t1<-table(traindata$lvmica,train.preds)
 trainacc <- (t1[1]+t1[4]) / sum(t1)
 train0acc <- t1[1]/(t1[1]+t1[3])
 train1acc <- t1[4]/(t1[2]+t1[4])
 t1
-t4<-table(test$lvmica,test.preds)
+t4<-table(testdata$lvmica,test.preds)
 testacc <- (t4[1]+t4[4]) / sum(t4)
 test0acc <- t4[1]/(t4[1]+t4[3])
 test1acc <- t4[4]/(t4[2]+t4[4])
