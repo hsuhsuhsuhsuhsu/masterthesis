@@ -137,8 +137,12 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
     return(list(c(t1),c(t4),iterations))
   }
 } 
-
-
+#V12 704 pre V3 85
+#切成早上晚上 一筆變成早上跟晚上 2筆 就*2
+#樣本限制成全部訪視都要來
+#V1 預測V2
+#重複兩個時間點以上
+#問題 變數太少 隨機效應放甚麼
 
 
 
