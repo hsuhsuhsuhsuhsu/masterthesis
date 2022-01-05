@@ -97,6 +97,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   options(warn=-1)
   
   random<-c("time","age")
+  #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
           collapse="~"), "+(1|time) +(1|age)",sep=""))),data=data,family=binomial,

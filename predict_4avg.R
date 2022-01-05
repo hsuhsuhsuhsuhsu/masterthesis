@@ -30,56 +30,72 @@ Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
 write.csv(Train,file="TCHCData/4avg_case_Train.csv")#154
 write.csv(Test,file="TCHCData/4avg_case_Test.csv")#676
 
-#Train Model  先讓function可以被call
-#後續直接call fun就好
-formula <- dip ~ HBP_d_AM_systolic + HBP_d_PM_systolic + HBP_d_AM_diastolic + HBP_d_PM_diastolic
-random <- c(HBP_d_AM_systolic,HBP_d_PM_systolic,HBP_d_AM_diastolic,HBP_d_PM_diastolic)#要放誰 跟時間有關係的 暫時X全放
-seed <- 123
-traindata <- Train
-testdata <- Test
-BiMMforest1 <- function(traindata,testdata,formula,random,seed){
-  #set up variables for Bimm method
+# visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
+#或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
+V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
+V2 <- FourAvg[which(FourAvg$visit_HBP_Dmode==2),]#142
+V3 <- FourAvg[which(FourAvg$visit_HBP_Dmode==3),]#85
+V4 <- FourAvg[which(FourAvg$visit_HBP_Dmode==4),]#39
+V12 <- rbind(V1,V2)
+V12 <- arrange(V12,V12$Mrn_Vis)#704
+V34 <- rbind(V3,V4)
+V34 <- arrange(V34,V12$Mrn_Vis)#124
+write.csv(V12,file = "TCHCData/4avg_Visit_Train_V12.csv")
+write.csv(V34,file = "TCHCData/4avg_Visit_Test_V34.csv")
+write.csv(V3,file = "TCHCData/4avg_Visit_Test_V3.csv")
+
+######模型訓練 BIMMRF 1iter / H1 / H3 / RF
+library(rpart)
+library(blme)
+library(randomForest)
+formula <- dip ~ HBP_d_AM_systolic+HBP_d_PM_systolic+HBP_d_AM_diastolic+HBP_d_PM_diastolic
+traindata <-  V12
+table(V12$dip)#0:542 1:162
+traindata$dip <- as.factor(traindata$dip)
+testdata <- V3 
+testdata$dip <- as.factor(testdata$dip)
+table(traindata$dip)
+random <- "(1|HBP_d_AM_systolic)+(1|HBP_d_PM_systolic)+(1|HBP_d_AM_diastolic)+(1|HBP_d_PM_diastolic)"
+BiMMforest1<-function(traindata,testdata,formula,random,seed){
   data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
-  ErrorTolerance=0.006
-  MaxIterations=1000
-  
+  ErrorTolerance = 0.006
+  MaxIterations = 1000
   #parse formula
-  str(formula)
-  Predictors<-paste(attr(terms(formula),"term.labels"),collapse="+")
-  TargetName<-formula[[2]]
-  Target<-data[,toString(TargetName)]
+  Predictors <- paste(attr(terms(formula), "term.labels"), 
+                      collapse = "+")
+  TargetName <- formula[[2]]
+  Target <- data[,toString(TargetName)]
   class(Target)#Target is factor
-  
   #set up variables for loop
-  ContinueCondition<-TRUE
-  iterations<-0
+  ContinueCondition <- TRUE
+  iterations <- 0
   #initial values
   #把factor0 1 as.numeric就變成1 2
-  AdjustedTarget<-as.numeric(Target)-initialRandomEffects
+  AdjustedTarget <- as.numeric(levels(Target)) - initialRandomEffects
+  table(AdjustedTarget)
   oldlik<- -Inf#負無窮大
   # Make a new data frame to include all the new variables
   newdata <- data
   #compile one iteration of the BiMM forest algorithm
-  newdata[,"AdjustedTarget"] <- AdjustedTarget# 1跟2
-  iterations <- iterations+1
+  newdata[, "AdjustedTarget"] <- AdjustedTarget# 1跟2
+  iterations <- iterations + 1
   #build tree
-  set.seed(seed)
-  factor(AdjustedTarget)
-  forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
-                                         Predictors),collapse = "~")),
+  #set.seed(seed)
+  set.seed(123)
+  table(AdjustedTarget)
+  forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")
-  forestprob<-predict(forest,type="prob")[,2]
+  forestprob<-predict(forest, type = "prob")[, 2]
   RFpredictprob <- as.data.frame(forestprob)
+  length(RFpredictprob[forestprob>=0.5,])
   ## Estimate New Random Effects and Errors using GLMER
-  options(warn=-1)
+  options(warn = -1)
   
-  #****要改
-  #*random <- c(HBP_d_AM_systolic,HBP_d_PM_systolic,HBP_d_AM_diastolic,HBP_d_PM_diastolic)#要放誰 跟時間有關係的 暫時X全放
-  
+  #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
-  lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                 collapse="~"), "+(1|time) +(1|age)",sep=""))),data=data,family=binomial,
+  lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                                 collapse="~"), "+(1|HBP_d_AM_systolic)",sep=""))),data=data,family=binomial,
                            control = glmerControl(optCtrl=list(maxfun=20000)
                            )),
                     error = function(cond)"skip")
@@ -91,16 +107,18 @@ BiMMforest1 <- function(traindata,testdata,formula,random,seed){
   }
   else if(!(class(lmefit)[1]=="character")){
     test.preds <- predict(forest,testdata)
-    traindata <- cbind(traindata,random)
+    random <- c("HBP_d_AM_systolic")
+    traindata1 <- cbind(traindata,random)
     train.preds <- ifelse(predict(lmefit,traindata,type="response")<.5,0,1)
     
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
-    t1<-table(traindata$lvmica,train.preds)
+    table(traindata$dip)
+    t1<-table(traindata$dip,train.preds)
     trainacc <- (t1[1]+t1[4]) / sum(t1)
     train0acc <- t1[1]/(t1[1]+t1[3])
     train1acc <- t1[4]/(t1[2]+t1[4])
     t1
-    t4<-table(testdata$lvmica,test.preds)
+    t4<-table(testdata$dip,test.preds)
     testacc <- (t4[1]+t4[4]) / sum(t4)
     test0acc <- t4[1]/(t4[1]+t4[3])
     test1acc <- t4[4]/(t4[2]+t4[4])
@@ -127,4 +145,4 @@ BiMMforest1 <- function(traindata,testdata,formula,random,seed){
 
 
 
-# visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
+

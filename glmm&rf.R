@@ -5,6 +5,15 @@ formula <- lvmica~sex+age+time+grad+ef+bsa
 random <- c("age","time")
 forest <- randomForest(lvmica~sex+age+time+grad+ef+bsa,
                        data = train, method = "class")
+
+forest <- randomForest(dip ~ HBP_d_AM_systolic+HBP_d_PM_systolic+HBP_d_AM_diastolic+HBP_d_PM_diastolic,
+                        data = V12, method = "class")
+forestprob<-predict(forest,type="prob")[,2]
+RFpredprob <- as.data.frame(forestprob)
+
+
+
+
 forestprob<-predict(forest,type="prob")[,2]
 RFpredprob <- as.data.frame(forestprob)
 train.preds <-  ifelse(RFpredprob <0.5,0,1)
