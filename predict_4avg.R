@@ -8,7 +8,7 @@ library(dplyr)
 dip <- read.csv("TCHCData/hbp_dip_byx.csv")
 na <- which(is.na(dip$dipping.status))
 dip <- dip[-na,]#845
-dip[,"dip"] <- ifelse(dip$dipping.status=="Non dipper"|dip$dipping.status=="Reverse dipper",0,1)
+dip[,"dip"] <- ifelse(dip$dipping.status=="Non dipper"|dip$dipping.status=="Reverse dipper",1,0)
 colnames(dip)
 table(dip$dip)
 table(dip$dipping.status)
@@ -27,8 +27,8 @@ Train <- merge(trainID,FourAvg,by = "MRN",all.x = T)
 Train <- arrange(Train,Train$Mrn_Vis)
 Test <- rbind(Train, FourAvg)
 Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
-write.csv(Train,file="TCHCData/4avg_case_Train.csv")#154
-write.csv(Test,file="TCHCData/4avg_case_Test.csv")#676
+write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
+write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
 
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
@@ -39,23 +39,44 @@ V4 <- FourAvg[which(FourAvg$visit_HBP_Dmode==4),]#39
 V12 <- rbind(V1,V2)
 V12 <- arrange(V12,V12$Mrn_Vis)#704
 V34 <- rbind(V3,V4)
-V34 <- arrange(V34,V12$Mrn_Vis)#124
+V34 <- arrange(V34,V34$Mrn_Vis)#124
+AM <- V12[,-c(5,7)]
+PM <- V12[,-c(4,6)]
+colnames(AM) <- c(1,2,3,4,5,6,7)
+colnames(PM) <- c(1,2,3,4,5,6,7)
+V12 <- rbind(AM,PM)
+colnames(V12)<-c("Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip")
+V1 <- V12[which(V12$visit_HBP_Dmode==1),]#1124
+V2 <- V12[which(V12$visit_HBP_Dmode==2),]#284
+V1 <- V1[which(V1$MRN%in%V2$MRN),]
+for (i in 1:dim(V2)[1]){
+  if(all(V2[i,"MRN"]!= V1[,"MRN"])){
+    print(V2[i,"MRN"])
+  }
+}
+which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035")
+V2<-V2[-c(116,257),]
+#新的
+write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#280
+write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#280
+
+#舊的(沒有變成2筆的)
 write.csv(V12,file = "TCHCData/4avg_Visit_Train_V12.csv")
 write.csv(V34,file = "TCHCData/4avg_Visit_Test_V34.csv")
 write.csv(V3,file = "TCHCData/4avg_Visit_Test_V3.csv")
-
+#####
 ######模型訓練 BIMMRF 1iter / H1 / H3 / RF
 library(rpart)
 library(blme)
 library(randomForest)
-formula <- dip ~ HBP_d_AM_systolic+HBP_d_PM_systolic+HBP_d_AM_diastolic+HBP_d_PM_diastolic
-traindata <-  V12
-table(V12$dip)#0:542 1:162
+formula <- dip ~ sys+dia
+traindata <-  Train
+table(Train$dip)#0:68 1:212
 traindata$dip <- as.factor(traindata$dip)
-testdata <- V3 
+testdata <- Test 
 testdata$dip <- as.factor(testdata$dip)
 table(traindata$dip)
-random <- "(1|HBP_d_AM_systolic)+(1|HBP_d_PM_systolic)+(1|HBP_d_AM_diastolic)+(1|HBP_d_PM_diastolic)"
+random <- "(1|sys)+(1|dia)"
 BiMMforest1<-function(traindata,testdata,formula,random,seed){
   data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
@@ -72,7 +93,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   iterations <- 0
   #initial values
   #把factor0 1 as.numeric就變成1 2
-  AdjustedTarget <- as.numeric(levels(Target)) - initialRandomEffects
+  AdjustedTarget <- as.numeric(Target) - initialRandomEffects
   table(AdjustedTarget)
   oldlik<- -Inf#負無窮大
   # Make a new data frame to include all the new variables
@@ -82,7 +103,6 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   iterations <- iterations + 1
   #build tree
   #set.seed(seed)
-  set.seed(123)
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")
@@ -95,7 +115,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                 collapse="~"), "+(1|HBP_d_AM_systolic)",sep=""))),data=data,family=binomial,
+                                                 collapse="~"), "+(1|sys)+(1|dia)",sep=""))),data=data,family=binomial,
                            control = glmerControl(optCtrl=list(maxfun=20000)
                            )),
                     error = function(cond)"skip")
@@ -107,9 +127,10 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   }
   else if(!(class(lmefit)[1]=="character")){
     test.preds <- predict(forest,testdata)
-    random <- c("HBP_d_AM_systolic")
+    train.preds <- predict(forest,traindata)
+    random <- c("sys","dia")
     traindata1 <- cbind(traindata,random)
-    train.preds <- ifelse(predict(lmefit,traindata,type="response")<.5,0,1)
+    train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
     table(traindata$dip)
@@ -137,16 +158,13 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
     return(list(c(t1),c(t4),iterations))
   }
 } 
+#####
 #V12 704 pre V3 85
-#切成早上晚上 一筆變成早上跟晚上 2筆 就*2
+#咪挺結果
+#切成早上晚上 一筆變成早上跟晚上 2筆 樣本就*2
 #樣本限制成全部訪視都要來
-#V1 預測V2
-#重複兩個時間點以上
-#問題 變數太少 隨機效應放甚麼
-
-
-
-
-
-
-
+#V1 預測V2 (就符合重複2次)
+Train <- read.csv("TCHCData/4avg_Train_V1.csv")#280
+Test <- read.csv("TCHCData/4avg_Test_V2.csv")
+Train<-Train[,-1]
+Test<-Test[,-1]
