@@ -4,34 +4,22 @@
 # visit-wise V1 預測 V2 ； V1 V2 預測 V3
 #再對X先做隨機森林插補 再抓4個平均 再跑模型 看效果 
 #做完再去做 對ABPM插補 再算Y 再跑模型
+
+
+#3vs1
 library(dplyr)
 dip <- read.csv("TCHCData/hbp_dip_byx.csv")
 na <- which(is.na(dip$dipping.status))
 dip <- dip[-na,]#845
-dip[,"dip"] <- ifelse(dip$dipping.status=="Non dipper"|dip$dipping.status=="Reverse dipper",1,0)
+dip[,"dip"] <- ifelse(dip$dipping.status=="Reverse dipper",1,0)
 colnames(dip)
 table(dip$dip)
 table(dip$dipping.status)
 FourAvg <- dip[,c(2,4,6,8,9,11,12,125,126)]
 sum(complete.cases(FourAvg))#830筆
 FourAvg <- FourAvg[complete.cases(FourAvg),]
-#20220115
-#** sys dia現在是chr 轉成數字看看
-
-FourAvg[FourAvg[,]=="---"]<-NA
-FourAvg[FourAvg[,]==0]<-NA
-FourAvg[,"dip"] <- ifelse(FourAvg$dipping.status=="Non dipper"|FourAvg$dipping.status=="Reverse dipper",1,0)
-sum(complete.cases(FourAvg))#817筆
-FourAvg <- FourAvg[complete.cases(FourAvg),]
-length(levels(factor(FourAvg$MRN)))#553人
-table(FourAvg$dipping.status)
-
-
-
-
 
 # case-wise 隨機切割ID 用ID所有資料去訓練 測試
-#####
 #Split Train test
 length(unique(FourAvg$MRN))#564人
 people <-as.data.frame(unique(FourAvg$MRN))
@@ -44,7 +32,7 @@ Test <- rbind(Train, FourAvg)
 Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
 write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
 write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
-#####
+
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
 V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
@@ -95,12 +83,13 @@ library(blme)
 library(randomForest)
 formula <- dip ~ sys+dia+time
 traindata <-  Train
-table(Train$dip)#0:68 1:212
+table(Train$dip)#0:206 1:74
+
 traindata$dip <- as.factor(traindata$dip)
 testdata <- Test 
 testdata$dip <- as.factor(testdata$dip)
 table(traindata$dip)
-random <- "(1|sys)+(1|dia)"
+random <- "(1|sys)+(1|dia)+(1|time)"
 BiMMforest1<-function(traindata,testdata,formula,random,seed){
   data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
@@ -139,10 +128,10 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                 collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
-                           control = glmerControl(optCtrl=list(maxfun=20000)
-                           )),
-                    error = function(cond)"skip")
+                                                  collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
+                            control = glmerControl(optCtrl=list(maxfun=20000)
+                            )),
+                     error = function(cond)"skip")
   
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
@@ -190,9 +179,3 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
 #樣本限制成全部訪視都要來
 #V1 預測V2 (就符合重複2次)
 summary(lmefit)
-#2vs2 + covariate
-#V12 pred V3
-#迭代
-#查 在模型裡讓資料平衡 EX:logistic weighted regression 
-#weight mixed model 讓有病沒病的人加權 讓權重balance一點
-

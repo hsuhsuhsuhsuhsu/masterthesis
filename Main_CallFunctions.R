@@ -1,32 +1,20 @@
-#從 845筆有Y的去做 =>收縮 舒張 早上 晚上 平均 =>取4個
-#先抓平均完的complete case 去做模型(完整case會變多) 看效果
-# case-wise 隨機切割ID 用ID所有資料去訓練 測試
-# visit-wise V1 預測 V2 ； V1 V2 預測 V3
-#再對X先做隨機森林插補 再抓4個平均 再跑模型 看效果 
-#做完再去做 對ABPM插補 再算Y 再跑模型
-library(dplyr)
-dip <- read.csv("TCHCData/hbp_dip_byx.csv")
-na <- which(is.na(dip$dipping.status))
-dip <- dip[-na,]#845
-dip[,"dip"] <- ifelse(dip$dipping.status=="Non dipper"|dip$dipping.status=="Reverse dipper",1,0)
-colnames(dip)
-table(dip$dip)
-table(dip$dipping.status)
-FourAvg <- dip[,c(2,4,6,8,9,11,12,125,126)]
-sum(complete.cases(FourAvg))#830筆
-FourAvg <- FourAvg[complete.cases(FourAvg),]
-#20220115
-#** sys dia現在是chr 轉成數字看看
+source("DataProcFunctions.r")
+#
+#### setting parameter ####
+file <- "TCHCData/hbp_dip_byx.csv"
 
-FourAvg[FourAvg[,]=="---"]<-NA
-FourAvg[FourAvg[,]==0]<-NA
-FourAvg[,"dip"] <- ifelse(FourAvg$dipping.status=="Non dipper"|FourAvg$dipping.status=="Reverse dipper",1,0)
-sum(complete.cases(FourAvg))#817筆
-FourAvg <- FourAvg[complete.cases(FourAvg),]
-length(levels(factor(FourAvg$MRN)))#553人
-table(FourAvg$dipping.status)
+#for time split
+reCol.AM <- c("HBP_d_PM_systolic","HBP_d_PM_diastolic")
+reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
+
+#### k ####
+result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
+                 newVar = "dip")
 
 
+timeSplit.22 <- timeSplit(data = result.22$myData, 
+                      removeCol.AM = reCol.AM,
+                      removeCol.PM = reCol.PM)
 
 
 
@@ -47,6 +35,7 @@ write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
 #####
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
+
 V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
 V2 <- FourAvg[which(FourAvg$visit_HBP_Dmode==2),]#142
 V3 <- FourAvg[which(FourAvg$visit_HBP_Dmode==3),]#85
@@ -55,10 +44,7 @@ V12 <- rbind(V1,V2)
 V12 <- arrange(V12,V12$Mrn_Vis)#704
 V34 <- rbind(V3,V4)
 V34 <- arrange(V34,V34$Mrn_Vis)#124
-AM <- V12[,-c(5,7)]
-AM[,"time"] <- 1
-PM <- V12[,-c(4,6)]
-PM[,"time"] <- 2
+
 colnames(AM) <- c(1,2,3,4,5,6,7)
 colnames(PM) <- c(1,2,3,4,5,6,7)
 V12 <- rbind(AM,PM)
@@ -139,10 +125,10 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
   lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                 collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
-                           control = glmerControl(optCtrl=list(maxfun=20000)
-                           )),
-                    error = function(cond)"skip")
+                                                  collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
+                            control = glmerControl(optCtrl=list(maxfun=20000)
+                            )),
+                     error = function(cond)"skip")
   
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){

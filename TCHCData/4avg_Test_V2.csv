@@ -1,281 +1,281 @@
-"","Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip"
-"2","CGMHLK00012","CGMHLK0001",2,"138","81","Reverse dipper",1
-"4","CGMHLK00022","CGMHLK0002",2,"112","64","Non dipper",1
-"6","CGMHLK00032","CGMHLK0003",2,"121","87","Dipper",0
-"8","CGMHLK00042","CGMHLK0004",2,"116","67","Reverse dipper",1
-"10","CGMHLK00072","CGMHLK0007",2,"132","85","Reverse dipper",1
-"12","CGMHLK00082","CGMHLK0008",2,"140","96","Non dipper",1
-"15","CGMHLK00102","CGMHLK0010",2,"129","86","Non dipper",1
-"17","CGMHLK00112","CGMHLK0011",2,"140","87","Dipper",0
-"20","CGMHLK00132","CGMHLK0013",2,"153","102","Non dipper",1
-"22","CGMHLK00142","CGMHLK0014",2,"131","68","Non dipper",1
-"24","CGMHLK00152","CGMHLK0015",2,"136","92","Non dipper",1
-"26","CGMHLK00162","CGMHLK0016",2,"149","86","Reverse dipper",1
-"28","CGMHLK00172","CGMHLK0017",2,"151","88","Reverse dipper",1
-"30","CGMHLK00202","CGMHLK0020",2,"132","60","Non dipper",1
-"32","CGMHLK00212","CGMHLK0021",2,"180","90","Non dipper",1
-"34","CGMHLK00222","CGMHLK0022",2,"127","81","Non dipper",1
-"36","CGMHLK00232","CGMHLK0023",2,"141","86","Extreme dipper",0
-"38","CGMHLK00252","CGMHLK0025",2,"158","90","Dipper",0
-"41","CGMHLK00272","CGMHLK0027",2,"114","70","Non dipper",1
-"44","CGMHLK00292","CGMHLK0029",2,"132","76","Dipper",0
-"46","CGMHLK00302","CGMHLK0030",2,"120","68","Non dipper",1
-"48","CGMHLK00312","CGMHLK0031",2,"137","92","Reverse dipper",1
-"50","CGMHLK00332","CGMHLK0033",2,"133","78","Dipper",0
-"52","CGMHLK00342","CGMHLK0034",2,"156","87","Reverse dipper",1
-"54","CGMHLK00362","CGMHLK0036",2,"126","87","Dipper",0
-"56","CGMHLK00382","CGMHLK0038",2,"138","101","Non dipper",1
-"58","CGMHLK00392","CGMHLK0039",2,"146","82","Non dipper",1
-"61","CGMHLK00422","CGMHLK0042",2,"136","98","Non dipper",1
-"63","CGMHLK00432","CGMHLK0043",2,"130","85","Non dipper",1
-"67","CGMHLK00462","CGMHLK0046",2,"160","80","Non dipper",1
-"71","CGMHLK00502","CGMHLK0050",2,"131","73","Dipper",0
-"73","CGMHLK00512","CGMHLK0051",2,"133","79","Non dipper",1
-"75","CGMHLK00522","CGMHLK0052",2,"118","68","Reverse dipper",1
-"78","CGMHLK00572","CGMHLK0057",2,"114","66","Dipper",0
-"80","CGMHLK00582","CGMHLK0058",2,"135","95","Non dipper",1
-"83","CGMHLK00612","CGMHLK0061",2,"114","75","Non dipper",1
-"86","CGMHLK00662","CGMHLK0066",2,"130","77","Dipper",0
-"89","CGMHLK00692","CGMHLK0069",2,"145","80","Reverse dipper",1
-"92","CGMHLK00712","CGMHLK0071",2,"131","71","Dipper",0
-"94","CGMHLK00722","CGMHLK0072",2,"122","81","Reverse dipper",1
-"96","CGMHLK00732","CGMHLK0073",2,"116","68","Non dipper",1
-"98","CGMHLK00742","CGMHLK0074",2,"132","72","Reverse dipper",1
-"102","CGMHLK00772","CGMHLK0077",2,"134","76","Reverse dipper",1
-"105","CGMHLK00792","CGMHLK0079",2,"123","93","Reverse dipper",1
-"107","CGMHLK00802","CGMHLK0080",2,"119","81","Dipper",0
-"109","CGMHLK00812","CGMHLK0081",2,"145","106","Reverse dipper",1
-"111","CGMHLK00822","CGMHLK0082",2,"147","87","Dipper",0
-"113","CGMHLK00832","CGMHLK0083",2,"121","77","Non dipper",1
-"115","CGMHLK00842","CGMHLK0084",2,"119","85","Non dipper",1
-"117","CGMHLK00852","CGMHLK0085",2,"127","86","Reverse dipper",1
-"120","CGMHLK00872","CGMHLK0087",2,"125","78","Non dipper",1
-"122","CGMHLK00882","CGMHLK0088",2,"114","77","Non dipper",1
-"126","CGMHLK00922","CGMHLK0092",2,"123","80","Extreme dipper",0
-"128","CGMHLK00932","CGMHLK0093",2,"135","74","Reverse dipper",1
-"134","CGMHLK00982","CGMHLK0098",2,"129","92","Non dipper",1
-"136","CGMHLK00992","CGMHLK0099",2,"120","78","Dipper",0
-"138","CGMHLK01002","CGMHLK0100",2,"134","67","Dipper",0
-"141","CGMHLK01022","CGMHLK0102",2,"110","79","Dipper",0
-"143","CGMHLK01032","CGMHLK0103",2,"134","73","Dipper",0
-"145","CGMHLK01042","CGMHLK0104",2,"129","90","Dipper",0
-"148","CGMHLK01062","CGMHLK0106",2,"130","75","Non dipper",1
-"151","CGMHLK01082","CGMHLK0108",2,"108","76","Non dipper",1
-"158","CGMHLK01162","CGMHLK0116",2,"---","---","Dipper",0
-"162","CGMHLK01192","CGMHLK0119",2,"126","85","Non dipper",1
-"165","CGMHLK01212","CGMHLK0121",2,"135","79","Non dipper",1
-"170","CGMHLK01252","CGMHLK0125",2,"124","78","Dipper",0
-"178","CGMHLK01332","CGMHLK0133",2,"133","85","Non dipper",1
-"194","CMUH00032","CMUH0003",2,"120","71","Dipper",0
-"196","CMUH00042","CMUH0004",2,"171","80","Non dipper",1
-"199","CMUH00062","CMUH0006",2,"125","70","Non dipper",1
-"202","CMUH00082","CMUH0008",2,"112","67","Dipper",0
-"208","CMUH00132","CMUH0013",2,"119","76","Reverse dipper",1
-"214","CMUH00192","CMUH0019",2,"107","66","Non dipper",1
-"218","CMUH00232","CMUH0023",2,"125","89","Non dipper",1
-"221","CMUH00252","CMUH0025",2,"120","87","Reverse dipper",1
-"224","CMUH00272","CMUH0027",2,"120","83","Dipper",0
-"228","CMUH00302","CMUH0030",2,"138","76","Reverse dipper",1
-"237","CMUH00402","CMUH0040",2,"123","78","Non dipper",1
-"239","CMUH00412","CMUH0041",2,"131","79","Reverse dipper",1
-"245","CMUH00472","CMUH0047",2,"125","81","Reverse dipper",1
-"247","CMUH00482","CMUH0048",2,"116","77","Reverse dipper",1
-"251","CMUH00522","CMUH0052",2,"125","76","Dipper",0
-"256","CMUH00582","CMUH0058",2,"134","75","Non dipper",1
-"265","CMUH00692","CMUH0069",2,"129","82","Non dipper",1
-"280","CMUH00972","CMUH0097",2,"124","70","Non dipper",1
-"346","CMUH02312","CMUH0231",2,"117","64","Dipper",0
-"418","EDA00062","EDA0006",2,"129","83","Non dipper",1
-"421","EDA00082","EDA0008",2,"119","68","Non dipper",1
-"423","EDA00092","EDA0009",2,"119","73","Non dipper",1
-"427","EDA00122","EDA0012",2,"115","65","Non dipper",1
-"429","EDA00132","EDA0013",2,"126","80","Reverse dipper",1
-"434","EDA00172","EDA0017",2,"131","92","Non dipper",1
-"440","EDA00222","EDA0022",2,"125","66","Dipper",0
-"443","EDA00242","EDA0024",2,"122","75","Non dipper",1
-"446","EDA00292","EDA0029",2,"119","65","Reverse dipper",1
-"449","EDA00352","EDA0035",2,"124","88","Non dipper",1
-"453","EDA00382","EDA0038",2,"113","72","Reverse dipper",1
-"455","EDA00392","EDA0039",2,"123","84","Non dipper",1
-"458","EDA00412","EDA0041",2,"130","85","Reverse dipper",1
-"461","EDA00432","EDA0043",2,"143","84","Non dipper",1
-"463","EDA00442","EDA0044",2,"129","65","Non dipper",1
-"475","EDA00672","EDA0067",2,"115","83","Non dipper",1
-"498","EDA01182","EDA0118",2,"---","---","Reverse dipper",1
-"512","KMUH00022","KMUH0002",2,"118","76","Dipper",0
-"514","KMUH00032","KMUH0003",2,"127","69","Reverse dipper",1
-"517","KMUH00052","KMUH0005",2,"153","76","Non dipper",1
-"522","KMUH00092","KMUH0009",2,"122","77","Reverse dipper",1
-"524","KMUH00102","KMUH0010",2,"138","74","Non dipper",1
-"526","KMUH00132","KMUH0013",2,"131","88","Dipper",0
-"528","KMUH00142","KMUH0014",2,"119","82","Non dipper",1
-"531","KMUH00162","KMUH0016",2,"156","74","Dipper",0
-"534","KMUH00212","KMUH0021",2,"124","78","Dipper",0
-"538","KMUH00262","KMUH0026",2,"124","71","Non dipper",1
-"541","KMUH00292","KMUH0029",2,"123","71","Non dipper",1
-"546","KMUH00342","KMUH0034",2,"157","87","Non dipper",1
-"549","KMUH00362","KMUH0036",2,"139","88","Dipper",0
-"554","KMUH00402","KMUH0040",2,"111","63","Non dipper",1
-"556","KMUH00422","KMUH0042",2,"122","77","Non dipper",1
-"558","KMUH00432","KMUH0043",2,"141","66","Reverse dipper",1
-"560","KMUH00442","KMUH0044",2,"146","80","Reverse dipper",1
-"562","KMUH00452","KMUH0045",2,"120","63","Dipper",0
-"564","KMUH00462","KMUH0046",2,"111","66","Reverse dipper",1
-"566","KMUH00472","KMUH0047",2,"121","80","Non dipper",1
-"568","KMUH00492","KMUH0049",2,"154","77","Dipper",0
-"571","KMUH00522","KMUH0052",2,"124","75","Non dipper",1
-"573","KMUH00532","KMUH0053",2,"117","79","Non dipper",1
-"575","KMUH00542","KMUH0054",2,"135","77","Non dipper",1
-"577","KMUH00552","KMUH0055",2,"133","89","Non dipper",1
-"579","KMUH00582","KMUH0058",2,"147","108","Non dipper",1
-"581","KMUH00592","KMUH0059",2,"110","62","Non dipper",1
-"584","KMUH00612","KMUH0061",2,"110","59","Non dipper",1
-"586","KMUH00622","KMUH0062",2,"140","78","Reverse dipper",1
-"588","KMUH00632","KMUH0063",2,"122","75","Dipper",0
-"590","KMUH00642","KMUH0064",2,"120","82","Reverse dipper",1
-"592","KMUH00652","KMUH0065",2,"125","68","Non dipper",1
-"596","KMUH00682","KMUH0068",2,"121","75","Non dipper",1
-"599","KMUH00702","KMUH0070",2,"173","99","Non dipper",1
-"601","KMUH00712","KMUH0071",2,"119","74","Non dipper",1
-"603","KMUH00722","KMUH0072",2,"130","91","Non dipper",1
-"606","KMUH00752","KMUH0075",2,"112","75","Reverse dipper",1
-"706","CGMHLK00012","CGMHLK0001",2,"142","77","Reverse dipper",1
-"708","CGMHLK00022","CGMHLK0002",2,"112","67","Non dipper",1
-"710","CGMHLK00032","CGMHLK0003",2,"109","74","Dipper",0
-"712","CGMHLK00042","CGMHLK0004",2,"116","61","Reverse dipper",1
-"714","CGMHLK00072","CGMHLK0007",2,"141","87","Reverse dipper",1
-"716","CGMHLK00082","CGMHLK0008",2,"138","92","Non dipper",1
-"719","CGMHLK00102","CGMHLK0010",2,"131","86","Non dipper",1
-"721","CGMHLK00112","CGMHLK0011",2,"148","91","Dipper",0
-"724","CGMHLK00132","CGMHLK0013",2,"170","110","Non dipper",1
-"726","CGMHLK00142","CGMHLK0014",2,"131","65","Non dipper",1
-"728","CGMHLK00152","CGMHLK0015",2,"139","91","Non dipper",1
-"730","CGMHLK00162","CGMHLK0016",2,"152","87","Reverse dipper",1
-"732","CGMHLK00172","CGMHLK0017",2,"143","85","Reverse dipper",1
-"734","CGMHLK00202","CGMHLK0020",2,"132","60","Non dipper",1
-"736","CGMHLK00212","CGMHLK0021",2,"182","83","Non dipper",1
-"738","CGMHLK00222","CGMHLK0022",2,"123","80","Non dipper",1
-"740","CGMHLK00232","CGMHLK0023",2,"132","79","Extreme dipper",0
-"742","CGMHLK00252","CGMHLK0025",2,"144","79","Dipper",0
-"745","CGMHLK00272","CGMHLK0027",2,"118","70","Non dipper",1
-"748","CGMHLK00292","CGMHLK0029",2,"129","77","Dipper",0
-"750","CGMHLK00302","CGMHLK0030",2,"129","72","Non dipper",1
-"752","CGMHLK00312","CGMHLK0031",2,"130","87","Reverse dipper",1
-"754","CGMHLK00332","CGMHLK0033",2,"140","77","Dipper",0
-"756","CGMHLK00342","CGMHLK0034",2,"128","71","Reverse dipper",1
-"758","CGMHLK00362","CGMHLK0036",2,"125","81","Dipper",0
-"760","CGMHLK00382","CGMHLK0038",2,"136","99","Non dipper",1
-"762","CGMHLK00392","CGMHLK0039",2,"128","73","Non dipper",1
-"765","CGMHLK00422","CGMHLK0042",2,"131","93","Non dipper",1
-"767","CGMHLK00432","CGMHLK0043",2,"135","97","Non dipper",1
-"771","CGMHLK00462","CGMHLK0046",2,"162","81","Non dipper",1
-"775","CGMHLK00502","CGMHLK0050",2,"131","76","Dipper",0
-"777","CGMHLK00512","CGMHLK0051",2,"128","77","Non dipper",1
-"779","CGMHLK00522","CGMHLK0052",2,"119","66","Reverse dipper",1
-"782","CGMHLK00572","CGMHLK0057",2,"119","69","Dipper",0
-"784","CGMHLK00582","CGMHLK0058",2,"131","94","Non dipper",1
-"787","CGMHLK00612","CGMHLK0061",2,"116","75","Non dipper",1
-"790","CGMHLK00662","CGMHLK0066",2,"127","77","Dipper",0
-"793","CGMHLK00692","CGMHLK0069",2,"146","78","Reverse dipper",1
-"796","CGMHLK00712","CGMHLK0071",2,"128","65","Dipper",0
-"798","CGMHLK00722","CGMHLK0072",2,"126","85","Reverse dipper",1
-"800","CGMHLK00732","CGMHLK0073",2,"118","68","Non dipper",1
-"802","CGMHLK00742","CGMHLK0074",2,"141","77","Reverse dipper",1
-"806","CGMHLK00772","CGMHLK0077",2,"129","67","Reverse dipper",1
-"809","CGMHLK00792","CGMHLK0079",2,"120","90","Reverse dipper",1
-"811","CGMHLK00802","CGMHLK0080",2,"107","71","Dipper",0
-"813","CGMHLK00812","CGMHLK0081",2,"156","107","Reverse dipper",1
-"815","CGMHLK00822","CGMHLK0082",2,"137","89","Dipper",0
-"817","CGMHLK00832","CGMHLK0083",2,"128","80","Non dipper",1
-"819","CGMHLK00842","CGMHLK0084",2,"118","83","Non dipper",1
-"821","CGMHLK00852","CGMHLK0085",2,"131","85","Reverse dipper",1
-"824","CGMHLK00872","CGMHLK0087",2,"122","77","Non dipper",1
-"826","CGMHLK00882","CGMHLK0088",2,"110","77","Non dipper",1
-"830","CGMHLK00922","CGMHLK0092",2,"130","85","Extreme dipper",0
-"832","CGMHLK00932","CGMHLK0093",2,"136","71","Reverse dipper",1
-"838","CGMHLK00982","CGMHLK0098",2,"123","86","Non dipper",1
-"840","CGMHLK00992","CGMHLK0099",2,"127","79","Dipper",0
-"842","CGMHLK01002","CGMHLK0100",2,"136","69","Dipper",0
-"845","CGMHLK01022","CGMHLK0102",2,"111","77","Dipper",0
-"847","CGMHLK01032","CGMHLK0103",2,"139","69","Dipper",0
-"849","CGMHLK01042","CGMHLK0104",2,"127","87","Dipper",0
-"852","CGMHLK01062","CGMHLK0106",2,"126","70","Non dipper",1
-"855","CGMHLK01082","CGMHLK0108",2,"111","77","Non dipper",1
-"862","CGMHLK01162","CGMHLK0116",2,"---","---","Dipper",0
-"866","CGMHLK01192","CGMHLK0119",2,"137","91","Non dipper",1
-"869","CGMHLK01212","CGMHLK0121",2,"131","82","Non dipper",1
-"874","CGMHLK01252","CGMHLK0125",2,"127","73","Dipper",0
-"882","CGMHLK01332","CGMHLK0133",2,"141","83","Non dipper",1
-"898","CMUH00032","CMUH0003",2,"126","74","Dipper",0
-"900","CMUH00042","CMUH0004",2,"147","71","Non dipper",1
-"903","CMUH00062","CMUH0006",2,"118","64","Non dipper",1
-"906","CMUH00082","CMUH0008",2,"107","68","Dipper",0
-"912","CMUH00132","CMUH0013",2,"116","75","Reverse dipper",1
-"918","CMUH00192","CMUH0019",2,"114","69","Non dipper",1
-"922","CMUH00232","CMUH0023",2,"121","84","Non dipper",1
-"925","CMUH00252","CMUH0025",2,"122","87","Reverse dipper",1
-"928","CMUH00272","CMUH0027",2,"122","87","Dipper",0
-"932","CMUH00302","CMUH0030",2,"144","80","Reverse dipper",1
-"941","CMUH00402","CMUH0040",2,"125","80","Non dipper",1
-"943","CMUH00412","CMUH0041",2,"128","73","Reverse dipper",1
-"949","CMUH00472","CMUH0047",2,"131","85","Reverse dipper",1
-"951","CMUH00482","CMUH0048",2,"120","78","Reverse dipper",1
-"955","CMUH00522","CMUH0052",2,"134","82","Dipper",0
-"960","CMUH00582","CMUH0058",2,"129","75","Non dipper",1
-"969","CMUH00692","CMUH0069",2,"126","79","Non dipper",1
-"984","CMUH00972","CMUH0097",2,"130","71","Non dipper",1
-"1050","CMUH02312","CMUH0231",2,"121","74","Dipper",0
-"1122","EDA00062","EDA0006",2,"129","85","Non dipper",1
-"1125","EDA00082","EDA0008",2,"116","65","Non dipper",1
-"1127","EDA00092","EDA0009",2,"127","76","Non dipper",1
-"1131","EDA00122","EDA0012",2,"109","59","Non dipper",1
-"1133","EDA00132","EDA0013",2,"138","87","Reverse dipper",1
-"1138","EDA00172","EDA0017",2,"121","83","Non dipper",1
-"1144","EDA00222","EDA0022",2,"122","70","Dipper",0
-"1147","EDA00242","EDA0024",2,"122","75","Non dipper",1
-"1150","EDA00292","EDA0029",2,"123","65","Reverse dipper",1
-"1153","EDA00352","EDA0035",2,"118","81","Non dipper",1
-"1157","EDA00382","EDA0038",2,"116","72","Reverse dipper",1
-"1159","EDA00392","EDA0039",2,"116","77","Non dipper",1
-"1162","EDA00412","EDA0041",2,"133","85","Reverse dipper",1
-"1165","EDA00432","EDA0043",2,"163","92","Non dipper",1
-"1167","EDA00442","EDA0044",2,"131","65","Non dipper",1
-"1179","EDA00672","EDA0067",2,"110","77","Non dipper",1
-"1202","EDA01182","EDA0118",2,"---","---","Reverse dipper",1
-"1216","KMUH00022","KMUH0002",2,"124","78","Dipper",0
-"1218","KMUH00032","KMUH0003",2,"123","65","Reverse dipper",1
-"1221","KMUH00052","KMUH0005",2,"126","64","Non dipper",1
-"1226","KMUH00092","KMUH0009",2,"127","77","Reverse dipper",1
-"1228","KMUH00102","KMUH0010",2,"141","72","Non dipper",1
-"1230","KMUH00132","KMUH0013",2,"136","91","Dipper",0
-"1232","KMUH00142","KMUH0014",2,"106","69","Non dipper",1
-"1235","KMUH00162","KMUH0016",2,"154","73","Dipper",0
-"1238","KMUH00212","KMUH0021",2,"119","73","Dipper",0
-"1242","KMUH00262","KMUH0026",2,"129","72","Non dipper",1
-"1245","KMUH00292","KMUH0029",2,"121","66","Non dipper",1
-"1250","KMUH00342","KMUH0034",2,"141","83","Non dipper",1
-"1253","KMUH00362","KMUH0036",2,"132","86","Dipper",0
-"1258","KMUH00402","KMUH0040",2,"117","64","Non dipper",1
-"1260","KMUH00422","KMUH0042",2,"126","77","Non dipper",1
-"1262","KMUH00432","KMUH0043",2,"164","76","Reverse dipper",1
-"1264","KMUH00442","KMUH0044",2,"153","80","Reverse dipper",1
-"1266","KMUH00452","KMUH0045",2,"123","63","Dipper",0
-"1268","KMUH00462","KMUH0046",2,"118","66","Reverse dipper",1
-"1270","KMUH00472","KMUH0047",2,"127","89","Non dipper",1
-"1272","KMUH00492","KMUH0049",2,"145","70","Dipper",0
-"1275","KMUH00522","KMUH0052",2,"129","75","Non dipper",1
-"1277","KMUH00532","KMUH0053",2,"117","76","Non dipper",1
-"1279","KMUH00542","KMUH0054",2,"132","76","Non dipper",1
-"1281","KMUH00552","KMUH0055",2,"131","84","Non dipper",1
-"1283","KMUH00582","KMUH0058",2,"159","107","Non dipper",1
-"1285","KMUH00592","KMUH0059",2,"110","66","Non dipper",1
-"1288","KMUH00612","KMUH0061",2,"121","60","Non dipper",1
-"1290","KMUH00622","KMUH0062",2,"136","77","Reverse dipper",1
-"1292","KMUH00632","KMUH0063",2,"120","71","Dipper",0
-"1294","KMUH00642","KMUH0064",2,"119","77","Reverse dipper",1
-"1296","KMUH00652","KMUH0065",2,"125","58","Non dipper",1
-"1300","KMUH00682","KMUH0068",2,"113","64","Non dipper",1
-"1303","KMUH00702","KMUH0070",2,"166","93","Non dipper",1
-"1305","KMUH00712","KMUH0071",2,"119","72","Non dipper",1
-"1307","KMUH00722","KMUH0072",2,"127","88","Non dipper",1
-"1310","KMUH00752","KMUH0075",2,"111","67","Reverse dipper",1
+"","Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip","time"
+"2","CGMHLK00012","CGMHLK0001",2,"138","81","Reverse dipper",1,1
+"6","CGMHLK00022","CGMHLK0002",2,"112","64","Non dipper",0,1
+"10","CGMHLK00032","CGMHLK0003",2,"121","87","Dipper",0,1
+"14","CGMHLK00042","CGMHLK0004",2,"116","67","Reverse dipper",1,1
+"22","CGMHLK00072","CGMHLK0007",2,"132","85","Reverse dipper",1,1
+"26","CGMHLK00082","CGMHLK0008",2,"140","96","Non dipper",0,1
+"30","CGMHLK00102","CGMHLK0010",2,"129","86","Non dipper",0,1
+"34","CGMHLK00112","CGMHLK0011",2,"140","87","Dipper",0,1
+"39","CGMHLK00132","CGMHLK0013",2,"153","102","Non dipper",0,1
+"43","CGMHLK00142","CGMHLK0014",2,"131","68","Non dipper",0,1
+"46","CGMHLK00152","CGMHLK0015",2,"136","92","Non dipper",0,1
+"50","CGMHLK00162","CGMHLK0016",2,"149","86","Reverse dipper",1,1
+"54","CGMHLK00172","CGMHLK0017",2,"151","88","Reverse dipper",1,1
+"62","CGMHLK00202","CGMHLK0020",2,"132","60","Non dipper",0,1
+"66","CGMHLK00212","CGMHLK0021",2,"180","90","Non dipper",0,1
+"68","CGMHLK00222","CGMHLK0022",2,"127","81","Non dipper",0,1
+"72","CGMHLK00232","CGMHLK0023",2,"141","86","Extreme dipper",0,1
+"80","CGMHLK00252","CGMHLK0025",2,"158","90","Dipper",0,1
+"83","CGMHLK00272","CGMHLK0027",2,"114","70","Non dipper",0,1
+"87","CGMHLK00292","CGMHLK0029",2,"132","76","Dipper",0,1
+"90","CGMHLK00302","CGMHLK0030",2,"120","68","Non dipper",0,1
+"94","CGMHLK00312","CGMHLK0031",2,"137","92","Reverse dipper",1,1
+"99","CGMHLK00332","CGMHLK0033",2,"133","78","Dipper",0,1
+"102","CGMHLK00342","CGMHLK0034",2,"156","87","Reverse dipper",1,1
+"107","CGMHLK00362","CGMHLK0036",2,"126","87","Dipper",0,1
+"113","CGMHLK00382","CGMHLK0038",2,"138","101","Non dipper",0,1
+"116","CGMHLK00392","CGMHLK0039",2,"146","82","Non dipper",0,1
+"122","CGMHLK00422","CGMHLK0042",2,"136","98","Non dipper",0,1
+"125","CGMHLK00432","CGMHLK0043",2,"130","85","Non dipper",0,1
+"133","CGMHLK00462","CGMHLK0046",2,"160","80","Non dipper",0,1
+"141","CGMHLK00502","CGMHLK0050",2,"131","73","Dipper",0,1
+"145","CGMHLK00512","CGMHLK0051",2,"133","79","Non dipper",0,1
+"149","CGMHLK00522","CGMHLK0052",2,"118","68","Reverse dipper",1,1
+"158","CGMHLK00572","CGMHLK0057",2,"114","66","Dipper",0,1
+"160","CGMHLK00582","CGMHLK0058",2,"135","95","Non dipper",0,1
+"164","CGMHLK00612","CGMHLK0061",2,"114","75","Non dipper",0,1
+"170","CGMHLK00662","CGMHLK0066",2,"130","77","Dipper",0,1
+"173","CGMHLK00692","CGMHLK0069",2,"145","80","Reverse dipper",1,1
+"178","CGMHLK00712","CGMHLK0071",2,"131","71","Dipper",0,1
+"180","CGMHLK00722","CGMHLK0072",2,"122","81","Reverse dipper",1,1
+"184","CGMHLK00732","CGMHLK0073",2,"116","68","Non dipper",0,1
+"186","CGMHLK00742","CGMHLK0074",2,"132","72","Reverse dipper",1,1
+"194","CGMHLK00772","CGMHLK0077",2,"134","76","Reverse dipper",1,1
+"199","CGMHLK00792","CGMHLK0079",2,"123","93","Reverse dipper",1,1
+"202","CGMHLK00802","CGMHLK0080",2,"119","81","Dipper",0,1
+"205","CGMHLK00812","CGMHLK0081",2,"145","106","Reverse dipper",1,1
+"207","CGMHLK00822","CGMHLK0082",2,"147","87","Dipper",0,1
+"209","CGMHLK00832","CGMHLK0083",2,"121","77","Non dipper",0,1
+"212","CGMHLK00842","CGMHLK0084",2,"119","85","Non dipper",0,1
+"215","CGMHLK00852","CGMHLK0085",2,"127","86","Reverse dipper",1,1
+"219","CGMHLK00872","CGMHLK0087",2,"125","78","Non dipper",0,1
+"222","CGMHLK00882","CGMHLK0088",2,"114","77","Non dipper",0,1
+"230","CGMHLK00922","CGMHLK0092",2,"123","80","Extreme dipper",0,1
+"233","CGMHLK00932","CGMHLK0093",2,"135","74","Reverse dipper",1,1
+"242","CGMHLK00982","CGMHLK0098",2,"129","92","Non dipper",0,1
+"245","CGMHLK00992","CGMHLK0099",2,"120","78","Dipper",0,1
+"248","CGMHLK01002","CGMHLK0100",2,"134","67","Dipper",0,1
+"254","CGMHLK01022","CGMHLK0102",2,"110","79","Dipper",0,1
+"257","CGMHLK01032","CGMHLK0103",2,"134","73","Dipper",0,1
+"260","CGMHLK01042","CGMHLK0104",2,"129","90","Dipper",0,1
+"264","CGMHLK01062","CGMHLK0106",2,"130","75","Non dipper",0,1
+"268","CGMHLK01082","CGMHLK0108",2,"108","76","Non dipper",0,1
+"282","CGMHLK01162","CGMHLK0116",2,"---","---","Dipper",0,1
+"287","CGMHLK01192","CGMHLK0119",2,"126","85","Non dipper",0,1
+"290","CGMHLK01212","CGMHLK0121",2,"135","79","Non dipper",0,1
+"295","CGMHLK01252","CGMHLK0125",2,"124","78","Dipper",0,1
+"304","CGMHLK01332","CGMHLK0133",2,"133","85","Non dipper",0,1
+"347","CMUH00032","CMUH0003",2,"120","71","Dipper",0,1
+"349","CMUH00042","CMUH0004",2,"171","80","Non dipper",0,1
+"356","CMUH00062","CMUH0006",2,"125","70","Non dipper",0,1
+"363","CMUH00082","CMUH0008",2,"112","67","Dipper",0,1
+"375","CMUH00132","CMUH0013",2,"119","76","Reverse dipper",1,1
+"391","CMUH00192","CMUH0019",2,"107","66","Non dipper",0,1
+"398","CMUH00232","CMUH0023",2,"125","89","Non dipper",0,1
+"404","CMUH00252","CMUH0025",2,"120","87","Reverse dipper",1,1
+"409","CMUH00272","CMUH0027",2,"120","83","Dipper",0,1
+"420","CMUH00302","CMUH0030",2,"138","76","Reverse dipper",1,1
+"445","CMUH00402","CMUH0040",2,"123","78","Non dipper",0,1
+"447","CMUH00412","CMUH0041",2,"131","79","Reverse dipper",1,1
+"462","CMUH00472","CMUH0047",2,"125","81","Reverse dipper",1,1
+"464","CMUH00482","CMUH0048",2,"116","77","Reverse dipper",1,1
+"474","CMUH00522","CMUH0052",2,"125","76","Dipper",0,1
+"487","CMUH00582","CMUH0058",2,"134","75","Non dipper",0,1
+"505","CMUH00692","CMUH0069",2,"129","82","Non dipper",0,1
+"560","CMUH00972","CMUH0097",2,"124","70","Non dipper",0,1
+"797","CMUH02312","CMUH0231",2,"117","64","Dipper",0,1
+"1079","EDA00062","EDA0006",2,"129","83","Non dipper",0,1
+"1083","EDA00082","EDA0008",2,"119","68","Non dipper",0,1
+"1086","EDA00092","EDA0009",2,"119","73","Non dipper",0,1
+"1096","EDA00122","EDA0012",2,"115","65","Non dipper",0,1
+"1098","EDA00132","EDA0013",2,"126","80","Reverse dipper",1,1
+"1107","EDA00172","EDA0017",2,"131","92","Non dipper",0,1
+"1122","EDA00222","EDA0022",2,"125","66","Dipper",0,1
+"1125","EDA00242","EDA0024",2,"122","75","Non dipper",0,1
+"1137","EDA00292","EDA0029",2,"119","65","Reverse dipper",1,1
+"1151","EDA00352","EDA0035",2,"124","88","Non dipper",0,1
+"1157","EDA00382","EDA0038",2,"113","72","Reverse dipper",1,1
+"1161","EDA00392","EDA0039",2,"123","84","Non dipper",0,1
+"1166","EDA00412","EDA0041",2,"130","85","Reverse dipper",1,1
+"1171","EDA00432","EDA0043",2,"143","84","Non dipper",0,1
+"1174","EDA00442","EDA0044",2,"129","65","Non dipper",0,1
+"1218","EDA00672","EDA0067",2,"115","83","Non dipper",0,1
+"1335","EDA01182","EDA0118",2,"---","---","Reverse dipper",1,1
+"1411","KMUH00022","KMUH0002",2,"118","76","Dipper",0,1
+"1415","KMUH00032","KMUH0003",2,"127","69","Reverse dipper",1,1
+"1419","KMUH00052","KMUH0005",2,"153","76","Non dipper",0,1
+"1430","KMUH00092","KMUH0009",2,"122","77","Reverse dipper",1,1
+"1433","KMUH00102","KMUH0010",2,"138","74","Non dipper",0,1
+"1439","KMUH00132","KMUH0013",2,"131","88","Dipper",0,1
+"1443","KMUH00142","KMUH0014",2,"119","82","Non dipper",0,1
+"1448","KMUH00162","KMUH0016",2,"156","74","Dipper",0,1
+"1455","KMUH00212","KMUH0021",2,"124","78","Dipper",0,1
+"1465","KMUH00262","KMUH0026",2,"124","71","Non dipper",0,1
+"1474","KMUH00292","KMUH0029",2,"123","71","Non dipper",0,1
+"1493","KMUH00342","KMUH0034",2,"157","87","Non dipper",0,1
+"1501","KMUH00362","KMUH0036",2,"139","88","Dipper",0,1
+"1514","KMUH00402","KMUH0040",2,"111","63","Non dipper",0,1
+"1521","KMUH00422","KMUH0042",2,"122","77","Non dipper",0,1
+"1525","KMUH00432","KMUH0043",2,"141","66","Reverse dipper",1,1
+"1530","KMUH00442","KMUH0044",2,"146","80","Reverse dipper",1,1
+"1534","KMUH00452","KMUH0045",2,"120","63","Dipper",0,1
+"1538","KMUH00462","KMUH0046",2,"111","66","Reverse dipper",1,1
+"1541","KMUH00472","KMUH0047",2,"121","80","Non dipper",0,1
+"1545","KMUH00492","KMUH0049",2,"154","77","Dipper",0,1
+"1553","KMUH00522","KMUH0052",2,"124","75","Non dipper",0,1
+"1557","KMUH00532","KMUH0053",2,"117","79","Non dipper",0,1
+"1561","KMUH00542","KMUH0054",2,"135","77","Non dipper",0,1
+"1565","KMUH00552","KMUH0055",2,"133","89","Non dipper",0,1
+"1569","KMUH00582","KMUH0058",2,"147","108","Non dipper",0,1
+"1572","KMUH00592","KMUH0059",2,"110","62","Non dipper",0,1
+"1576","KMUH00612","KMUH0061",2,"110","59","Non dipper",0,1
+"1581","KMUH00622","KMUH0062",2,"140","78","Reverse dipper",1,1
+"1584","KMUH00632","KMUH0063",2,"122","75","Dipper",0,1
+"1588","KMUH00642","KMUH0064",2,"120","82","Reverse dipper",1,1
+"1591","KMUH00652","KMUH0065",2,"125","68","Non dipper",0,1
+"1597","KMUH00682","KMUH0068",2,"121","75","Non dipper",0,1
+"1602","KMUH00702","KMUH0070",2,"173","99","Non dipper",0,1
+"1605","KMUH00712","KMUH0071",2,"119","74","Non dipper",0,1
+"1607","KMUH00722","KMUH0072",2,"130","91","Non dipper",0,1
+"1610","KMUH00752","KMUH0075",2,"112","75","Reverse dipper",1,1
+"23","CGMHLK00012","CGMHLK0001",2,"142","77","Reverse dipper",1,2
+"63","CGMHLK00022","CGMHLK0002",2,"112","67","Non dipper",0,2
+"103","CGMHLK00032","CGMHLK0003",2,"109","74","Dipper",0,2
+"142","CGMHLK00042","CGMHLK0004",2,"116","61","Reverse dipper",1,2
+"223","CGMHLK00072","CGMHLK0007",2,"141","87","Reverse dipper",1,2
+"261","CGMHLK00082","CGMHLK0008",2,"138","92","Non dipper",0,2
+"305","CGMHLK00102","CGMHLK0010",2,"131","86","Non dipper",0,2
+"341","CGMHLK00112","CGMHLK0011",2,"148","91","Dipper",0,2
+"393","CGMHLK00132","CGMHLK0013",2,"170","110","Non dipper",0,2
+"431","CGMHLK00142","CGMHLK0014",2,"131","65","Non dipper",0,2
+"466","CGMHLK00152","CGMHLK0015",2,"139","91","Non dipper",0,2
+"501","CGMHLK00162","CGMHLK0016",2,"152","87","Reverse dipper",1,2
+"541","CGMHLK00172","CGMHLK0017",2,"143","85","Reverse dipper",1,2
+"621","CGMHLK00202","CGMHLK0020",2,"132","60","Non dipper",0,2
+"661","CGMHLK00212","CGMHLK0021",2,"182","83","Non dipper",0,2
+"681","CGMHLK00222","CGMHLK0022",2,"123","80","Non dipper",0,2
+"721","CGMHLK00232","CGMHLK0023",2,"132","79","Extreme dipper",0,2
+"801","CGMHLK00252","CGMHLK0025",2,"144","79","Dipper",0,2
+"831","CGMHLK00272","CGMHLK0027",2,"118","70","Non dipper",0,2
+"872","CGMHLK00292","CGMHLK0029",2,"129","77","Dipper",0,2
+"902","CGMHLK00302","CGMHLK0030",2,"129","72","Non dipper",0,2
+"941","CGMHLK00312","CGMHLK0031",2,"130","87","Reverse dipper",1,2
+"992","CGMHLK00332","CGMHLK0033",2,"140","77","Dipper",0,2
+"1021","CGMHLK00342","CGMHLK0034",2,"128","71","Reverse dipper",1,2
+"1071","CGMHLK00362","CGMHLK0036",2,"125","81","Dipper",0,2
+"1131","CGMHLK00382","CGMHLK0038",2,"136","99","Non dipper",0,2
+"1163","CGMHLK00392","CGMHLK0039",2,"128","73","Non dipper",0,2
+"1222","CGMHLK00422","CGMHLK0042",2,"131","93","Non dipper",0,2
+"1251","CGMHLK00432","CGMHLK0043",2,"135","97","Non dipper",0,2
+"1331","CGMHLK00462","CGMHLK0046",2,"162","81","Non dipper",0,2
+"1412","CGMHLK00502","CGMHLK0050",2,"131","76","Dipper",0,2
+"1451","CGMHLK00512","CGMHLK0051",2,"128","77","Non dipper",0,2
+"1491","CGMHLK00522","CGMHLK0052",2,"119","66","Reverse dipper",1,2
+"1582","CGMHLK00572","CGMHLK0057",2,"119","69","Dipper",0,2
+"1603","CGMHLK00582","CGMHLK0058",2,"131","94","Non dipper",0,2
+"1641","CGMHLK00612","CGMHLK0061",2,"116","75","Non dipper",0,2
+"1702","CGMHLK00662","CGMHLK0066",2,"127","77","Dipper",0,2
+"1731","CGMHLK00692","CGMHLK0069",2,"146","78","Reverse dipper",1,2
+"1781","CGMHLK00712","CGMHLK0071",2,"128","65","Dipper",0,2
+"1801","CGMHLK00722","CGMHLK0072",2,"126","85","Reverse dipper",1,2
+"1841","CGMHLK00732","CGMHLK0073",2,"118","68","Non dipper",0,2
+"1861","CGMHLK00742","CGMHLK0074",2,"141","77","Reverse dipper",1,2
+"1941","CGMHLK00772","CGMHLK0077",2,"129","67","Reverse dipper",1,2
+"1991","CGMHLK00792","CGMHLK0079",2,"120","90","Reverse dipper",1,2
+"2021","CGMHLK00802","CGMHLK0080",2,"107","71","Dipper",0,2
+"2051","CGMHLK00812","CGMHLK0081",2,"156","107","Reverse dipper",1,2
+"2071","CGMHLK00822","CGMHLK0082",2,"137","89","Dipper",0,2
+"2091","CGMHLK00832","CGMHLK0083",2,"128","80","Non dipper",0,2
+"2121","CGMHLK00842","CGMHLK0084",2,"118","83","Non dipper",0,2
+"2151","CGMHLK00852","CGMHLK0085",2,"131","85","Reverse dipper",1,2
+"2191","CGMHLK00872","CGMHLK0087",2,"122","77","Non dipper",0,2
+"2221","CGMHLK00882","CGMHLK0088",2,"110","77","Non dipper",0,2
+"2301","CGMHLK00922","CGMHLK0092",2,"130","85","Extreme dipper",0,2
+"2331","CGMHLK00932","CGMHLK0093",2,"136","71","Reverse dipper",1,2
+"2421","CGMHLK00982","CGMHLK0098",2,"123","86","Non dipper",0,2
+"2451","CGMHLK00992","CGMHLK0099",2,"127","79","Dipper",0,2
+"2481","CGMHLK01002","CGMHLK0100",2,"136","69","Dipper",0,2
+"2541","CGMHLK01022","CGMHLK0102",2,"111","77","Dipper",0,2
+"2571","CGMHLK01032","CGMHLK0103",2,"139","69","Dipper",0,2
+"2601","CGMHLK01042","CGMHLK0104",2,"127","87","Dipper",0,2
+"2641","CGMHLK01062","CGMHLK0106",2,"126","70","Non dipper",0,2
+"2681","CGMHLK01082","CGMHLK0108",2,"111","77","Non dipper",0,2
+"2821","CGMHLK01162","CGMHLK0116",2,"---","---","Dipper",0,2
+"2871","CGMHLK01192","CGMHLK0119",2,"137","91","Non dipper",0,2
+"2901","CGMHLK01212","CGMHLK0121",2,"131","82","Non dipper",0,2
+"2951","CGMHLK01252","CGMHLK0125",2,"127","73","Dipper",0,2
+"3041","CGMHLK01332","CGMHLK0133",2,"141","83","Non dipper",0,2
+"3471","CMUH00032","CMUH0003",2,"126","74","Dipper",0,2
+"3491","CMUH00042","CMUH0004",2,"147","71","Non dipper",0,2
+"3561","CMUH00062","CMUH0006",2,"118","64","Non dipper",0,2
+"3631","CMUH00082","CMUH0008",2,"107","68","Dipper",0,2
+"3751","CMUH00132","CMUH0013",2,"116","75","Reverse dipper",1,2
+"3911","CMUH00192","CMUH0019",2,"114","69","Non dipper",0,2
+"3981","CMUH00232","CMUH0023",2,"121","84","Non dipper",0,2
+"4041","CMUH00252","CMUH0025",2,"122","87","Reverse dipper",1,2
+"4091","CMUH00272","CMUH0027",2,"122","87","Dipper",0,2
+"4201","CMUH00302","CMUH0030",2,"144","80","Reverse dipper",1,2
+"4451","CMUH00402","CMUH0040",2,"125","80","Non dipper",0,2
+"4471","CMUH00412","CMUH0041",2,"128","73","Reverse dipper",1,2
+"4621","CMUH00472","CMUH0047",2,"131","85","Reverse dipper",1,2
+"4641","CMUH00482","CMUH0048",2,"120","78","Reverse dipper",1,2
+"4741","CMUH00522","CMUH0052",2,"134","82","Dipper",0,2
+"4871","CMUH00582","CMUH0058",2,"129","75","Non dipper",0,2
+"5051","CMUH00692","CMUH0069",2,"126","79","Non dipper",0,2
+"5601","CMUH00972","CMUH0097",2,"130","71","Non dipper",0,2
+"7971","CMUH02312","CMUH0231",2,"121","74","Dipper",0,2
+"10791","EDA00062","EDA0006",2,"129","85","Non dipper",0,2
+"10831","EDA00082","EDA0008",2,"116","65","Non dipper",0,2
+"10861","EDA00092","EDA0009",2,"127","76","Non dipper",0,2
+"10961","EDA00122","EDA0012",2,"109","59","Non dipper",0,2
+"10981","EDA00132","EDA0013",2,"138","87","Reverse dipper",1,2
+"11071","EDA00172","EDA0017",2,"121","83","Non dipper",0,2
+"11221","EDA00222","EDA0022",2,"122","70","Dipper",0,2
+"11251","EDA00242","EDA0024",2,"122","75","Non dipper",0,2
+"11371","EDA00292","EDA0029",2,"123","65","Reverse dipper",1,2
+"11511","EDA00352","EDA0035",2,"118","81","Non dipper",0,2
+"11571","EDA00382","EDA0038",2,"116","72","Reverse dipper",1,2
+"11611","EDA00392","EDA0039",2,"116","77","Non dipper",0,2
+"11661","EDA00412","EDA0041",2,"133","85","Reverse dipper",1,2
+"11711","EDA00432","EDA0043",2,"163","92","Non dipper",0,2
+"11741","EDA00442","EDA0044",2,"131","65","Non dipper",0,2
+"12181","EDA00672","EDA0067",2,"110","77","Non dipper",0,2
+"13351","EDA01182","EDA0118",2,"---","---","Reverse dipper",1,2
+"14111","KMUH00022","KMUH0002",2,"124","78","Dipper",0,2
+"14151","KMUH00032","KMUH0003",2,"123","65","Reverse dipper",1,2
+"14191","KMUH00052","KMUH0005",2,"126","64","Non dipper",0,2
+"14301","KMUH00092","KMUH0009",2,"127","77","Reverse dipper",1,2
+"14331","KMUH00102","KMUH0010",2,"141","72","Non dipper",0,2
+"14391","KMUH00132","KMUH0013",2,"136","91","Dipper",0,2
+"14431","KMUH00142","KMUH0014",2,"106","69","Non dipper",0,2
+"14481","KMUH00162","KMUH0016",2,"154","73","Dipper",0,2
+"14551","KMUH00212","KMUH0021",2,"119","73","Dipper",0,2
+"14651","KMUH00262","KMUH0026",2,"129","72","Non dipper",0,2
+"14741","KMUH00292","KMUH0029",2,"121","66","Non dipper",0,2
+"14931","KMUH00342","KMUH0034",2,"141","83","Non dipper",0,2
+"15011","KMUH00362","KMUH0036",2,"132","86","Dipper",0,2
+"15141","KMUH00402","KMUH0040",2,"117","64","Non dipper",0,2
+"15211","KMUH00422","KMUH0042",2,"126","77","Non dipper",0,2
+"15251","KMUH00432","KMUH0043",2,"164","76","Reverse dipper",1,2
+"15301","KMUH00442","KMUH0044",2,"153","80","Reverse dipper",1,2
+"15341","KMUH00452","KMUH0045",2,"123","63","Dipper",0,2
+"15381","KMUH00462","KMUH0046",2,"118","66","Reverse dipper",1,2
+"15411","KMUH00472","KMUH0047",2,"127","89","Non dipper",0,2
+"15451","KMUH00492","KMUH0049",2,"145","70","Dipper",0,2
+"15531","KMUH00522","KMUH0052",2,"129","75","Non dipper",0,2
+"15571","KMUH00532","KMUH0053",2,"117","76","Non dipper",0,2
+"15611","KMUH00542","KMUH0054",2,"132","76","Non dipper",0,2
+"15651","KMUH00552","KMUH0055",2,"131","84","Non dipper",0,2
+"15691","KMUH00582","KMUH0058",2,"159","107","Non dipper",0,2
+"15721","KMUH00592","KMUH0059",2,"110","66","Non dipper",0,2
+"15761","KMUH00612","KMUH0061",2,"121","60","Non dipper",0,2
+"15811","KMUH00622","KMUH0062",2,"136","77","Reverse dipper",1,2
+"15841","KMUH00632","KMUH0063",2,"120","71","Dipper",0,2
+"15881","KMUH00642","KMUH0064",2,"119","77","Reverse dipper",1,2
+"15911","KMUH00652","KMUH0065",2,"125","58","Non dipper",0,2
+"15971","KMUH00682","KMUH0068",2,"113","64","Non dipper",0,2
+"16021","KMUH00702","KMUH0070",2,"166","93","Non dipper",0,2
+"16051","KMUH00712","KMUH0071",2,"119","72","Non dipper",0,2
+"16071","KMUH00722","KMUH0072",2,"127","88","Non dipper",0,2
+"16101","KMUH00752","KMUH0075",2,"111","67","Reverse dipper",1,2

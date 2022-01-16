@@ -56,11 +56,15 @@ lets+ammonia+inr+pressors+rrt
 #random<-c("age","time")
 #f <- lvmica~sex+age+time+grad+ef+bsa
 #BiMMforest1(train,test,f,random,123)
+formula <- lvmica~sex+age+time+grad+ef+bsa
+traindata <- train
+testdata <- test
+table(test$lvmica)
+table(train$lvmica)
 BiMMforest1<-function(traindata,testdata,formula,random,seed){
   #set up variables for Bimm method
   #先把原本的井字號 
-  #data=traindata
-  data=train
+  data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
   ErrorTolerance=0.006
   MaxIterations=1000
@@ -104,7 +108,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
           control = glmerControl(optCtrl=list(maxfun=20000)
            )),
           error = function(cond)"skip")
-  
+  summary(lmefit)
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
     #return train and test confusion matrices
