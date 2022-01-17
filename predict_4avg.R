@@ -6,6 +6,8 @@
 #做完再去做 對ABPM插補 再算Y 再跑模型
 library(dplyr)
 dip <- read.csv("TCHCData/hbp_dip_byx.csv")
+a<-dip[which(dip$MRN=="KMUH0006"|dip$MRN=="KMUH0035"),]
+
 na <- which(is.na(dip$dipping.status))
 dip <- dip[-na,]#845
 dip[,"dip"] <- ifelse(dip$dipping.status=="Non dipper"|dip$dipping.status=="Reverse dipper",1,0)
@@ -15,8 +17,7 @@ table(dip$dipping.status)
 FourAvg <- dip[,c(2,4,6,8,9,11,12,125,126)]
 sum(complete.cases(FourAvg))#830筆
 FourAvg <- FourAvg[complete.cases(FourAvg),]
-#20220115
-#** sys dia現在是chr 轉成數字看看
+
 
 FourAvg[FourAvg[,]=="---"]<-NA
 FourAvg[FourAvg[,]==0]<-NA
@@ -25,7 +26,7 @@ sum(complete.cases(FourAvg))#817筆
 FourAvg <- FourAvg[complete.cases(FourAvg),]
 length(levels(factor(FourAvg$MRN)))#553人
 table(FourAvg$dipping.status)
-
+table(FourAvg$visit_HBP_Dmode)
 
 
 
@@ -45,8 +46,11 @@ Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
 write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
 write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
 #####
+
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
+#20220115
+#** sys dia現在是chr 轉成數字看
 V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
 V2 <- FourAvg[which(FourAvg$visit_HBP_Dmode==2),]#142
 V3 <- FourAvg[which(FourAvg$visit_HBP_Dmode==3),]#85
@@ -65,17 +69,24 @@ V12 <- rbind(AM,PM)
 colnames(V12)<-c("Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip","time")
 V1 <- V12[which(V12$visit_HBP_Dmode==1),]#1124
 V2 <- V12[which(V12$visit_HBP_Dmode==2),]#284
-V1 <- V1[which(V1$MRN%in%V2$MRN),]
+V5 <- V1[which(V1$MRN%in%V2$MRN),]
 for (i in 1:dim(V2)[1]){
   if(all(V2[i,"MRN"]!= V1[,"MRN"])){
     print(V2[i,"MRN"])
   }
 }
 which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035")
+V2<-V2[-which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035"),]
+a<-FourAvg[which(FourAvg$MRN=="KMUH0006"|FourAvg$MRN=="KMUH0035"),]
+FourAvg$MRN
 V2<-V2[-c(107,117,249,259),]
+V1$sys <- as.numeric(V1$sys)
+V1$dia <- as.numeric(V1$dia)
+V2$sys <- as.numeric(V2$sys)
+V2$dia <- as.numeric(V2$dia)
 #新的
-write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#280
-write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#280
+write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#276
+write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#276
 
 #舊的(沒有變成2筆的)
 write.csv(V12,file = "TCHCData/4avg_Visit_Train_V12.csv")
@@ -89,6 +100,7 @@ Test<-Test[,-1]
 
 Train<-V1
 Test<-V2
+table(FourAvg$visit_HBP_Dmode)
 ######模型訓練 BIMMRF 1iter / H1 / H3 / RF
 library(rpart)
 library(blme)
@@ -126,7 +138,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   newdata[, "AdjustedTarget"] <- AdjustedTarget# 1跟2
   iterations <- iterations + 1
   #build tree
-  #set.seed(seed)
+  set.seed(123)
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")

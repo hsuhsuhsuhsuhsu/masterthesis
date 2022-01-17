@@ -1,26 +1,21 @@
-#從 845筆有Y的去做 =>收縮 舒張 早上 晚上 平均 =>取4個
-#先抓平均完的complete case 去做模型(完整case會變多) 看效果
-# case-wise 隨機切割ID 用ID所有資料去訓練 測試
-# visit-wise V1 預測 V2 ； V1 V2 預測 V3
-#再對X先做隨機森林插補 再抓4個平均 再跑模型 看效果 
-#做完再去做 對ABPM插補 再算Y 再跑模型
 library(dplyr)
 dip <- read.csv("TCHCData/hbp_dip_byx.csv")
 na <- which(is.na(dip$dipping.status))
 dip <- dip[-na,]#845
 dip[,"dip"] <- ifelse(dip$dipping.status=="Reverse dipper",1,0)
 dip <- dip[-which(dip$dipping.status=="Non dipper"),]
-colnames(dip)
 table(dip$dip)
 table(dip$dipping.status)
 FourAvg <- dip[,c(2,4,6,8,9,11,12,125,126)]
-na <- which(is.na(FourAvg$dipping.status))
-dip <- dip[-na,]
-sum(complete.cases(FourAvg))#830筆
-
+FourAvg[FourAvg[,]=="---"]<-NA
+FourAvg[FourAvg[,]==0]<-NA
+FourAvg[,"dip"] <- ifelse(FourAvg$dipping.status=="Reverse dipper",1,0)
+sum(complete.cases(FourAvg))#393
 FourAvg <- FourAvg[complete.cases(FourAvg),]
-
-# case-wise 隨機切割ID 用ID所有資料去訓練 測試
+length(levels(factor(FourAvg$MRN)))#305
+table(FourAvg$dipping.status)
+table(FourAvg$visit_HBP_Dmode)
+#### case-wise 隨機切割ID 用ID所有資料去訓練 測試####
 #Split Train test
 length(unique(FourAvg$MRN))#564人
 people <-as.data.frame(unique(FourAvg$MRN))
@@ -33,7 +28,7 @@ Test <- rbind(Train, FourAvg)
 Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
 write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
 write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
-
+#####
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
 V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
@@ -52,29 +47,21 @@ colnames(AM) <- c(1,2,3,4,5,6,7)
 colnames(PM) <- c(1,2,3,4,5,6,7)
 V12 <- rbind(AM,PM)
 colnames(V12)<-c("Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip","time")
-V1 <- V12[which(V12$visit_HBP_Dmode==1),]#542
-V2 <- V12[which(V12$visit_HBP_Dmode==2),]#140
-V1 <- V1[which(V1$MRN%in%V2$MRN),]
+V1 <- V12[which(V12$visit_HBP_Dmode==1),]#530
+V2 <- V12[which(V12$visit_HBP_Dmode==2),]#136
+VV1 <- V1[which(V1$MRN%in%V2$MRN),]#80
+del=NULL
 for (i in 1:dim(V2)[1]){
   if(all(V2[i,"MRN"]!= V1[,"MRN"])){
-    print(V2[i,"MRN"])
+    notinV1 <- V2[i,"MRN"]
+    del <- rbind(del,notinV1)
   }
 }
-which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035")
-V2<-V2[-c(107,117,249,259),]
-#新的
-write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#280
-write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#280
+del <- as.data.frame(del)
+VV2 <- V2[-which(V2$MRN %in% del$V1),]
 
-#舊的(沒有變成2筆的)
-write.csv(V12,file = "TCHCData/4avg_Visit_Train_V12.csv")
-write.csv(V34,file = "TCHCData/4avg_Visit_Test_V34.csv")
-write.csv(V3,file = "TCHCData/4avg_Visit_Test_V3.csv")
-#####
-Train <- read.csv("TCHCData/4avg_Train_V1.csv")#280
-Test <- read.csv("TCHCData/4avg_Test_V2.csv")
-Train<-Train[,-1]
-Test<-Test[,-1]
+Train<-VV1
+Test<-VV2
 
 Train<-V1
 Test<-V2
@@ -83,13 +70,16 @@ library(rpart)
 library(blme)
 library(randomForest)
 formula <- dip ~ sys+dia+time
+
+table(Train$dip)#0:44 1:36
+table(Test$dip)# 0:42 1:38
+
 traindata <-  Train
-table(Train$dip)#0:206 1:74
+testdata <- Test 
 
 traindata$dip <- as.factor(traindata$dip)
-testdata <- Test 
 testdata$dip <- as.factor(testdata$dip)
-table(traindata$dip)
+
 random <- "(1|sys)+(1|dia)+(1|time)"
 BiMMforest1<-function(traindata,testdata,formula,random,seed){
   data=traindata
@@ -116,7 +106,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   newdata[, "AdjustedTarget"] <- AdjustedTarget# 1跟2
   iterations <- iterations + 1
   #build tree
-  #set.seed(seed)
+  set.seed(123)
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")
@@ -128,11 +118,8 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   
   #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
-  lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                  collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
-                            control = glmerControl(optCtrl=list(maxfun=20000)
-                            )),
-                     error = function(cond)"skip")
+  lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
+                            control = glmerControl(optCtrl=list(maxfun=20000))),error = function(cond)"skip")
   
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
@@ -146,7 +133,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
     random <- c("sys","dia","time")
     traindata1 <- cbind(traindata,random)
     train.preds <- ifelse(predict(lmefit,traindata,type="response")<.5,0,1)
-    
+    lme.test.preds <- ifelse(predict(lmefit,testdata,type="response")<.5,0,1)
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
     table(traindata$dip)
     t1<-table(traindata$dip,train.preds)

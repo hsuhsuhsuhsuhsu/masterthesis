@@ -2,6 +2,8 @@ library(dplyr)
 #讓日期時間讀進來就是字串 read.csv (colClass = c("colname" ="class type"))
 ab <- read.csv("TCHCData/abpm.csv", header = T)
 abp <- ab
+
+
 #計算TCHC 的 nocturnal dipping rate
 #白天:06-22 晚上22-06
 #白天sbp : 06 - 22 的平均sbp

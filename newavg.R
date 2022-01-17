@@ -8,7 +8,8 @@
 
 #3vs1
 library(dplyr)
-dip <- read.csv("TCHCData/hbp_dip_byx.csv")
+raw <- read.csv("TCHCData/hbp_dip_byx.csv")
+dip <- raw
 na <- which(is.na(dip$dipping.status))
 dip <- dip[-na,]#845
 dip[,"dip"] <- ifelse(dip$dipping.status=="Reverse dipper",1,0)
@@ -19,8 +20,17 @@ FourAvg <- dip[,c(2,4,6,8,9,11,12,125,126)]
 sum(complete.cases(FourAvg))#830筆
 FourAvg <- FourAvg[complete.cases(FourAvg),]
 
+FourAvg[FourAvg[,]=="---"]<-NA
+FourAvg[FourAvg[,]==0]<-NA
+FourAvg[,"dip"] <- ifelse(FourAvg$dipping.status=="Reverse dipper",1,0)
+sum(complete.cases(FourAvg))#817筆
+FourAvg <- FourAvg[complete.cases(FourAvg),]
+length(levels(factor(FourAvg$MRN)))#553人
+table(FourAvg$dipping.status)
+table(FourAvg$visit_HBP_Dmode)
+
 # case-wise 隨機切割ID 用ID所有資料去訓練 測試
-#Split Train test
+#### Split Train test ####
 length(unique(FourAvg$MRN))#564人
 people <-as.data.frame(unique(FourAvg$MRN))
 set.seed(1226)
@@ -32,7 +42,8 @@ Test <- rbind(Train, FourAvg)
 Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
 write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
 write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
-
+table(FourAvg$visit_HBP_Dmode)
+#### ####
 # visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
 #或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
 V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
@@ -51,8 +62,8 @@ colnames(AM) <- c(1,2,3,4,5,6,7)
 colnames(PM) <- c(1,2,3,4,5,6,7)
 V12 <- rbind(AM,PM)
 colnames(V12)<-c("Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip","time")
-V1 <- V12[which(V12$visit_HBP_Dmode==1),]#1124
-V2 <- V12[which(V12$visit_HBP_Dmode==2),]#284
+V1 <- V12[which(V12$visit_HBP_Dmode==1),]#1102
+V2 <- V12[which(V12$visit_HBP_Dmode==2),]#280
 V1 <- V1[which(V1$MRN%in%V2$MRN),]
 for (i in 1:dim(V2)[1]){
   if(all(V2[i,"MRN"]!= V1[,"MRN"])){
@@ -60,7 +71,11 @@ for (i in 1:dim(V2)[1]){
   }
 }
 which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035")
-V2<-V2[-c(107,117,249,259),]
+V2<-V2[-which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035"),]
+V1$sys <- as.numeric(V1$sys)
+V1$dia <- as.numeric(V1$dia)
+V2$sys <- as.numeric(V2$sys)
+V2$dia <- as.numeric(V2$dia)
 #新的
 write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#280
 write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#280
@@ -83,10 +98,12 @@ library(blme)
 library(randomForest)
 formula <- dip ~ sys+dia+time
 traindata <-  Train
-table(Train$dip)#0:206 1:74
+table(Train$dip)#0:202 1:74
 
 traindata$dip <- as.factor(traindata$dip)
 testdata <- Test 
+table(Test$dip)
+table(Test$dipping.status)
 testdata$dip <- as.factor(testdata$dip)
 table(traindata$dip)
 random <- "(1|sys)+(1|dia)+(1|time)"
@@ -115,7 +132,7 @@ BiMMforest1<-function(traindata,testdata,formula,random,seed){
   newdata[, "AdjustedTarget"] <- AdjustedTarget# 1跟2
   iterations <- iterations + 1
   #build tree
-  #set.seed(seed)
+  set.seed(123)
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")

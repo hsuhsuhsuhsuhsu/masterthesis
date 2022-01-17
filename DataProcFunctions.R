@@ -57,7 +57,7 @@ TrainTest <- function(data = NULL, VisitOrCase = NULL, nfixed = T, Train = NULL,
       #選出有test visit的MRN(人)
       test.true.MRN <- filter(data, data$visit %in% Test) %>%
         select(MRN)
-      0
+      #改
       Training <- filter(data, data$visit %in% Train)
     }else{
      Training <- data[which(data$visit %in% Train), ]
