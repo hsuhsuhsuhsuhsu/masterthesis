@@ -1,4 +1,5 @@
 source("DataProcFunctions.r")
+source("ModelBuildFunction.r")
 #
 #### setting parameter ####
 file <- "TCHCData/hbp_dip_byx.csv"
@@ -7,178 +8,198 @@ file <- "TCHCData/hbp_dip_byx.csv"
 reCol.AM <- c("HBP_d_PM_systolic","HBP_d_PM_diastolic")
 reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 
-#### k ####
+
+#### data processing ####
 result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
                  newVar = "dip")
-
-
+#timeSplit裡有把sys dia轉成數值
 timeSplit.22 <- timeSplit(data = result.22$myData, 
                       removeCol.AM = reCol.AM,
                       removeCol.PM = reCol.PM)
+#### V1 V2####
+TrainTest.22 <- TrainTest(data = timeSplit.22, VisitOrCase = "Visit", nfixed = T, Train = 1,
+                      Test = 2, seed = NULL, removeCategory = NULL, Trainper = 0.8)
+####MRN有沒有改成factor結果一樣####
+Train.22 <- TypeChange(data = TrainTest.22$`Training set`, variable = "MRN", type = "factor")
+Test.22 <- TypeChange(data = TrainTest.22$`Test set`, variable = "MRN", type = "factor")
 
 
+#### model Building ####
+V1Train <- Train.22 #276
+V2Test <- Test.22 #276
+#### random = "+(1+time|sys)+(1+time|dia)" ####
+V1V2 <- BiMMforest1(traindata = V1Train, testdata = V2Test,
+                  formula = dip ~ sys+dia+time,
+                  random = "+(1+time|sys)+(1+time|dia)",
+                  seed = 123)
+V1V2$`CM of Train data`
+V1V2$`CM of Test data`
+V1V2$`Train acc sen spe`# 0.8405797 1.0000000 0.3333333
+V1V2$`Test acc sen spe`# 0.7536232 1.0000000 0.0000000
+V1V2$`model summary`
 
-# case-wise 隨機切割ID 用ID所有資料去訓練 測試
-#####
-#Split Train test
-length(unique(FourAvg$MRN))#564人
-people <-as.data.frame(unique(FourAvg$MRN))
-set.seed(1226)
-trainID <- as.data.frame(sample(people$`unique(FourAvg$MRN)`,nrow(people)*0.8))
-colnames(trainID)[1] <- "MRN"
-Train <- merge(trainID,FourAvg,by = "MRN",all.x = T)
-Train <- arrange(Train,Train$Mrn_Vis)
-Test <- rbind(Train, FourAvg)
-Test <- Test[!(duplicated(Test) | duplicated(Test, fromLast = TRUE)), ]
-write.csv(Train,file="TCHCData/4avg_case_Train.csv")#676
-write.csv(Test,file="TCHCData/4avg_case_Test.csv")#154
-#####
-# visit-wise 所有人的V1 預測所有人的 V2 ； V1 V2 預測 V3
-#或是 有V2的人=> V1 預測 V2 有V3的人=>V1 V2 預測V3
+H1 <- BiMMforestH1(traindata = V1Train, testdata = V2Test,
+                    formula = dip ~ sys+dia+time,
+                    random = "+(1+time|sys)+(1+time|dia)",
+                    seed = 123)
+#"all of the binary outcomes are the same"
 
-V1 <- FourAvg[which(FourAvg$visit_HBP_Dmode==1),]#562
-V2 <- FourAvg[which(FourAvg$visit_HBP_Dmode==2),]#142
-V3 <- FourAvg[which(FourAvg$visit_HBP_Dmode==3),]#85
-V4 <- FourAvg[which(FourAvg$visit_HBP_Dmode==4),]#39
-V12 <- rbind(V1,V2)
-V12 <- arrange(V12,V12$Mrn_Vis)#704
-V34 <- rbind(V3,V4)
-V34 <- arrange(V34,V34$Mrn_Vis)#124
+H3 <- BiMMforestH3(traindata = V1Train, testdata = V2Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1+time|sys)+(1+time|dia)",
+                   seed = 123)
+H3$iter
+H3$`model summary`
+H3$`Train acc sen spe`#0.8405797 1 0.3333333 same as V1V2
+H3$`Test acc sen spe`#0.7536232 1 0 same as V1V2
+H3$`CM of Train data`
+H3$`CM of Test data`
 
-colnames(AM) <- c(1,2,3,4,5,6,7)
-colnames(PM) <- c(1,2,3,4,5,6,7)
-V12 <- rbind(AM,PM)
-colnames(V12)<-c("Mrn_Vis","MRN","visit_HBP_Dmode","sys","dia","dipping.status","dip","time")
-V1 <- V12[which(V12$visit_HBP_Dmode==1),]#1124
-V2 <- V12[which(V12$visit_HBP_Dmode==2),]#284
-V1 <- V1[which(V1$MRN%in%V2$MRN),]
-for (i in 1:dim(V2)[1]){
-  if(all(V2[i,"MRN"]!= V1[,"MRN"])){
-    print(V2[i,"MRN"])
-  }
-}
-which(V2$MRN=="KMUH0006"|V2$MRN=="KMUH0035")
-V2<-V2[-c(107,117,249,259),]
-#新的
-write.csv(V1,file="TCHCData/4avg_Train_V1.csv")#280
-write.csv(V2,file="TCHCData/4avg_Test_V2.csv")#280
+H2 <- BiMMforestH2(traindata = V1Train, testdata = V2Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1+time|sys)+(1+time|dia)",
+                   seed = 123)
+H2$iter
+H2$`model summary`
+H2$`Train acc sen spe`#0.8405797 1 0.3333333 same as V1V2
+H2$`Test acc sen spe`#0.7536232 1 0 same as V1V2
+H2$`CM of Train data`
+H2$`CM of Test data`
 
-#舊的(沒有變成2筆的)
-write.csv(V12,file = "TCHCData/4avg_Visit_Train_V12.csv")
-write.csv(V34,file = "TCHCData/4avg_Visit_Test_V34.csv")
-write.csv(V3,file = "TCHCData/4avg_Visit_Test_V3.csv")
-#####
-Train <- read.csv("TCHCData/4avg_Train_V1.csv")#280
-Test <- read.csv("TCHCData/4avg_Test_V2.csv")
-Train<-Train[,-1]
-Test<-Test[,-1]
 
-Train<-V1
-Test<-V2
-######模型訓練 BIMMRF 1iter / H1 / H3 / RF
-library(rpart)
-library(blme)
-library(randomForest)
-formula <- dip ~ sys+dia+time
-traindata <-  Train
-table(Train$dip)#0:68 1:212
-traindata$dip <- as.factor(traindata$dip)
-testdata <- Test 
-testdata$dip <- as.factor(testdata$dip)
-table(traindata$dip)
-random <- "(1|sys)+(1|dia)"
-BiMMforest1<-function(traindata,testdata,formula,random,seed){
-  data=traindata
-  initialRandomEffects=rep(0,length(data[,1]))#起始都是0
-  ErrorTolerance = 0.006
-  MaxIterations = 1000
-  #parse formula
-  Predictors <- paste(attr(terms(formula), "term.labels"), 
-                      collapse = "+")
-  TargetName <- formula[[2]]
-  Target <- data[,toString(TargetName)]
-  class(Target)#Target is factor
-  #set up variables for loop
-  ContinueCondition <- TRUE
-  iterations <- 0
-  #initial values
-  #把factor0 1 as.numeric就變成1 2
-  AdjustedTarget <- as.numeric(Target) - initialRandomEffects
-  table(AdjustedTarget)
-  oldlik<- -Inf#負無窮大
-  # Make a new data frame to include all the new variables
-  newdata <- data
-  #compile one iteration of the BiMM forest algorithm
-  newdata[, "AdjustedTarget"] <- AdjustedTarget# 1跟2
-  iterations <- iterations + 1
-  #build tree
-  #set.seed(seed)
-  table(AdjustedTarget)
-  forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
-                         data = data, method = "class")
-  forestprob<-predict(forest, type = "prob")[, 2]
-  RFpredictprob <- as.data.frame(forestprob)
-  length(RFpredictprob[forestprob>=0.5,])
-  ## Estimate New Random Effects and Errors using GLMER
-  options(warn = -1)
-  
-  #隨機效應怎麼放是一個問題
-  #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
-  lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                  collapse="~"), "+(1|sys)+(1|dia)+(1|time)",sep=""))),data=data,family=binomial,
-                            control = glmerControl(optCtrl=list(maxfun=20000)
-                            )),
-                     error = function(cond)"skip")
-  
-  #if GLMM did not converge, produce NAs for accuracy statistics
-  if(class(lmefit)[1]=="character"){
-    #return train and test confusion matrices
-    return(list(c(NA,NA,NA,NA),c(NA,NA,NA,NA),NA))
-  }
-  else if(!(class(lmefit)[1]=="character")){
-    test.preds <- predict(forest,testdata)
-    RFtrain.preds <- predict(forest,traindata)
-    table(traindata$dip,RFtrain.preds)
-    random <- c("sys","dia")
-    traindata1 <- cbind(traindata,random)
-    train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
-    
-    #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
-    table(traindata$dip)
-    t1<-table(traindata$dip,train.preds)
-    trainacc <- (t1[1]+t1[4]) / sum(t1)
-    train0acc <- t1[1]/(t1[1]+t1[3])
-    train1acc <- t1[4]/(t1[2]+t1[4])
-    t1
-    t4<-table(testdata$dip,test.preds)
-    testacc <- (t4[1]+t4[4]) / sum(t4)
-    test0acc <- t4[1]/(t4[1]+t4[3])
-    test1acc <- t4[4]/(t4[2]+t4[4])
-    t4
-    if(ncol(t1)==1 & train.preds[1]==1){
-      t1<-c(0,0,t1[1,1],t1[2,1])
-    }else if(ncol(t1)==1 & train.preds[1]==0){
-      t1<-c(t1[1,1],t1[2,1],0,0)
-    }
-    if(ncol(t4)==1 & test.preds[1]==1){
-      t4<-c(0,0,t4[1,1],t4[2,1])
-    }else if(ncol(t4)==1 & test.preds[1]==0){
-      t4<-c(t4[1,1],t4[2,1],0,0)
-    }
-    #return train and test confusion matrices, # iterations
-    return(list(c(t1),c(t4),iterations))
-  }
-} 
-#####
-#V12 704 pre V3 85
-#咪挺結果
-#切成早上晚上 一筆變成早上跟晚上 2筆 樣本就*2
-#樣本限制成全部訪視都要來
-#V1 預測V2 (就符合重複2次)
-summary(lmefit)
-#2vs2 + covariate
-#V12 pred V3
-#迭代
-#查 在模型裡讓資料平衡 EX:logistic weighted regression 
-#weight mixed model 讓有病沒病的人加權 讓權重balance一點
+#### random = "+(1|MRN)" ####
+try <- BiMMforest1(traindata = V1Train, testdata = V2Test,
+                  formula = dip ~ sys+dia+time,
+                  random = "+(1|MRN)",
+                  seed = 123)
+try$`model summary`
+try$`CM of Train data`
+try$`Train acc sen spe`#1 1 1
+try$`CM of Test data`
+try$`Test acc sen spe`#same as V1V2
 
+
+V1V2H1<-BiMMforestH1(traindata = V1Train, testdata = V2Test,
+               formula = dip ~ sys+dia+time,
+               random = "+(1|MRN)",
+               seed = 123)
+#"all of the binary outcomes are the same"
+
+V1V2H3<-BiMMforestH3(traindata = V1Train, testdata = V2Test,
+                     formula = dip ~ sys+dia+time,
+                     random = "+(1|MRN)",
+                     seed = 123)
+V1V2H3$iter
+V1V2H3$`Train acc sen spe`#1 1 1
+V1V2H3$`Test acc sen spe`#0.7536232 1 0 same as V1V2
+V1V2H3$`CM of Train data`
+V1V2H3$`CM of Test data`
+
+V1V2H2 <- BiMMforestH2(traindata = V1Train, testdata = V2Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1|MRN)",
+                   seed = 123)
+V1V2H2$iter
+V1V2H2$`model summary`
+V1V2H2$`Train acc sen spe`# 1 1 1
+V1V2H2$`Test acc sen spe`#0.7536232 1 0 same as V1V2
+V1V2H2$`CM of Train data`
+V1V2H2$`CM of Test data`
+
+#### V12 V3####
+TT.22.V12V3<- TrainTest(data = timeSplit.22, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+                        Test = 3, seed = NULL, removeCategory = NULL, Trainper = 0.8)
+
+Train.V12V3 <- TT.22.V12V3$`Training set`
+Test.V12V3 <-TT.22.V12V3$`Test set`
+Train.V12V3_uncomplete <- Train.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
+Train.V12V3 <- Train.V12V3[-which(Train.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
+Test.V12V3 <- Test.V12V3[-which(Test.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
+#### model Building ####
+V12Train <- Train.V12V3 #324
+V3Test <- Test.V12V3 #162
+#### random = "+(1+time|sys)+(1+time|dia)" ####
+V12V3 <- BiMMforest1(traindata = V12Train, testdata = V3Test,
+                    formula = dip ~ sys+dia+time,
+                    random = "+(1+time|sys)+(1+time|dia)",
+                    seed = 123)
+V12V3$`CM of Train data`
+V12V3$`CM of Test data`
+V12V3$`Train acc sen spe`# 0.7839506 1 0 
+V12V3$`Test acc sen spe`# 0.7283951 1.0000000 0.0000000
+V12V3$`model summary`
+
+
+V12V3H1 <- BiMMforestH1(traindata = V12Train, testdata = V3Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1+time|sys)+(1+time|dia)",
+                   seed = 123)
+#"all of the binary outcomes are the same"
+
+V12V3H3 <- BiMMforestH3(traindata = V12Train, testdata = V3Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1+time|sys)+(1+time|dia)",
+                   seed = 123)
+V12V3H3$iter
+V12V3H3$`Train acc sen spe`#0.7839506 1 0  same as V12V3
+V12V3H3$`Test acc sen spe`#0.7283951 1.0000000 0.0000000
+V12V3H3$`CM of Train data`
+V12V3H3$`CM of Test data`
+
+V12V3H2 <- BiMMforestH2(traindata = V12Train, testdata = V3Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1+time|sys)+(1+time|dia)",
+                   seed = 123)
+V12V3H2$iter
+V12V3H2$`model summary`
+V12V3H2$`Train acc sen spe`#0.7839506 1 0  same as V12V3
+V12V3H2$`Test acc sen spe`#0.7536232 1 0 same as V1V2
+V12V3H2$`CM of Train data`
+V12V3H2$`CM of Test data`
+
+
+#### random = "+(1|MRN)" ####
+V12V3.1 <- BiMMforest1(traindata = V12Train, testdata = V3Test,
+                   formula = dip ~ sys+dia+time,
+                   random = "+(1|MRN)",
+                   seed = 123)
+V12V3.1$`model summary`
+V12V3.1$`CM of Train data`
+V12V3.1$`Train acc sen spe`#0.9043210 0.9527559 0.7285714
+V12V3.1$`CM of Test data`
+V12V3.1$`Test acc sen spe`#0.7283951 1.0000000 0.0000000
+
+
+V12V3.H1<-BiMMforestH1(traindata = V12Train, testdata = V3Test,
+                     formula = dip ~ sys+dia+time,
+                     random = "+(1|MRN)",
+                     seed = 123)
+#"all of the binary outcomes are the same"
+
+V12V3.H3<-BiMMforestH3(traindata = V12Train, testdata = V3Test,
+                     formula = dip ~ sys+dia+time,
+                     random = "+(1|MRN)",
+                     seed = 123)
+V12V3.H3$iter
+V12V3.H3$`Train acc sen spe`#0.9043210 0.9527559 0.7285714
+V12V3.H3$`Test acc sen spe`#0.7283951 1.0000000 0.0000000
+V12V3.H3$`CM of Train data`
+V12V3.H3$`CM of Test data`
+
+V12V3.H2 <- BiMMforestH2(traindata = V12Train, testdata = V3Test,
+                       formula = dip ~ sys+dia+time,
+                       random = "+(1|MRN)",
+                       seed = 123)
+V12V3.H2$iter
+V12V3.H2$`model summary`
+V12V3.H2$`Train acc sen spe`# 0.9043210 0.9527559 0.7285714
+V12V3.H2$`Test acc sen spe`#0.7283951 1 0 same as H3 1iter
+V12V3.H2$`CM of Train data`
+V12V3.H2$`CM of Test data`
+
+#### 預測new cases ####
+
+#####小結####
+#V1V2 略優於 V12V3
+#(1|MRN) 比(1+time|sys)+(1+time|dia)好
+#H3H2結果和1iter相同 H1因資料已經偏向1 不需要用
