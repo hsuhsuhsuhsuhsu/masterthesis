@@ -81,7 +81,7 @@ try$`Test acc sen spe`#same as V1V2
 
 V1V2H1<-BiMMforestH1(traindata = V1Train, testdata = V2Test,
                formula = dip ~ sys+dia+time,
-               random = "+(1|MRN)",
+               random = "+(1+time|MRN)",
                seed = 123)
 #"all of the binary outcomes are the same"
 
@@ -197,9 +197,19 @@ V12V3.H2$`Test acc sen spe`#0.7283951 1 0 same as H3 1iter
 V12V3.H2$`CM of Train data`
 V12V3.H2$`CM of Test data`
 
-#### 預測new cases ####
+#### 預測new cases #### paper已經說比較不好 就不用做
 
 #####小結####
 #V1V2 略優於 V12V3
 #(1|MRN) 比(1+time|sys)+(1+time|dia)好
 #H3H2結果和1iter相同 H1因資料已經偏向1 不需要用
+
+#把樣本限制在一樣的 看誰表現得比較好 就用那個訓練跟測試資料集
+#測試sys dia time 22交互作用
+#如果有交互作用 在考慮要不要放random effect
+#如果交互作用都不顯著 就放3個變數的random effect
+#放鄭醫師提到的covariate
+#+(1|MRN)是對的
+#最後重要的是mixed model 的系數
+#把係數寫出來 確保自己了解
+#題目machine learning model for nocturnal dipping
