@@ -10,6 +10,11 @@ library(randomForest)
 #random=> random effect 公式 
 #return: 訓練/測試 的混淆矩陣和準確度敏感度特異度
 #隨機森林判成1數量 / 混合模型的結果
+traindata = V1Train.V3
+testdata = V2Test.V3
+formula = dip ~ sys+dia+time
+random = "+(1|MRN)"
+seed = 123
 BiMMforest1<-function(traindata = NULL, testdata = NULL,
                       formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
                       seed = NULL){
@@ -50,14 +55,16 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   
   #隨機效應怎麼放是一個問題
   #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
-  lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+  #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+  #                                                collapse="~"),random,sep=""))),data=data,family=binomial,
+  #                          control = glmerControl(optCtrl=list(maxfun=200000)
+  #                         )), error = function(cond)"skip")
+  lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                                   collapse="~"),random,sep=""))),data=data,family=binomial,
-                            control = glmerControl(optCtrl=list(maxfun=20000)
-                            )), error = function(cond)"skip")
+                   control = glmerControl(tolPwrss=1e-3))
   results[["model summary"]] <- summary(lmefit)
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
-    #return train and test confusion matrices
     return("GLMM did not converge")
   }
   else if(!(class(lmefit)[1]=="character")){
@@ -133,12 +140,14 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     results[["forestprob >= 0.5"]] <- RFpredict1
 
     ## Estimate New Random Effects and Errors using BLMER
-    lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                    collapse="~"), random, sep=""))),
-                              data=data,family=binomial,
-                              control=glmerControl(optCtrl=list(maxfun=20000))),
-                       error=function(cond)"skip")
-    
+    #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+     #                                               collapse="~"), random, sep=""))),
+      #                        data=data,family=binomial,
+       #                       control=glmerControl(optCtrl=list(maxfun=20000))),
+        #               error=function(cond)"skip")
+    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                           collapse="~"),random,sep=""))),data=data,family=binomial,
+                     control = glmerControl(tolPwrss=1e-3))
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
       newlik <- logLik(lmefit)#loglikelihood
@@ -250,14 +259,16 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
         Predictors), collapse = "~")),data = data, method = "class")
     forestprob <- predict(forest, type = "prob")[, 2]
     ## Estimate New Random Effects and Errors using BLMER
-    lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName), 
-                                                     "forestprob"),
-                                                   collapse = "~"), 
-                                             random, sep =""))),
-             data = data,family = binomial,
-             control = glmerControl(optCtrl = list(maxfun = 20000))),
-             error = function(cond)"skip")
-    
+    #lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName), 
+    #                                                 "forestprob"),
+    #                                               collapse = "~"), 
+    #                                         random, sep =""))),
+    #         data = data,family = binomial,
+     #        control = glmerControl(optCtrl = list(maxfun = 20000))),
+     #        error = function(cond)"skip")
+    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                           collapse="~"),random,sep=""))),data=data,family=binomial,
+                     control = glmerControl(tolPwrss=1e-3))
     # Get the likelihood to check on convergence
     if (!(class(lmefit)[1] == "character")) {
       newlik <- logLik(lmefit)
@@ -376,12 +387,14 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
     results[["forestprob >= 0.5"]] <- RFpredict1
     
     ## Estimate New Random Effects and Errors using BLMER
-    lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                    collapse="~"), random, sep=""))),
-                              data=data,family=binomial,
-                              control=glmerControl(optCtrl=list(maxfun=20000))),
-                       error=function(cond)"skip")
-    
+    #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+     #                                               collapse="~"), random, sep=""))),
+      #                        data=data,family=binomial,
+      #                        control=glmerControl(optCtrl=list(maxfun=20000))),
+      #                 error=function(cond)"skip")
+    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                           collapse="~"),random,sep=""))),data=data,family=binomial,
+                     control = glmerControl(tolPwrss=1e-3))
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
       newlik <- logLik(lmefit)#loglikelihood
@@ -449,4 +462,14 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
   }
   
 }
+
+
+
+#### 測試變數交互作用 ####
+#作用:測2個變數間的交互作用是否顯著
+#參數:
+#return:
+
+
+
 

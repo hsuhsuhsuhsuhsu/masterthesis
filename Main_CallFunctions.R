@@ -199,17 +199,67 @@ V12V3.H2$`CM of Test data`
 
 #### 預測new cases #### paper已經說比較不好 就不用做
 
-#####小結####
-#V1V2 略優於 V12V3
-#(1|MRN) 比(1+time|sys)+(1+time|dia)好
-#H3H2結果和1iter相同 H1因資料已經偏向1 不需要用
+#### V1 V2 樣本與V12V3相同####
+#V12V3
+TT.22.V12V3<- TrainTest(data = timeSplit.22, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+                        Test = 3, seed = NULL, removeCategory = NULL, Trainper = 0.8)
 
-#把樣本限制在一樣的 看誰表現得比較好 就用那個訓練跟測試資料集
-#測試sys dia time 22交互作用
-#如果有交互作用 在考慮要不要放random effect
-#如果交互作用都不顯著 就放3個變數的random effect
-#放鄭醫師提到的covariate
-#+(1|MRN)是對的
-#最後重要的是mixed model 的系數
-#把係數寫出來 確保自己了解
-#題目machine learning model for nocturnal dipping
+Train.V12V3 <- TT.22.V12V3$`Training set`
+Test.V12V3 <-TT.22.V12V3$`Test set`
+Train.V12V3_uncomplete <- Train.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
+Train.V12V3 <- Train.V12V3[-which(Train.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]#324
+Test.V12V3 <- Test.V12V3[-which(Test.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]#162
+#從V12V3接續
+Train.V1V2 <- Train.V12V3[which(Train.V12V3$visit==1),]#162
+Test.V1V2 <- Train.V12V3[which(Train.V12V3$visit==2),]#162
+#### model Building ####
+V1Train.V3 <- Train.V1V2 
+V2Test.V3 <- Test.V1V2
+#### random = "+(1|MRN)" ####
+V1V2.V3.1 <- BiMMforest1(traindata = V1Train.V3, testdata = V2Test.V3,
+                       formula = dip ~ sys+dia+time,
+                       random = "+(1|MRN)",
+                       seed = 123)
+V1V2.V3.1$`model summary`
+V1V2.V3.1$`CM of Train data`
+V1V2.V3.1$`Train acc sen spe`#1 1 1
+V1V2.V3.1$`CM of Test data`
+V1V2.V3.1$`Test acc sen spe`#0.753 1 0
+
+
+V1V2.V3.H1<-BiMMforestH1(traindata = V1Train.V3, testdata = V2Test.V3,
+                       formula = dip ~ sys+dia+time,
+                       random = "+(1|MRN)",
+                       seed = 123)
+#"all of the binary outcomes are the same"
+
+V1V2.V3.H3<-BiMMforestH3(traindata = V1Train.V3, testdata = V2Test.V3,
+                       formula = dip ~ sys+dia+time,
+                       random = "+(1|MRN)",
+                       seed = 123)
+V1V2.V3.H3$iter
+V1V2.V3.H3$`model summary`
+V1V2.V3.H3$`Train acc sen spe`#1 1 1
+V1V2.V3.H3$`Test acc sen spe`#0.753 1 0
+V1V2.V3.H3$`CM of Train data`
+V1V2.V3.H3$`CM of Test data`
+
+V1V2.V3.H2 <- BiMMforestH2(traindata = V1Train.V3, testdata = V2Test.V3,
+                         formula = dip ~ sys+dia+time,
+                         random = "+(1|MRN)",
+                         seed = 123)
+V1V2.V3.H2$iter
+V1V2.V3.H2$`model summary`
+V1V2.V3.H2$`Train acc sen spe`#1 1 1
+V1V2.V3.H2$`Test acc sen spe`#0.753 1 0
+V1V2.V3.H2$`CM of Train data`
+V1V2.V3.H2$`CM of Test data`
+
+
+
+
+
+
+#### 測試sys dia time 22交互作用####
+
+#####小結####
