@@ -10,11 +10,6 @@ library(randomForest)
 #random=> random effect 公式 
 #return: 訓練/測試 的混淆矩陣和準確度敏感度特異度
 #隨機森林判成1數量 / 混合模型的結果
-traindata = V1Train.V3
-testdata = V2Test.V3
-formula = dip ~ sys+dia+time
-random = "+(1|MRN)"
-seed = 123
 BiMMforest1<-function(traindata = NULL, testdata = NULL,
                       formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
                       seed = NULL){
@@ -464,11 +459,6 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
 }
 
 
-
-#### 測試變數交互作用 ####
-#作用:測2個變數間的交互作用是否顯著
-#參數:
-#return:
 
 
 

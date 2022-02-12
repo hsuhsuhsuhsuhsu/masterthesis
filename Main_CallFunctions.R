@@ -256,10 +256,35 @@ V1V2.V3.H2$`CM of Train data`
 V1V2.V3.H2$`CM of Test data`
 
 
-
-
-
-
 #### 測試sys dia time 22交互作用####
+#### V12 V3 data ####
+InterV12V3 <- Interact(data1 = Train.V12V3, data2 = Test.V12V3,
+                       formula = dip ~ sys + dia*time + (1|MRN), scaleCol = c(4,5), seed = 123)
+InterV12V3$`model summary`# dia*time 不顯著
+
+InterV12V3.1 <- Interact(data1 = Train.V12V3, data2 = Test.V12V3,
+                         formula = dip ~ sys*time +dia + (1|MRN),scaleCol = c(4,5), seed = 123)
+InterV12V3.1$`model summary`#sys*time 不顯著
+
+InterV12V3.2 <- Interact(data1 = Train.V12V3, data2 = Test.V12V3,
+                         formula = dip ~ sys*dia + time + (1|MRN),scaleCol = c(4,5), seed = 123)
+InterV12V3.2$`model summary`#sys*dia 不顯著
+#### V1V2 data ####
+InterV12 <- Interact(data1 = Train.V1V2, data2 = Test.V1V2,
+                       formula = dip ~ sys + dia*time + (1|MRN), scaleCol = c(4,5), seed = 123)
+InterV12$`model summary`# dia*time 不顯著
+
+InterV12.1 <- Interact(data1 = Train.V1V2, data2 = Test.V1V2,
+                     formula = dip ~ dia + sys*time + (1|MRN), scaleCol = c(4,5), seed = 123)
+InterV12.1$`model summary`#sys*time 不顯著
+
+InterV12.2 <- Interact(data1 = Train.V1V2, data2 = Test.V1V2,
+                     formula = dip ~ time + dia*sys + (1|MRN), scaleCol = c(4,5), seed = 123)
+InterV12.2$`model summary`#dia*sys顯著 p-value = 0.0494
+
+
+
+
+
 
 #####小結####

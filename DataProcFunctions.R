@@ -168,3 +168,30 @@ TypeChange <- function(data = NULL, variable = NULL, type = NULL){
 }
 
 
+#### 測試變數交互作用 ####
+#作用:測2個變數間的交互作用是否顯著
+#參數: 
+#data => 資料
+#formula => effect 公式
+#scaleCol => 要標準化的變數
+#return: model summary 
+Interact <- function(data1 = NULL, data2 = NULL, formula = NULL,
+                     scaleCol = NULL, seed = NULL){
+  results = NULL
+  if(!is.null(data2)){
+    data <- as.data.frame(rbind(data1, data2))
+  }else{
+    data <- as.data.frame(data1)
+  }
+  results[["data"]] <- data
+  data[,scaleCol] <- scale(data[,scaleCol])
+  results[["scale data"]] <- data
+  glmfit <-glmer(formula,data = data , family = binomial)
+  results[["model summary"]] <- summary(glmfit)
+  return(results)
+}
+
+#### 整理 covariate ####
+#血壓變異程度 sd arv dv / heart rate / hba1c / 年齡性別/有沒有投某藥
+#年齡性別=> demo 裡面
+
