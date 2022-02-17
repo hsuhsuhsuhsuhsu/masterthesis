@@ -3,7 +3,7 @@ source("ModelBuildFunction.r")
 #
 #### setting parameter ####
 file <- "TCHCData/hbp_dip_byx.csv"
-
+Covfile <- "TCHCData/Covariate.csv"
 #for time split
 reCol.AM <- c("HBP_d_PM_systolic","HBP_d_PM_diastolic")
 reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
@@ -12,6 +12,12 @@ reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 #### data processing ####
 result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
                  newVar = "dip")
+#### add cov ####
+a <- result.22$myData
+addCov.22 <- PlusCov(data = result.22$myData, Covfile = Covfile,
+                   IDname = "Mrn_Vis",
+                   Cov = c("CCB","HbA1C","HR","Gender","Age"), 
+                   impute = T, Yname = "dip")
 #timeSplit裡有把sys dia轉成數值
 timeSplit.22 <- timeSplit(data = result.22$myData, 
                       removeCol.AM = reCol.AM,
@@ -281,6 +287,14 @@ InterV12.1$`model summary`#sys*time 0.78 不顯著
 InterV12.2 <- Interact(data1 = Train.V1V2, data2 = Test.V1V2,
                      formula = dip ~ time + dia*sys + (1|MRN), scaleCol = c(4,5), seed = 123)
 InterV12.2$`model summary`#dia*sys顯著 p-value = 0.0494
+
+
+
+
+
+
+
+
 
 
 

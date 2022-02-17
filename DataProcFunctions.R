@@ -1,5 +1,8 @@
 library(dplyr)
-
+library(faraway)
+library(randomForest)
+library(tibble)
+install.packages("farway")
 #作用: 切Y的資料；設定1/0的類別和新變數(Y)
 #參數: file=> 檔案名 category=>類別=1的名稱 ex:c(non dipper,reverse dipper)
 #return : 樣本數 / 人數 / Y的分布 / 最後切完的data frame
@@ -33,6 +36,55 @@ myRead <- function(file = NULL, removeNa = T, category = NULL,
   results[["myData"]] <- FourAvg
   return(results)
 }
+
+#### 加入其他變數 ####
+#作用: 加入其他變數 餅且合併成一個資料集
+#參數:
+#return:合併完的資料集
+PlusCov <- function(data = NULL, Covfile = NULL,
+                    timeIDname = "Mrn_Vis", timeCov = NULL,
+                    IDname = "MRN", Cov = NULL,
+                    impute = FALSE, Yname = "dip"){
+  OrginData <- result.22$myData
+  f <- read.csv(Covfile)
+  Cov = c("CCB","Gender","Age")
+  timeCov = c("HbA1C","HR")
+  results = NULL
+  OrginData <- data
+  f <- read.csv(Covfile)
+  ID.col <- which(colnames(f) == IDname)
+  Cov.col <- which(colnames(f) %in% Cov)
+  Cov.df <- f[ ,c(ID.col,Cov.col)]
+  results[["Cov.df"]] <- Cov.df
+  timeID.col <- which(colnames(f) %in% timeIDname)
+  timeCov.col <- which(colnames(f) %in% timeCov)
+  timeCov.df <- f[,c(timeID.col,timeCov.col)]
+  results[["timeCov.df"]] <- timeCov.df
+  
+  #有沒有時間性的變數 分開來merge
+  merge.df <- merge(OrginData, Cov.df, by = IDname, all.x=T)
+  merge.df1 <- merge(merge.df, timeCov.df, by=timeIDname, all.x=T)
+  a <- unique(merge.df1)
+  aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
+  sum(complete.cases(merge.df1))
+  if(impute){
+    df.rf.impute <- rfImpute(Yname ~ ., ntree = 200, iter = 5, data = merge.df)
+    if(nrow(OrginData)==nrow(df.rf.impute)){
+      results[["AddCov.df"]] <- df.rf.impute
+    }else{
+      return("nrow not equal in two df")
+    }
+  }else{
+    if(nrow(OrginData)==nrow(merge.df)){
+      results[["AddCov.df"]] <- merge.df
+    }else{
+      return("nrow not equal in two df")
+    }
+  }
+  
+  return(results)
+}
+
 
 #作用: 時間分割 1筆切成早上晚上2筆
 #參數: removeCol.AM=> 要丟掉的colname 
@@ -190,7 +242,6 @@ Interact <- function(data1 = NULL, data2 = NULL, formula = NULL,
   results[["model summary"]] <- summary(glmfit)
   return(results)
 }
-
 
 
 
