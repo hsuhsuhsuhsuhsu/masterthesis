@@ -67,6 +67,7 @@ PlusCov <- function(data = NULL, Covfile = NULL,
   a <- unique(merge.df1)
   aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
   sum(complete.cases(merge.df1))
+  #插補也分開 網路上說要先分訓練測試再插補
   if(impute){
     df.rf.impute <- rfImpute(Yname ~ ., ntree = 200, iter = 5, data = merge.df)
     if(nrow(OrginData)==nrow(df.rf.impute)){
