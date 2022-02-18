@@ -42,13 +42,11 @@ Drug_Binary <- Drug_Binary[,-c(3,4)]
 sum(is.na(Hb_HR$HR))/dim(Hb_HR)[1]
 sum(is.na(Hb_HR$HbA1C))/dim(Hb_HR)[1]
 Hb.HR <- Hb_HR[,-3]
-Cov.proc <- merge(Drug_Binary,Hb.HR,by="Mrn_Vis")
-all(Cov.proc$MRN.x==Cov.proc$MRN.y)
-Cov.proc <- Cov.proc[,-which(colnames(Cov.proc)==c("MRN.y"))]
-Cov.proc <- merge(Cov.proc, age.sex,by.x = "MRN.x",by.y = "MRN")
-colnames(Cov.proc)[1] <- "MRN"
-Cov.ok <- Cov.proc
-write.csv(Cov.ok,file="TCHCData/Covariate.csv")
+
+Cov.canproc <- list(Age_Sex=age.sex, Drug=Drug_Binary, Hb_HR=Hb.HR)
+write.csv(age.sex, file = "Cov_AgeSex.csv")
+write.csv(Drug_Binary, file = "Cov_Drug.csv")
+write.csv(Hb.HR, file = "Cov_HbHR.csv" )
 #血壓變異程度 sd arv cv => PDF檔有公式自己算 #暫時先pass
 
 

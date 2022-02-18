@@ -3,7 +3,9 @@ source("ModelBuildFunction.r")
 #
 #### setting parameter ####
 file <- "TCHCData/hbp_dip_byx.csv"
-Covfile <- "TCHCData/Covariate.csv"
+CovAS <- "TCHCData/Cov_AgeSex.csv"
+CovD <- "TCHCData/Cov_Drug.csv"
+CovHH <- "TCHCData/Cov_HbHR.csv" 
 #for time split
 reCol.AM <- c("HBP_d_PM_systolic","HBP_d_PM_diastolic")
 reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
@@ -12,12 +14,13 @@ reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 #### data processing ####
 result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
                  newVar = "dip")
+#### imputation ####
+
 #### add cov ####
-a <- result.22$myData
-addCov.22 <- PlusCov(data = result.22$myData, Covfile = Covfile,
-                   IDname = "Mrn_Vis",
-                   Cov = c("CCB","HbA1C","HR","Gender","Age"), 
-                   impute = T, Yname = "dip")
+addCov.22 <- PlusCov(data = result.22$myData, Covlist = CovAS ,
+                                 IDname = "MRN", Cov = c("Gender","Age"),
+                                 Yname = "dip")
+
 #timeSplit裡有把sys dia轉成數值
 timeSplit.22 <- timeSplit(data = result.22$myData, 
                       removeCol.AM = reCol.AM,

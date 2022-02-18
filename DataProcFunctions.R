@@ -2,7 +2,7 @@ library(dplyr)
 library(faraway)
 library(randomForest)
 library(tibble)
-install.packages("farway")
+
 #作用: 切Y的資料；設定1/0的類別和新變數(Y)
 #參數: file=> 檔案名 category=>類別=1的名稱 ex:c(non dipper,reverse dipper)
 #return : 樣本數 / 人數 / Y的分布 / 最後切完的data frame
@@ -37,52 +37,57 @@ myRead <- function(file = NULL, removeNa = T, category = NULL,
   return(results)
 }
 
+
+#### 隨機森林插補 ####
+#作用: 對特定變數做插補
+#參數: data => 資料 
+#Var => 要插補的變數
+#Yname => 目標變數名稱
+#return: 插補完的資料集
+RF.impute <- function(data = NULL, Var = NULL, Yname = NULL,
+                      notIm.Var = NULL){
+    df.rf.impute <- rfImpute(Yname ~ ., ntree = 200, iter = 5, data = data)
+}
+
 #### 加入其他變數 ####
 #作用: 加入其他變數 餅且合併成一個資料集
-#參數:
+#參數: data => 原始資料
+#Covlist =>
 #return:合併完的資料集
-PlusCov <- function(data = NULL, Covfile = NULL,
-                    timeIDname = "Mrn_Vis", timeCov = NULL,
+#性別跟年齡na的預設刪掉
+PlusCov <- function(data = NULL, Covlist = NULL,
                     IDname = "MRN", Cov = NULL,
-                    impute = FALSE, Yname = "dip"){
-  OrginData <- result.22$myData
-  f <- read.csv(Covfile)
-  Cov = c("CCB","Gender","Age")
-  timeCov = c("HbA1C","HR")
+                    Yname = "dip"){
   results = NULL
   OrginData <- data
-  f <- read.csv(Covfile)
-  ID.col <- which(colnames(f) == IDname)
+  f <- read.csv(Covlist)
+  ID.col <- which(colnames(f) %in% IDname)
   Cov.col <- which(colnames(f) %in% Cov)
   Cov.df <- f[ ,c(ID.col,Cov.col)]
   results[["Cov.df"]] <- Cov.df
-  timeID.col <- which(colnames(f) %in% timeIDname)
-  timeCov.col <- which(colnames(f) %in% timeCov)
-  timeCov.df <- f[,c(timeID.col,timeCov.col)]
-  results[["timeCov.df"]] <- timeCov.df
-  
-  #有沒有時間性的變數 分開來merge
   merge.df <- merge(OrginData, Cov.df, by = IDname, all.x=T)
-  merge.df1 <- merge(merge.df, timeCov.df, by=timeIDname, all.x=T)
-  a <- unique(merge.df1)
-  aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
-  sum(complete.cases(merge.df1))
-  #插補也分開 網路上說要先分訓練測試再插補
-  if(impute){
-    df.rf.impute <- rfImpute(Yname ~ ., ntree = 200, iter = 5, data = merge.df)
-    if(nrow(OrginData)==nrow(df.rf.impute)){
-      results[["AddCov.df"]] <- df.rf.impute
-    }else{
-      return("nrow not equal in two df")
-    }
-  }else{
-    if(nrow(OrginData)==nrow(merge.df)){
-      results[["AddCov.df"]] <- merge.df
-    }else{
-      return("nrow not equal in two df")
+  results[["merge.df"]] <- merge.df
+  #合併完再刪掉年齡性別NA的row
+  if (any(Cov %in% "Gender")){
+    merge.df <- merge.df[-which(is.na(merge.df[,"Gender"])),]
+    results[["dim without sex na"]] <- dim(merge.df)
+  }
+  if(any(Cov %in% "Age")){
+    if(length(which(is.na(merge.df[,"Age"])))!=0){
+      merge.df <- merge.df[-which(is.na(merge.df[,"Age"])),]
+      results[["dim without age na"]] <- dim(merge.df)
     }
   }
-  
+  #把Yname那行放在最後面
+  y.col <- which(colnames(merge.df) %in% Yname)
+  n <- ncol(merge.df)
+  complete.df <- merge.df[,c(1:(y.col-1),(y.col+1):n,y.col)]
+  #檢查資料筆數 ID unique
+    if(nrow( unique(complete.df)) == nrow(complete.df)){
+      results[["AddCov.df"]] <- complete.df
+    }else{
+      return("nrow is not unique")
+    }
   return(results)
 }
 
@@ -245,5 +250,16 @@ Interact <- function(data1 = NULL, data2 = NULL, formula = NULL,
 }
 
 
-
+x <- data.frame(k1=c(NA,NA,3,4,5), k2=c(1,NA,NA,4,5), data=1:5)
+y <- data.frame(k1=c(NA,2,NA,4,5), k2=c(NA,NA,3,4,5), data=1:5)
+merge(x, y, by=c("k1","k2"))
+timeID.col <- which(colnames(f) %in% timeIDname)
+timeCov.col <- which(colnames(f) %in% timeCov)
+timeCov.df <- f[,c(timeID.col,timeCov.col)]
+results[["timeCov.df"]] <- timeCov.df
+merge.df1 <- merge(a, timeCov.df, by=timeIDname, all.x=T)
+b <- unique(merge.df2)
+aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
+sum(is.na(merge.df1$Age))
+sum(complete.cases(merge.df1))
 
