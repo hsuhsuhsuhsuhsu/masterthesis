@@ -2,7 +2,9 @@ library(dplyr)
 library(faraway)
 library(randomForest)
 library(tibble)
-
+library(mice)
+library(missForest)
+library(visdat)
 #作用: 切Y的資料；設定1/0的類別和新變數(Y)
 #參數: file=> 檔案名 category=>類別=1的名稱 ex:c(non dipper,reverse dipper)
 #return : 樣本數 / 人數 / Y的分布 / 最後切完的data frame
@@ -38,18 +40,22 @@ myRead <- function(file = NULL, removeNa = T, category = NULL,
 }
 
 
-#### 隨機森林插補 ####
-#作用: 對特定變數做插補
+#### 隨機森林插補FUN沒寫 直接寫在CALL FUN####
+#作用: 對特定變數做隨機森林插補
 #參數: data => 資料 
-#Var => 要插補的變數
+#Var => 要插補的變數 / all => 全部都impute
 #Yname => 目標變數名稱
 #return: 插補完的資料集
-RF.impute <- function(data = NULL, Var = NULL, Yname = NULL,
-                      notIm.Var = NULL){
-    df.rf.impute <- rfImpute(Yname ~ ., ntree = 200, iter = 5, data = data)
-}
+#miss Forest 變數要都是數值 或是binary
+RF.impute <- function(data = NULL, chrVar = c("MRN","Mrn_Vis","dipping.status"),
+                      factorVar = "CCB" , maxiter = 10, ntree = 100, verbose = F){
+  #強制轉換成numeric 除了特定col以外
+  results = NULL
+  
+  }
+  
 
-#### 加入其他變數 ####
+
 #作用: 加入其他變數 餅且合併成一個資料集
 #參數: data => 原始資料
 #Covlist =>
@@ -97,6 +103,7 @@ PlusCov <- function(data = NULL, Covlist = NULL,
 #return : 分割完且排序的dataframe
 timeSplit <- function(data = NULL, removeCol.AM = NULL,
                       removeCol.PM = NULL){
+  cnames <- colnames(data)
   AM <- select(data,-removeCol.AM)
   AM[,"time"] <- 1
   PM <- select(data,-removeCol.PM)
@@ -104,15 +111,25 @@ timeSplit <- function(data = NULL, removeCol.AM = NULL,
   colnames(AM) <- 1:(dim(AM)[2])
   colnames(PM) <- 1:(dim(PM)[2])
   AMPM <- rbind(AM, PM)
-  colnames(AMPM) <- c("Mrn_Vis", "MRN", "visit", "sys", 
-                      "dia", "dip.status", "dip", "time")
+  if(ncol(AMPM)==13){
+    colnames(AMPM) <- c("Mrn_Vis","MRN","dipping.status",
+                        "visit","sys","dia","sex","age","HbA1C",
+                        "HR","CCB","dip","time")
+  }else if(ncol(AMPM)==8){
+    colnames(AMPM) <- c("Mrn_Vis","MRN","visit","sys",
+                        "dia", "dip.status","dip","time" )  
+  }
+  
   AMPM$sys <- as.numeric(AMPM$sys)
   AMPM$dia <- as.numeric(AMPM$dia)
   #AMPM$MRN <- as.factor(AMPM$MRN)
   
   #sort
   AMPM <- arrange(AMPM, Mrn_Vis, visit)
-  return(AMPM[, c(1:6, 8, 7)])
+  y.col <- which(colnames(AMPM) %in% "dip")
+  n <- ncol(AMPM)
+  col.names <- c(seq(n)[-which(seq(n)==y.col)],y.col)
+  return(AMPM[,col.names])
 }
 
 #作用: 按照不同回訪時間或是不同人去切割訓練測試資料集

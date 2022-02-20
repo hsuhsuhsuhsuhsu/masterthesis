@@ -1,5 +1,6 @@
 source("DataProcFunctions.r")
 source("ModelBuildFunction.r")
+#要更新R
 #
 #### setting parameter ####
 file <- "TCHCData/hbp_dip_byx.csv"
@@ -14,14 +15,106 @@ reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 #### data processing ####
 result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
                  newVar = "dip")
-#### imputation ####
 
 #### add cov ####
 addCov.22 <- PlusCov(data = result.22$myData, Covlist = CovAS ,
                                  IDname = "MRN", Cov = c("Gender","Age"),
                                  Yname = "dip")
+addCov.22.1 <- PlusCov(data = addCov.22$AddCov.df, Covlist = CovHH ,
+                     IDname = "Mrn_Vis", NULL,Cov = c("HbA1C","HR"),
+                     Yname = "dip")
+addCov.22.2 <- PlusCov(data = addCov.22.1$AddCov.df, Covlist = CovD ,
+                       IDname = "Mrn_Vis", Cov = c("CCB"),
+                       Yname = "dip")
+addCov.22.2$AddCov.df #761 * 14
+#### cov imputation ####
+df <- addCov.22.2$AddCov.df
+tmp <- df[,c(1,2,8)]
+library(visdat)
+vis_miss(df, show_perc = F) + coord_flip()
+library(missForest)
+df <- df[,-c(1,2,8)]
+df$CCB <- as.factor(df$CCB)
+RF.impute.HH <- missForest(df,verbose=T)
+rfimp <- RF.impute.HH$ximp
+rfimp.proc <- cbind(tmp,rfimp)#761 * 14
 
-#timeSplit裡有把sys dia轉成數值
+
+######### WITH COV ########
+#### time split ####
+timeSplit.cov <- timeSplit(data = rfimp.proc, 
+                           removeCol.AM = reCol.AM,
+                           removeCol.PM = reCol.PM)#1522 * 13
+#### V12 V3 ####
+cov.V12V3 <- TrainTest(data = timeSplit.cov, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+                        Test = 3, seed = 123, removeCategory = NULL, Trainper = 0.8)
+
+covTrain.V12V3 <- cov.V12V3$`Training set`
+covTest.V12V3 <-cov.V12V3$`Test set`
+covTrain.V12V3_uncomplete <- covTrain.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
+covTrain.V12V3 <- covTrain.V12V3[-which(covTrain.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
+covTest.V12V3 <- covTest.V12V3[-which(covTest.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
+#### Model Building ####
+cov.V12Train <- covTrain.V12V3#284
+cov.V3Test <- covTest.V12V3#142
+#### random = "+(1|MRN)" ####
+covV12V3  <- BiMMforest1(traindata = cov.V12Train, testdata = cov.V12Train,
+                        formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+                         random = "+(1|MRN)",
+                         seed = 123)
+covV12V3$`model summary`
+covV12V3$`CM of Train data`
+covV12V3$`Train acc sen spe`#0.95 0.977 0.85
+covV12V3$`CM of Test data`
+covV12V3$`Test acc sen spe`#0.739 0.92 0.19
+
+
+covV12V3.H1<-BiMMforestH1(traindata = cov.V12Train, testdata = cov.V12Train,
+                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+                         random = "+(1|MRN)",
+                         seed = 123)
+#"all of the binary outcomes are the same"
+
+V1V2.V3.H3<-BiMMforestH3(traindata = V1Train.V3, testdata = V2Test.V3,
+                         formula = dip ~ sys+dia+time,
+                         random = "+(1|MRN)",
+                         seed = 123)
+V1V2.V3.H3$iter
+V1V2.V3.H3$`model summary`
+V1V2.V3.H3$`Train acc sen spe`#1 1 1
+V1V2.V3.H3$`Test acc sen spe`#0.753 1 0
+V1V2.V3.H3$`CM of Train data`
+V1V2.V3.H3$`CM of Test data`
+
+V1V2.V3.H2 <- BiMMforestH2(traindata = V1Train.V3, testdata = V2Test.V3,
+                           formula = dip ~ sys+dia+time,
+                           random = "+(1|MRN)",
+                           seed = 123)
+V1V2.V3.H2$iter
+V1V2.V3.H2$`model summary`
+V1V2.V3.H2$`Train acc sen spe`#1 1 1
+V1V2.V3.H2$`Test acc sen spe`#0.753 1 0
+V1V2.V3.H2$`CM of Train data`
+V1V2.V3.H2$`CM of Test data`
+#### V1 V2 樣本與V12V3相同####
+#V12V3
+cov.V12V3 <- TrainTest(data = timeSplit.cov, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+                       Test = 3, seed = 123, removeCategory = NULL, Trainper = 0.8)
+
+covTrain.V12V3 <- cov.V12V3$`Training set`
+covTest.V12V3 <-cov.V12V3$`Test set`
+covTrain.V12V3_uncomplete <- covTrain.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
+covTrain.V12V3 <- covTrain.V12V3[-which(covTrain.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
+covTest.V12V3 <- covTest.V12V3[-which(covTest.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
+#接續上面做V1V2
+covTrain.V1V2 <- covTrain.V12V3[which(covTrain.V12V3$visit==1),]#142
+covTest.V1V2 <- covTrain.V12V3[which(covTrain.V12V3$visit==2),]#142
+#### Model Building ####
+#### random = "+(1|MRN)" ####
+
+
+######### NO COV ########
+##### timeSplit裡有把sys dia轉成數值 ####
 timeSplit.22 <- timeSplit(data = result.22$myData, 
                       removeCol.AM = reCol.AM,
                       removeCol.PM = reCol.PM)
