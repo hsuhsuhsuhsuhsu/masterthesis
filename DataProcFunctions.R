@@ -266,17 +266,37 @@ Interact <- function(data1 = NULL, data2 = NULL, formula = NULL,
   return(results)
 }
 
+##### 連續型資料標準化 #####
+#作用 :資料標準化
+#參數 : data =>資料 NumVar =>連續型變數 Yname =>目標變數
+#return : 標準化完的資料
+DataScale <- function(data = NULL, NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"),
+                      Yname = "dip"){
+  results = NULL
+  Num <- which(colnames(data) %in% NumVar)
+  NonNum.df <- data[,-Num]
+  scale.df <- data[,Num]
+  scale.df.done <- scale(scale.df)
+  scale.ok <- cbind(NonNum.df,scale.df.done)
+  y.col <- which(colnames(scale.ok) %in% Yname)
+  n <- ncol(scale.ok)
+  scale.ok <- scale.ok[,c(1:(y.col-1),(y.col+1):n,y.col)] 
+  results[["scale.df"]] <- scale.ok
+  return(results)
+}
 
-x <- data.frame(k1=c(NA,NA,3,4,5), k2=c(1,NA,NA,4,5), data=1:5)
-y <- data.frame(k1=c(NA,2,NA,4,5), k2=c(NA,NA,3,4,5), data=1:5)
-merge(x, y, by=c("k1","k2"))
-timeID.col <- which(colnames(f) %in% timeIDname)
-timeCov.col <- which(colnames(f) %in% timeCov)
-timeCov.df <- f[,c(timeID.col,timeCov.col)]
-results[["timeCov.df"]] <- timeCov.df
-merge.df1 <- merge(a, timeCov.df, by=timeIDname, all.x=T)
-b <- unique(merge.df2)
-aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
-sum(is.na(merge.df1$Age))
-sum(complete.cases(merge.df1))
+
+##### 暫放code ####
+# x <- data.frame(k1=c(NA,NA,3,4,5), k2=c(1,NA,NA,4,5), data=1:5)
+# y <- data.frame(k1=c(NA,2,NA,4,5), k2=c(NA,NA,3,4,5), data=1:5)
+# merge(x, y, by=c("k1","k2"))
+# timeID.col <- which(colnames(f) %in% timeIDname)
+# timeCov.col <- which(colnames(f) %in% timeCov)
+# timeCov.df <- f[,c(timeID.col,timeCov.col)]
+# results[["timeCov.df"]] <- timeCov.df
+# merge.df1 <- merge(a, timeCov.df, by=timeIDname, all.x=T)
+# b <- unique(merge.df2)
+# aa <- merge.df1[ which(is.na(merge.df1$Gender)),]
+# sum(is.na(merge.df1$Age))
+# sum(complete.cases(merge.df1))
 

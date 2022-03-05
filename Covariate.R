@@ -47,6 +47,7 @@ Cov.canproc <- list(Age_Sex=age.sex, Drug=Drug_Binary, Hb_HR=Hb.HR)
 write.csv(age.sex, file = "Cov_AgeSex.csv")
 write.csv(Drug_Binary, file = "Cov_Drug.csv")
 write.csv(Hb.HR, file = "Cov_HbHR.csv" )
-#血壓變異程度 sd arv cv => PDF檔有公式自己算 #暫時先pass
+
+#HBP血壓變異程度 sd arv cv 
 
 

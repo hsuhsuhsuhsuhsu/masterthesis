@@ -11,8 +11,8 @@ library(randomForest)
 #return: 訓練/測試 的混淆矩陣和準確度敏感度特異度
 #隨機森林判成1數量 / 混合模型的結果
 BiMMforest1<-function(traindata = NULL, testdata = NULL,
-                      formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
-                      seed = NULL){
+                      formula = NULL, random = "+(1|MRN)",
+                      seed = NULL, glmControl = "maxfun"){
   results <- NULL
   data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
@@ -41,7 +41,8 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
                          data = data, method = "class")
-  forestprob<-predict(forest, type = "prob")[, 2]
+  
+  forestprob <- predict(forest, type = "prob")[, 2]
   RFpredictprob <- as.data.frame(forestprob)
   RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
   results[["forestprob >= 0.5"]] <- RFpredict1
@@ -49,14 +50,18 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   options(warn = -1)
   
   #隨機效應怎麼放是一個問題
-  #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
-  #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-  #                                                collapse="~"),random,sep=""))),data=data,family=binomial,
-  #                          control = glmerControl(optCtrl=list(maxfun=200000)
-  #                         )), error = function(cond)"skip")
-  lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                                  collapse="~"),random,sep=""))),data=data,family=binomial,
-                   control = glmerControl(tolPwrss=1e-3))
+  if (glmControl == "maxfun"){
+    #(1|random)=(random intercept | random slope) 要放隨機效應變數進去
+    lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                                    collapse="~"),random,sep=""))),data=data,family=binomial,
+                              control = glmerControl(optCtrl=list(maxfun=200000)
+                              )), error = function(cond)"skip")
+    
+  }else if (glmControl == "tolPwrss"){
+    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                           collapse="~"),random,sep=""))),data=data,family=binomial,
+                     control = glmerControl(tolPwrss=1e-3))
+  }
   results[["model summary"]] <- summary(lmefit)
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
@@ -64,6 +69,7 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   }
   else if(!(class(lmefit)[1]=="character")){
     test.preds <- predict(forest,testdata)
+    #test.preds <- ifelse(predict(lmefit,testdata,type="response")<.5,0,1)
     RFtrain.preds <- predict(forest,traindata)
     traindata1 <- cbind(traindata,random)
     train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
@@ -97,8 +103,8 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
 #隨機森林判成1數量 / 混合模型的結果 / 迭代次數 / RF OOBError
 #程式運行時間
 BiMMforestH1<-function(traindata = NULL, testdata = NULL,
-                       formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
-                       seed = NULL){
+                       formula = NULL, random = "+(1|MRN)",
+                       seed = NULL, glmControl = "maxfun"){
   results <- NULL
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
@@ -133,16 +139,18 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
     results[["forestprob >= 0.5"]] <- RFpredict1
-
-    ## Estimate New Random Effects and Errors using BLMER
-    #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-     #                                               collapse="~"), random, sep=""))),
-      #                        data=data,family=binomial,
-       #                       control=glmerControl(optCtrl=list(maxfun=20000))),
-        #               error=function(cond)"skip")
+    if(glmControl == "maxfun"){
+      lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                                      collapse="~"), random, sep=""))),
+                                data=data,family=binomial,
+                                control=glmerControl(optCtrl=list(maxfun=20000))),
+                         error=function(cond)"skip")
+    }else if(glmControl == "tolPwrss"){
+    # Estimate New Random Effects and Errors using BLMER
     lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                            collapse="~"),random,sep=""))),data=data,family=binomial,
                      control = glmerControl(tolPwrss=1e-3))
+    }
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
       newlik <- logLik(lmefit)#loglikelihood
@@ -221,8 +229,8 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
 #隨機森林判成1數量 / 混合模型的結果 / 迭代次數 / RF OOBError
 #程式運行時間
 BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
-                         formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
-                         seed = NULL) {
+                         formula = NULL, random = "+(1|MRN)",
+                         seed = NULL, glmControl = "maxfun" ) {
   results <- NULL
   #set up variables for Bimm method
   data = traindata
@@ -254,16 +262,18 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
         Predictors), collapse = "~")),data = data, method = "class")
     forestprob <- predict(forest, type = "prob")[, 2]
     ## Estimate New Random Effects and Errors using BLMER
-    #lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName), 
-    #                                                 "forestprob"),
-    #                                               collapse = "~"), 
-    #                                         random, sep =""))),
-    #         data = data,family = binomial,
-     #        control = glmerControl(optCtrl = list(maxfun = 20000))),
-     #        error = function(cond)"skip")
-    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                           collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(tolPwrss=1e-3))
+    if (glmControl == "maxfun"){
+      lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName), 
+                                               "forestprob"), collapse = "~"),
+                                               random, sep =""))),data = data,
+                               family = binomial,
+                               control = glmerControl(optCtrl = list(maxfun = 20000))),
+                        error = function(cond)"skip")
+    }else if(glmControl == "tolPwrss"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(tolPwrss=1e-3))
+    }
     # Get the likelihood to check on convergence
     if (!(class(lmefit)[1] == "character")) {
       newlik <- logLik(lmefit)
@@ -343,9 +353,9 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
 #return:訓練/測試 的混淆矩陣和準確度敏感度特異度
 #隨機森林判成1數量 / 混合模型的結果 / 迭代次數 / RF OOBError
 #程式運行時間
-BiMMforestH2<-function(traindata = NULL, testdata = NULL,
-                       formula = NULL, random = "+(1|sys)+(1|dia)+(1|time)",
-                       seed = NULL){
+BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
+                       formula = NULL, random = "+(1|MRN)",
+                       seed = NULL,glmControl = "maxfun"){
   results <- NULL
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
@@ -380,21 +390,24 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
     results[["forestprob >= 0.5"]] <- RFpredict1
+    if (glmControl == "maxfun"){
+      lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                                      collapse="~"), random, sep=""))),
+                                data=data,family=binomial,
+                                control=glmerControl(optCtrl=list(maxfun=20000))),
+                         error=function(cond)"skip")
+    }else if(glmControl == "tolPwrss"){
+    # Estimate New Random Effects and Errors using BLMER
     
-    ## Estimate New Random Effects and Errors using BLMER
-    #lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-     #                                               collapse="~"), random, sep=""))),
-      #                        data=data,family=binomial,
-      #                        control=glmerControl(optCtrl=list(maxfun=20000))),
-      #                 error=function(cond)"skip")
     lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                            collapse="~"),random,sep=""))),data=data,family=binomial,
                      control = glmerControl(tolPwrss=1e-3))
+    }
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
       newlik <- logLik(lmefit)#loglikelihood
       
-      ContinueCondition <- (abs(newlik-oldlik)>ErrorTolerance & iterations < MaxIterations)
+      ContinueCondition <- (abs(newlik-oldlik) > ErrorTolerance & iterations < MaxIterations)
       oldlik <- newlik 
       
       # Extract random effects to make the new adjusted target
@@ -405,7 +418,7 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
       AllEffects <- (logit+logit2)/2 #average them =>paper上的qit
       
       #h2 update
-      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects <1.5,0,1)
+      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects < 1.5,0,1)
       
     }else{ 
       ContinueCondition <- FALSE 
@@ -460,6 +473,6 @@ BiMMforestH2<-function(traindata = NULL, testdata = NULL,
 
 
 
-
-
+?randomForest()
+?bglmer()
 
