@@ -140,8 +140,10 @@ timeSplit <- function(data = NULL, removeCol.AM = NULL,
 #nfixed=> 人數固定(訓練和測試的Visit都存在才納入)
 #for Case.ver的參數: seed隨機種子 
 #return : test.true.mrn=> MRN / Training set / test set
-TrainTest <- function(data = NULL, VisitOrCase = NULL, nfixed = T, Train = NULL,
-                      Test = NULL, seed = NULL, removeCategory = NULL, Trainper = 0.8){
+TrainTest <- function(data = NULL, VisitOrCase = NULL,
+                      nfixed = T, Train = NULL,
+                      Test = NULL, seed = NULL,
+                      removeCategory = NULL, Trainper = 0.8){
   results <- NULL
   if (VisitOrCase =="Visit"){
     if(is.null(removeCategory)){
@@ -156,7 +158,7 @@ TrainTest <- function(data = NULL, VisitOrCase = NULL, nfixed = T, Train = NULL,
           filter(visit %in% Train)
         Testing.proc <- filter(data, MRN %in% test.true.MRN$MRN) %>%
           filter(visit %in% Test)
-        print(nrow(Testing.proc))
+        print(paste0("nrow(Testing.proc)",nrow(Testing.proc)))
 
         delMRN <- NULL 
         for (i in 1:dim(Testing.proc)[1]){
@@ -165,11 +167,11 @@ TrainTest <- function(data = NULL, VisitOrCase = NULL, nfixed = T, Train = NULL,
               delMRN <-rbind(delMRN,MRNnotinTrain)
             }
         }
-        print(nrow(Testing.proc))
+        print(paste0("nrow(Testing.proc)",nrow(Testing.proc)))
         if (!is.null(delMRN)){
           Testing.proc <- Testing.proc[-which(Testing.proc$MRN %in% delMRN ),]
         }
-        print(nrow(Testing.proc))
+        print(paste0("nrow(Testing.proc)",nrow(Testing.proc)))
         results[["test.true.MRN"]] <- test.true.MRN
         results[["Training set"]] <- Training.proc
         results[["Test set"]] <- Testing.proc

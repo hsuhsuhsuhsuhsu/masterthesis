@@ -69,12 +69,18 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   }
   else if(!(class(lmefit)[1]=="character")){
     test.preds <- predict(forest,testdata)
-    #test.preds <- ifelse(predict(lmefit,testdata,type="response")<.5,0,1)
+    results[["test.preds"]] <- test.preds
+    
+    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    #results[["aaaaa"]] <- lmefit
     RFtrain.preds <- predict(forest,traindata)
+    
     traindata1 <- cbind(traindata,random)
     train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     results[["train.preds"]] <- train.preds
-    results[["test.preds"]] <- test.preds
+    
+    
     #format table to make sure it always has 4 entries, even if it is only 2 by 1 (0's in other spots)
     t1 <- table(traindata[,ncol(traindata)],train.preds)
     trainacc <- (t1[1]+t1[4]) / sum(t1)
@@ -90,6 +96,12 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
+    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    results[["lme.CM of Test data"]] <- t2
+    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     return(results)
   }
 } 
@@ -195,6 +207,8 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     results[["train.preds"]] <- train.preds
     results[["test.preds"]] <- test.preds
+    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     
     t1 <- table(traindata[,ncol(traindata)],train.preds)
     trainacc <- (t1[1]+t1[4]) / sum(t1)
@@ -210,6 +224,12 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
+    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    results[["lme.CM of Test data"]] <- t2
+    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
@@ -335,6 +355,14 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
+    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    results[["lme.CM of Test data"]] <- t2
+    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
@@ -462,6 +490,14 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
+    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    results[["lme.CM of Test data"]] <- t2
+    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
