@@ -6,28 +6,40 @@ status = ifelse(sample.int(2,size = 200,replace = T)==1,
 table(sex,status)
 chisq.test(table(sex,status))
 
-Yescov <- read.csv("TCHCData/RFimp.csv ")
-Yescov <- Yescov[which(Yescov$visit_HBP_Dmode %in% 1:3),]
-NOcov <- result.22$myData
-NOcov <- NOcov[which(NOcov$visit_HBP_Dmode %in% 1:3),]
-dim(Yescov)
-table(Yescov$visit_HBP_Dmode,Yescov$dip)
-dim(NOcov)
-table(NOcov$visit_HBP_Dmode,NOcov$dip)
 
-WCov <- ifelse(Yescov$dip ==1 ,"non-dipping","dipping")
-WOCov <- ifelse(NOcov$dip ==1 ,"non-dip","dip" )
+chi <- read.csv("TCHCData/chi_square.csv")
+chi$A <- as.factor(chi$A)
+chi$B <- as.factor(chi$B)
+table(chi$A,chi$B)
+chisq.test(table(chi$A,chi$B))
+#data:  table(chi$A, chi$B)
+#X-squared = 2.8152e-30, 
+#df= 1, p-value = 1
 
-a <- data.frame(x=c(rep(0,171),rep(0,183)),y=c(556,593))
-colnames(a) <- c("dip","nondip")
-rownames(a) <- c("WithCov" , "WithOutCov")
+chi1 <- read.csv("TCHCData/chi_square1.csv")
+chi1$A <- as.factor(chi1$A)
+chi1$B <- as.factor(chi1$B)
+table(chi1$A,chi1$B)
+chisq.test(table(chi1$A,chi1$B))
+#data:  table(chi1$A, chi1$B)
+#X-squared = 0.0073271, 
+#df = 1, p-value= 0.9318
 
+chi2 <- read.csv("TCHCData/chi_square2.csv")
+chi2$A <- as.factor(chi2$A)
+chi2$B <- as.factor(chi2$B)
+table(chi2$A,chi2$B)
+chisq.test(table(chi2$A,chi2$B))
+#data:  table(chi2$A, chi2$B)
+#X-squared = 0.003011, 
+#df = 1, p-value =0.9562
 
-table(WCov)
-table(WOCov)
-table(WCov,WOCov)
-chisq.test()
-as.table(c(180,192,581,625),nrow = 2, ncol = 2)
-a <- data.frame(x=c(171,556),y=c(183,593))
-colnames(a) <- c("dip","nondip")
-table(a)
+chi3 <- read.csv("TCHCData/chi_square3.csv")
+chi3$A <- as.factor(chi3$A)
+chi3$B <- as.factor(chi3$B)
+table(chi3$A,chi3$B)
+chisq.test(table(chi3$A,chi3$B))
+#data:  table(chi3$A, chi3$B)
+#X-squared = 1.153e-30, df = 1,
+#p-value = 1
+
