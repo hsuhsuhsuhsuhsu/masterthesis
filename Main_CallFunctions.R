@@ -15,15 +15,14 @@ reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 #### data processing ####
 result.22 <- myRead(file, removeNa = T, category = c("Non dipper", "Reverse dipper"),
                  newVar = "dip")
-
-
 #### add cov ####
+
 addCov.22 <- PlusCov(data = result.22$myData, Covlist = CovAS ,
-                                 IDname = "MRN", Cov = c("Gender","Age"),
-                                 Yname = "dip")
-addCov.22.1 <- PlusCov(data = addCov.22$AddCov.df, Covlist = CovHH ,
-                     IDname = "Mrn_Vis",Cov = c("HbA1C","HR"),
+                     IDname = "MRN", Cov = c("Gender","Age"),
                      Yname = "dip")
+addCov.22.1 <- PlusCov(data = addCov.22$AddCov.df, Covlist = CovHH ,
+                       IDname = "Mrn_Vis",Cov = c("HbA1C","HR"),
+                       Yname = "dip")
 addCov.22.2 <- PlusCov(data = addCov.22.1$AddCov.df, Covlist = CovD ,
                        IDname = "Mrn_Vis", Cov = c("CCB"),
                        Yname = "dip")
@@ -52,6 +51,9 @@ write.csv(rfimp.proc,file = "TCHCData/RFimp.csv ")
 rf <- read.csv("TCHCData/RFimp.csv ")
 
 
+#
+
+
 ######### WITH COV ########
 #### time split ####
 RF.imp.ok <- read.csv("TCHCData/RFimp.csv ")
@@ -59,10 +61,13 @@ RF.imp.ok <- RF.imp.ok[,-1]
 timeSplit.cov <- timeSplit(data = RF.imp.ok, 
                            removeCol.AM = reCol.AM,
                            removeCol.PM = reCol.PM)#1522 * 13
+write.csv(timeSplit.cov,"TCHCData/yesCOVdata.csv")
 #### 重新讀csv進來的話要再factor一次####
 timeSplit.cov$visit <- as.factor(timeSplit.cov$visit)
 #### V12 V3 ####
-cov.V12V3 <- TrainTest(data = timeSplit.cov, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+timeSplit.cov1 <- read.csv("TCHCData/yesCOVplusHOS.csv")
+timeSplit.cov1 <- timeSplit.cov1[,-1]
+cov.V12V3 <- TrainTest(data = timeSplit.cov1, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
                         Test = 3, seed = 123, removeCategory = NULL, Trainper = 0.8)
 
 covTrain.V12V3 <- cov.V12V3$`Training set`
@@ -70,216 +75,281 @@ covTest.V12V3 <- cov.V12V3$`Test set`
 covTrain.V12V3_uncomplete <- covTrain.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
 covTrain.V12V3 <- covTrain.V12V3[-which(covTrain.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
 covTest.V12V3 <- covTest.V12V3[-which(covTest.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
-#加醫院變數 去跑
 
 #### Model Building ####
 cov.V12Train <- covTrain.V12V3#284
 cov.V3Test <- covTest.V12V3#142
 cov.V12Train$visit <- factor(cov.V12Train$visit ,levels=c("1","2","3"))
 cov.V3Test$visit <- factor(cov.V3Test$visit ,levels=c("1","2","3"))
-
-write.csv(cov.V12Train,"TCHCData/cov_V12Train.csv")
-write.csv(cov.V3Test,"TCHCData/cov_V3Test.csv")
+cov.V12Train$HOS <- factor(cov.V12Train$HOS)
+cov.V3Test$HOS <- factor(cov.V3Test$HOS)
+cov.V12Train$CCB <- factor(cov.V12Train$CCB)
+cov.V3Test$CCB <- factor(cov.V3Test$CCB)
+#write.csv(cov.V12Train,"TCHCData/cov_V12Train.csv")
+#write.csv(cov.V3Test,"TCHCData/cov_V3Test.csv")
 #### random = "+(1|MRN)" +Visit(3 levels) ####
 covV12V3  <- BiMMforest1(traindata = cov.V12Train, testdata = cov.V3Test,
-                        formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
-                         random = "+(1+time|MRN)",
+                        formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
+                         random = "+(1|MRN)",
                          seed = 123, glmControl = "maxfun")
 
 covV12V3$`model summary`
 covV12V3$`CM of Train data`
-covV12V3$`Train acc sen spe`#0.9753521 0.9821429 0.9500000
+covV12V3$`Train acc sen spe`#0.9823944 0.9910714 0.9500000
 covV12V3$`CM of Test data`
-covV12V3$`Test acc sen spe`#0.7676056 0.9433962 0.2500000
+covV12V3$`Test acc sen spe`#0.7535211 0.9433962 0.1944444
 covV12V3$`lme.CM of Test data`
-covV12V3$`lme.Test acc sen spe`#0.6408451 0.8113208 0.1388889
- covV12V3$RF
-
-
+covV12V3$`lme.Test acc sen spe`#0.6478873 0.8207547 0.1388889
+#輸出成一個table
+cov1 <- cbind(covV12V3$`Train acc sen spe`,covV12V3$`Test acc sen spe`,covV12V3$`lme.Test acc sen spe`)
+colnames(cov1)<- c("Train","Test","lme.test")
+rownames(cov1)<- c("Acc","Sen","Spe")
+cov1
 tryy  <- BiMMforest1(traindata = cov.V12Train, testdata = cov.V3Test,
-                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
-                         random = "+(1|MRN)+(0+visit|MRN)",
+                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
+                         random = "+(1|MRN)",
                          seed = 123, glmControl = "tolPwrss")
 tryy$RF
 tryy$`model summary`
 tryy$`CM of Train data`
-tryy$`Train acc sen spe`#0.9753521 0.9821429 0.9500000
+tryy$`Train acc sen spe`#0.9823944 0.9910714 0.9500000
 tryy$`CM of Test data`
-tryy$`Test acc sen spe`#0.7676056 0.9433962 0.2500000
+tryy$`Test acc sen spe`#0.7535211 0.9433962 0.1944444
 tryy$`lme.CM of Test data`
-tryy$`lme.Test acc sen spe`#0.6267606 0.7735849 0.1944444
+tryy$`lme.Test acc sen spe`#0.6478873 0.8207547 0.1388889
 
 aa <- as.data.frame(tryy$test.preds)
 table(cov.V12Train$dip)
 table(cov.V3Test$dip)
 table(aa$`tryy$test.preds`)
 
+#cov.V12Train$HOS <- as.numeric(cov.V12Train$HOS)
+#cov.V3Test$HOS <- as.numeric(cov.V3Test$HOS)
+#cov.V12Train$CCB <- as.numeric(cov.V12Train$CCB)
+#cov.V3Test$CCB <- as.numeric(cov.V3Test$CCB)
+#把time 變成factor後 有機會變成all of the binary outcomes are the same
 covV12V3.H1 <- BiMMforestH1(traindata = cov.V12Train, testdata = cov.V3Test,
-                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
+                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                          random = "+(1|MRN)",
                          seed = 123, glmControl = "tolPwrss")
-covV12V3.H1$iter #7 "all of the binary outcomes are the same"
+covV12V3.H1$iter #1000
 covV12V3.H1$`model summary`
 covV12V3.H1$`CM of Train data`
-covV12V3.H1$`Train acc sen spe`#0.9084507 0.9866071 0.6166667
+covV12V3.H1$`Train acc sen spe`#0.9119718 0.9866071 0.6333333
 covV12V3.H1$`CM of Test data` 
-covV12V3.H1$`Test acc sen spe`#0.76056338 1.00000000 0.05555556
+covV12V3.H1$`Test acc sen spe`#0.74647887 0.98113208 0.05555556
+covV12V3.H1$`lme.CM of Test data`
+covV12V3.H1$`lme.Test acc sen spe`#0.7323944 0.9245283 0.1666667
+cov3 <- cbind(covV12V3.H1$`Train acc sen spe`,covV12V3.H1$`Test acc sen spe`,covV12V3.H1$`lme.Test acc sen spe`)
+colnames(cov3)<- c("Train","Test","lme.test")
+rownames(cov3)<- c("Acc","Sen","Spe")
+cov3
 
 covV12V3.H1.max <- BiMMforestH1(traindata = cov.V12Train, testdata = cov.V3Test,
-                          formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
+                          formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                           random = "+(1|MRN)",
                           seed = 123, glmControl = "maxfun")
 covV12V3.H1.max$iter#1000
 covV12V3.H1.max$`run time`
 covV12V3.H1.max$`model summary`
 covV12V3.H1.max$`CM of Train data`
-covV12V3.H1.max$`Train acc sen spe`# 0.9014085 0.9910714 0.5666667
+covV12V3.H1.max$`Train acc sen spe`# 0.9014085 0.9732143 0.6333333
 covV12V3.H1.max$`CM of Test data`
-covV12V3.H1.max$`Test acc sen spe`#0.76056338 1.00000000 0.05555556
+covV12V3.H1.max$`Test acc sen spe`#0.75356338 0.99 0.05555556
+covV12V3.H1.max$`lme.CM of Test data`
+covV12V3.H1.max$`lme.Test acc sen spe`#0.7253521 0.9056604 0.1944444
+cov4 <- cbind(covV12V3.H1.max$`Train acc sen spe`,covV12V3.H1.max$`Test acc sen spe`,covV12V3.H1.max$`lme.Test acc sen spe`)
+colnames(cov4)<- c("Train","Test","lme.test")
+rownames(cov4)<- c("Acc","Sen","Spe")
+cov4
 
 covV12V3.H3 <- BiMMforestH3(traindata = cov.V12Train, testdata = cov.V3Test,
-                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
+                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                          random = "+(1|MRN)",
                          seed = 123, glmControl = "tolPwrss")
 
-covV12V3.H3$iter#100
+covV12V3.H3$iter#9
 covV12V3.H3$`model summary`
-covV12V3.H3$`Train acc sen spe`#0.9612676 0.9732143 0.9166667
-covV12V3.H3$`Test acc sen spe`#0.6971831 0.8396226 0.2777778
+covV12V3.H3$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
+covV12V3.H3$`Test acc sen spe`#0.6971831 0.8679245 0.1944444
 covV12V3.H3$`CM of Train data`
 covV12V3.H3$`CM of Test data`
 covV12V3.H3$`lme.CM of Test data`
-covV12V3.H3$`lme.Test acc sen spe`#0.6760563 0.8490566 0.1666667
+covV12V3.H3$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov5 <- cbind(covV12V3.H3$`Train acc sen spe`,covV12V3.H3$`Test acc sen spe`,covV12V3.H3$`lme.Test acc sen spe`)
+colnames(cov5)<- c("Train","Test","lme.test")
+rownames(cov5)<- c("Acc","Sen","Spe")
+cov5
 
 try <- BiMMforestH3(traindata = cov.V12Train, testdata = cov.V3Test,
-                   formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
+                   formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                    random = "+(1|MRN)",
                    seed = 123, glmControl = "maxfun")
-try$iter#100
+try$iter#7
 try$`model summary`
 try$`CM of Train data`
-try$`Train acc sen spe`#0.9612676 0.9732143 0.9166667
+try$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
 try$`CM of Test data`
-try$`Test acc sen spe`#0.6971831 0.8396226 0.2777778
+try$`Test acc sen spe`#0.9683099 0.9821429 0.9166667
+try$`lme.CM of Test data`
+try$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov2 <- cbind(try$`Train acc sen spe`,try$`Test acc sen spe`,try$`lme.Test acc sen spe`)
+colnames(cov2)<- c("Train","Test","lme.test")
+rownames(cov2)<- c("Acc","Sen","Spe")
+cov2
 
 covV12V3.H2 <- BiMMforestH2(traindata = cov.V12Train, testdata = cov.V3Test,
-                           formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
+                           formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                            random = "+(1|MRN)",
                            seed = 123, glmControl = "maxfun")
-covV12V3.H2$iter#1000
+covV12V3.H2$iter#7
 covV12V3.H2$`run time`
 covV12V3.H2$`model summary`
-covV12V3.H2$`Train acc sen spe`#0.9612676 0.9732143 0.9166667
-covV12V3.H2$`Test acc sen spe`#0.6971831 0.8396226 0.2777778
+covV12V3.H2$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
+covV12V3.H2$`Test acc sen spe`#0.9683099 0.9821429 0.9166667
 covV12V3.H2$`CM of Train data`
 covV12V3.H2$`CM of Test data`
-
+covV12V3.H2$`lme.CM of Test data`
+covV12V3.H2$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov6 <- cbind(covV12V3.H2$`Train acc sen spe`,covV12V3.H2$`Test acc sen spe`,covV12V3.H2$`lme.Test acc sen spe`)
+colnames(cov6)<- c("Train","Test","lme.test")
+rownames(cov6)<- c("Acc","Sen","Spe")
+cov6
 #### Data scale (standardization) ####
-ds.covTrain.V1V2 <- DataScale(data = covTrain.V1V2,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
-ds.covTest.V1V2 <- DataScale(data = covTest.V1V2,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
+ds.covTrain.V12 <- DataScale(data = cov.V12Train,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
+ds.covTest.V3 <- DataScale(data = cov.V3Test,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
 #### after data scale modeling again ####
-
-
-#
-#### V1 V2 樣本與V12V3相同####
-#V12V3
-cov.V12V3 <- TrainTest(data = timeSplit.cov, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
-                       Test = 3, seed = 123, removeCategory = NULL, Trainper = 0.8)
-
-covTrain.V12V3 <- cov.V12V3$`Training set`
-covTest.V12V3 <-cov.V12V3$`Test set`
-covTrain.V12V3_uncomplete <- covTrain.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
-covTrain.V12V3 <- covTrain.V12V3[-which(covTrain.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
-covTest.V12V3 <- covTest.V12V3[-which(covTest.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
-#接續上面做V1V2
-covTrain.V1V2 <- covTrain.V12V3[which(covTrain.V12V3$visit==1),]#142
-covTest.V1V2 <- covTrain.V12V3[which(covTrain.V12V3$visit==2),]#142
-covTrain.V1V2$visit <- factor(covTrain.V1V2$visit ,levels=c("1","2"))
-covTest.V1V2$visit <- factor(covTest.V1V2$visit ,levels=c("1","2"))
-
-write.csv(covTrain.V1V2,"TCHCData/cov_V1Train.csv")
-write.csv(covTest.V1V2,"TCHCData/cov_V2Test.csv")
-#### Data scale (standardization) ####
-ds.covTrain.V1V2 <- DataScale(data = covTrain.V1V2,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
-ds.covTest.V1V2 <- DataScale(data = covTest.V1V2,NumVar = c("sys", "dia" ,"age" ,"HbA1C" ,"HR"))
-#### Model Building ####
-cov.V1Train <-ds.covTrain.V1V2$scale.df #142
-cov.V2Test <- ds.covTest.V1V2$scale.df#142
-cov.V1Train$visit <- factor(cov.V1Train$visit ,levels=c("1","2"))
-cov.V2Test$visit <- factor(cov.V2Test$visit ,levels=c("1","2"))
-#### random = "+(1|MRN)" ####
-table(cov.V1Train$dip)
-table(cov.V2Test$dip)
-table(cov.V3Test$dip)
-covV1V2  <- BiMMforest1(traindata = cov.V1Train, testdata = cov.V2Test,
-                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+dscov.V12Train<- ds.covTrain.V12$scale.df
+dscov.V3Test <- ds.covTest.V3$scale.df
+#### random = "+(1|MRN)" +Visit(3 levels) ####
+dscovV12V3  <- BiMMforest1(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                         formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                          random = "+(1|MRN)",
-                         seed = 123 , glmControl = "tolPwrss")
-covV1V2$`model summary`
-covV1V2$`CM of Train data`
-covV1V2$`Train acc sen spe`#1 1 1
-covV1V2$`CM of Test data`
-covV1V2$`Test acc sen spe`#0.7746479 0.9818182 0.0625
-covV1V2$`lme.CM of Test data`
-covV1V2$`lme.Test acc sen spe`#0.8028169 0.8909091 0.5000000
+                         seed = 123, glmControl = "maxfun")
 
+dscovV12V3$`model summary`
+dscovV12V3$`CM of Train data`
+dscovV12V3$`Train acc sen spe`#0.9823944 0.9910714 0.9500000
+dscovV12V3$`CM of Test data`
+dscovV12V3$`Test acc sen spe`#0.7535211 0.9433962 0.1944444
+dscovV12V3$`lme.CM of Test data`
+dscovV12V3$`lme.Test acc sen spe`#0.6478873 0.8207547 0.1388889
+#輸出成一個table
+dscov1 <- cbind(dscovV12V3$`Train acc sen spe`,dscovV12V3$`Test acc sen spe`,dscovV12V3$`lme.Test acc sen spe`)
+colnames(dscov1)<- c("Train","Test","lme.test")
+rownames(dscov1)<- c("Acc","Sen","Spe")
+dscov1
 
-covV1V2.H1 <- BiMMforestH1(traindata = cov.V1Train, testdata = cov.V2Test,
-                          formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
-                          random = "+(1|MRN)",
-                          seed = 123, glmControl = "tolPwrss")
-#資料標準化後 有error
-covV1V2.H1$iter#1000
-covV1V2.H1$`model summary`
-covV1V2.H1$`CM of Train data`
-covV1V2.H1$`Train acc sen spe`#1 1 1 
-covV1V2.H1$`CM of Test data`
-covV1V2.H1$`Test acc sen spe`#0.7746479 1 0
+tryy  <- BiMMforest1(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                     formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
+                     random = "+(1|MRN)",
+                     seed = 123, glmControl = "tolPwrss")
+tryy$RF
+tryy$`model summary`
+tryy$`CM of Train data`
+tryy$`Train acc sen spe`#0.9823944 0.9910714 0.9500000
+tryy$`CM of Test data`
+tryy$`Test acc sen spe`#0.7535211 0.9433962 0.1944444
+tryy$`lme.CM of Test data`
+tryy$`lme.Test acc sen spe`#0.6478873 0.8207547 0.1388889
 
-covV1V2.H1 <- BiMMforestH1(traindata = cov.V1Train, testdata = cov.V2Test,
-                           formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
-                           random = "+(1|MRN)",
-                           seed = 123, glmControl = "maxfun")
-covV1V2.H1$iter#1000
-covV1V2.H1$`model summary`
-covV1V2.H1$`CM of Train data`
-covV1V2.H1$`Train acc sen spe`#1 1 1 
-covV1V2.H1$`CM of Test data`
-covV1V2.H1$`Test acc sen spe`#0.7605634 0.9818182 0.000000
+aa <- as.data.frame(tryy$test.preds)
+table(cov.V12Train$dip)
+table(cov.V3Test$dip)
+table(aa$`tryy$test.preds`)
 
-covV1V2.H3 <- BiMMforestH3(traindata = cov.V1Train, testdata = cov.V2Test,
-                            formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+#cov.V12Train$HOS <- as.numeric(cov.V12Train$HOS)
+#cov.V3Test$HOS <- as.numeric(cov.V3Test$HOS)
+#cov.V12Train$CCB <- as.numeric(cov.V12Train$CCB)
+#cov.V3Test$CCB <- as.numeric(cov.V3Test$CCB)
+#把time 變成factor後 有機會變成all of the binary outcomes are the same
+covV12V3.H1 <- BiMMforestH1(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                            formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                             random = "+(1|MRN)",
                             seed = 123, glmControl = "tolPwrss")
-covV1V2.H3$iter#100
-covV1V2.H3$`model summary`
-covV1V2.H3$`Train acc sen spe`#1 1 1
-covV1V2.H3$`Test acc sen spe`#0.8098592 0.9818182 0.2187500
-covV1V2.H3$`CM of Train data`
-covV1V2.H3$`CM of Test data`
-covV1V2.H3$`lme.CM of Test data`
-covV1V2.H3$`lme.Test acc sen spe`#0.8028169 0.8909091 0.5000000
+covV12V3.H1$iter #1000
+covV12V3.H1$`model summary`
+covV12V3.H1$`CM of Train data`
+covV12V3.H1$`Train acc sen spe`#0.9119718 0.9866071 0.6333333
+covV12V3.H1$`CM of Test data` 
+covV12V3.H1$`Test acc sen spe`#0.74647887 0.98113208 0.05555556
+covV12V3.H1$`lme.CM of Test data`
+covV12V3.H1$`lme.Test acc sen spe`#0.7323944 0.9245283 0.1666667
+cov3 <- cbind(covV12V3.H1$`Train acc sen spe`,covV12V3.H1$`Test acc sen spe`,covV12V3.H1$`lme.Test acc sen spe`)
+colnames(cov3)<- c("Train","Test","lme.test")
+rownames(cov3)<- c("Acc","Sen","Spe")
+cov3
 
-tryV1V2.H3 <- BiMMforestH3(traindata = cov.V1Train, testdata = cov.V2Test,
-                    formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+covV12V3.H1.max <- BiMMforestH1(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                                formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
+                                random = "+(1|MRN)",
+                                seed = 123, glmControl = "maxfun")
+covV12V3.H1.max$iter#1000
+covV12V3.H1.max$`run time`
+covV12V3.H1.max$`model summary`
+covV12V3.H1.max$`CM of Train data`
+covV12V3.H1.max$`Train acc sen spe`# 0.9014085 0.9732143 0.6333333
+covV12V3.H1.max$`CM of Test data`
+covV12V3.H1.max$`Test acc sen spe`#0.75356338 0.99 0.05555556
+covV12V3.H1.max$`lme.CM of Test data`
+covV12V3.H1.max$`lme.Test acc sen spe`#0.7253521 0.9056604 0.1944444
+cov4 <- cbind(covV12V3.H1.max$`Train acc sen spe`,covV12V3.H1.max$`Test acc sen spe`,covV12V3.H1.max$`lme.Test acc sen spe`)
+colnames(cov4)<- c("Train","Test","lme.test")
+rownames(cov4)<- c("Acc","Sen","Spe")
+cov4
+
+covV12V3.H3 <- BiMMforestH3(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                            formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
+                            random = "+(1|MRN)",
+                            seed = 123, glmControl = "tolPwrss")
+
+covV12V3.H3$iter#9
+covV12V3.H3$`model summary`
+covV12V3.H3$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
+covV12V3.H3$`Test acc sen spe`#0.6971831 0.8679245 0.1944444
+covV12V3.H3$`CM of Train data`
+covV12V3.H3$`CM of Test data`
+covV12V3.H3$`lme.CM of Test data`
+covV12V3.H3$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov5 <- cbind(covV12V3.H3$`Train acc sen spe`,covV12V3.H3$`Test acc sen spe`,covV12V3.H3$`lme.Test acc sen spe`)
+colnames(cov5)<- c("Train","Test","lme.test")
+rownames(cov5)<- c("Acc","Sen","Spe")
+cov5
+
+try <- BiMMforestH3(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                    formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                     random = "+(1|MRN)",
                     seed = 123, glmControl = "maxfun")
-#"GLMM did not converge or all of the outcomes are the same"
+try$iter#7
+try$`model summary`
+try$`CM of Train data`
+try$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
+try$`CM of Test data`
+try$`Test acc sen spe`#0.9683099 0.9821429 0.9166667
+try$`lme.CM of Test data`
+try$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov2 <- cbind(try$`Train acc sen spe`,try$`Test acc sen spe`,try$`lme.Test acc sen spe`)
+colnames(cov2)<- c("Train","Test","lme.test")
+rownames(cov2)<- c("Acc","Sen","Spe")
+cov2
 
-
-covV1V2.H2 <- BiMMforestH2(traindata = cov.V1Train, testdata = cov.V2Test,
-                            formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB,
+covV12V3.H2 <- BiMMforestH2(traindata = dscov.V12Train, testdata = dscov.V3Test,
+                            formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit+HOS,
                             random = "+(1|MRN)",
-                            seed = 123, glmControl = "tolPwrss")
-covV1V2.H2$iter#1000
-covV1V2.H2$`run time`
-covV1V2.H2$`model summary`
-covV1V2.H2$`Train acc sen spe`#1 1 1
-covV1V2.H2$`Test acc sen spe`# 0.7816901 0.9818182 0.0937500
-covV1V2.H2$`CM of Train data`
-covV1V2.H2$`CM of Test data`
-covV1V2.H2$`lme.CM of Test data`
-covV1V2.H2$`lme.Test acc sen spe`#0.8028169 0.8909091 0.5000000
+                            seed = 123, glmControl = "maxfun")
+covV12V3.H2$iter#7
+covV12V3.H2$`run time`
+covV12V3.H2$`model summary`
+covV12V3.H2$`Train acc sen spe`#0.9683099 0.9821429 0.9166667
+covV12V3.H2$`Test acc sen spe`#0.9683099 0.9821429 0.9166667
+covV12V3.H2$`CM of Train data`
+covV12V3.H2$`CM of Test data`
+covV12V3.H2$`lme.CM of Test data`
+covV12V3.H2$`lme.Test acc sen spe`#0.7042254 0.8867925 0.1666667
+cov6 <- cbind(covV12V3.H2$`Train acc sen spe`,covV12V3.H2$`Test acc sen spe`,covV12V3.H2$`lme.Test acc sen spe`)
+colnames(cov6)<- c("Train","Test","lme.test")
+rownames(cov6)<- c("Acc","Sen","Spe")
+cov6
 
 
 
@@ -583,22 +653,9 @@ InterV12.2$`model summary`#dia*sys顯著 p-value = 0.0494
 
 
 
+
+#
 #####小結 ####
-#### 預測new cases #### paper已經說比較不好 就不用做
+#### 預測new cases #### 
 
-####對醫院做校正####
-#V1 - V3 的樣本 n=486
-Hospital.ad1 <- rbind(Train.V12V3,Test.V12V3)
-table(Hospital.ad1$visit)
-#取MRN 先去掉重複 再撈英文(醫院名) 看個醫院的
-Hos <- as.data.frame(Hospital.ad1$MRN)
-Hos <- unique(Hos)
-colnames(Hos)[1] <- "MRN"
-Hos["Hospital"] <- str_extract(Hos$MRN,"[A-Z]+")
-table(Hos$Hospital)
-#CGMHLK 林口長庚 45 #CMUH 中國附醫 1
-#EDA 義大 3 #KMUH 高醫 32
-#分成北和中南進行校正 HOW??
-
-#### 對樣本下降做隨機性檢定 ####
 

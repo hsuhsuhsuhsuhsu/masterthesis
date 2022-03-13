@@ -1,3 +1,5 @@
+#這裡的code好像是舊的
+#要做的話 複製call FUN再重來一次
 source("DataProcFunctions.r")
 source("ModelBuildFunction.r")
 library(stringr)

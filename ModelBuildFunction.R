@@ -524,7 +524,3 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
 }
 
 
-
-?randomForest()
-?bglmer()
-

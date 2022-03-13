@@ -1,6 +1,7 @@
 #### 整理 covariate ####
 library(readr)
 library(eeptools)
+library(stringr)
 #投藥1/0=> Visit Treatment
 cVT <- read_csv("TCHCData/cVT.csv")
 Drug <- cVT[,c(3:21)]
@@ -49,5 +50,52 @@ write.csv(Drug_Binary, file = "Cov_Drug.csv")
 write.csv(Hb.HR, file = "Cov_HbHR.csv" )
 
 #HBP血壓變異程度 sd arv cv 
+####加入醫院變數做校正####
+#怎麼分組
+#V1 - V3 的樣本 n=486
+Hospital.ad1 <- rbind(Train.V12V3,Test.V12V3)
+table(Hospital.ad1$visit)
+#取MRN 先去掉重複 再撈英文(醫院名) 看個醫院的
+Hos <- as.data.frame(Hospital.ad1$MRN)
+Hos <- unique(Hos)
+colnames(Hos)[1] <- "MRN"
+Hos["Hospital"] <- str_extract(Hos$MRN,"[A-Z]+")
+table(Hos$Hospital)
+#CGMHLK 林口長庚 45 #CMUH 中國附醫 1
+#EDA 義大 3 #KMUH 高醫 32
+#發現長庚最多 其他都在中南且加起來比長庚少
+#所以分成長庚和非長庚進行校正 (1/0)
+df <- read.csv("TCHCData/noCOVdata.csv")
+df <- df[,-1]
+df["hos"] <- str_extract(df$MRN,"[A-Z]+")
+df["HOS"] <- ifelse(df$hos=="CGMHLK",1,0)
+df <- df[,c(1:7,9,10,8)]
+write.csv(df,"TCHCData/noCOVplusHOS.csv")
 
+covdf <- read.csv("TCHCData/yesCOVdata.csv")
+covdf <- covdf[,-1]
+covdf["hos"] <- str_extract(covdf$MRN,"[A-Z]+")
+covdf["HOS"] <- ifelse(covdf$hos=="CGMHLK",1,0)
+covdf <- covdf[,c(1:12,14,15,13)]
+write.csv(covdf,"TCHCData/yesCOVplusHOS.csv")
+
+####MAP平均動脈壓 變數 MAP = 2/3舒張dia + 1/3收縮sys####
+#### 後面切割時間的時候參數要改
+df <- read.csv("TCHCData/noCOVplusHOS.csv")#已加醫院
+df <- df[,-1]
+df$sys <- as.numeric(df$sys)
+df$dia <- as.numeric(df$dia)
+df["MAP"] <- round(2/3*df[,"dia"]+1/3*df[,"sys"],0)
+df <- df[,c(1:9,11,10)]
+write.csv(df,"TCHCData/noCOV+MAP.csv")
+dim(df)
+
+covdf <- read.csv("TCHCData/yesCOVplusHOS.csv")#已加醫院
+covdf <- covdf[,-1]
+covdf$sys <- as.numeric(covdf$sys)
+covdf$dia <- as.numeric(covdf$dia)
+covdf["MAP"] <- round(2/3*covdf[,"dia"]+1/3*covdf[,"sys"],0)
+covdf <- covdf[,c(1:14,16,15)]
+write.csv(covdf,"TCHCData/yesCOV+MAP.csv")
+dim(covdf)3
 
