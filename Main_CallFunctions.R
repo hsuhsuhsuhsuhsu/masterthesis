@@ -49,7 +49,7 @@ rfimp <- RF.impute.HH$ximp
 vis_miss(rfimp, show_perc = F) + coord_flip()
 rfimp.proc <- cbind(tmp,rfimp)#761 * 14
 write.csv(rfimp.proc,file = "TCHCData/RFimp.csv ")
-
+rf <- read.csv("TCHCData/RFimp.csv ")
 
 
 ######### WITH COV ########
@@ -70,6 +70,8 @@ covTest.V12V3 <- cov.V12V3$`Test set`
 covTrain.V12V3_uncomplete <- covTrain.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
 covTrain.V12V3 <- covTrain.V12V3[-which(covTrain.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
 covTest.V12V3 <- covTest.V12V3[-which(covTest.V12V3$MRN %in% covTrain.V12V3_uncomplete$MRN),]
+#加醫院變數 去跑
+
 #### Model Building ####
 cov.V12Train <- covTrain.V12V3#284
 cov.V3Test <- covTest.V12V3#142
@@ -90,17 +92,23 @@ covV12V3$`Train acc sen spe`#0.9753521 0.9821429 0.9500000
 covV12V3$`CM of Test data`
 covV12V3$`Test acc sen spe`#0.7676056 0.9433962 0.2500000
 covV12V3$`lme.CM of Test data`
-covV12V3$`lme.Test acc sen spe`#0.6338028 0.8018868 0.1388889
+covV12V3$`lme.Test acc sen spe`#0.6408451 0.8113208 0.1388889
+ covV12V3$RF
 
 
 tryy  <- BiMMforest1(traindata = cov.V12Train, testdata = cov.V3Test,
                          formula = dip ~ sys+dia+time+sex+age+HbA1C+HR+CCB+visit,
-                         random = "+(1|MRN)",
-                         seed = 123, glmControl = "maxfun")
+                         random = "+(1|MRN)+(0+visit|MRN)",
+                         seed = 123, glmControl = "tolPwrss")
+tryy$RF
+tryy$`model summary`
 tryy$`CM of Train data`
 tryy$`Train acc sen spe`#0.9753521 0.9821429 0.9500000
 tryy$`CM of Test data`
 tryy$`Test acc sen spe`#0.7676056 0.9433962 0.2500000
+tryy$`lme.CM of Test data`
+tryy$`lme.Test acc sen spe`#0.6267606 0.7735849 0.1944444
+
 aa <- as.data.frame(tryy$test.preds)
 table(cov.V12Train$dip)
 table(cov.V3Test$dip)
@@ -279,6 +287,8 @@ covV1V2.H2$`lme.Test acc sen spe`#0.8028169 0.8909091 0.5000000
 
 
 #
+
+#
 ######### NO COV ########
 ##### timeSplit裡有把sys dia轉成數值 ####
 timeSplit.22 <- timeSplit(data = result.22$myData, 
@@ -385,6 +395,7 @@ Test.V12V3 <-TT.22.V12V3$`Test set`
 Train.V12V3_uncomplete <- Train.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
 Train.V12V3 <- Train.V12V3[-which(Train.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
 Test.V12V3 <- Test.V12V3[-which(Test.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
+#加醫院變數 去跑
 #### model Building ####
 V12Train <- Train.V12V3 #324
 V3Test <- Test.V12V3 #162
@@ -576,7 +587,7 @@ InterV12.2$`model summary`#dia*sys顯著 p-value = 0.0494
 #### 預測new cases #### paper已經說比較不好 就不用做
 
 ####對醫院做校正####
-#V1 -V3 的樣本 n=486
+#V1 - V3 的樣本 n=486
 Hospital.ad1 <- rbind(Train.V12V3,Test.V12V3)
 table(Hospital.ad1$visit)
 #取MRN 先去掉重複 再撈英文(醫院名) 看個醫院的

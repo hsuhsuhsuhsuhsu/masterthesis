@@ -16,6 +16,7 @@ chisq.test(table(chi$A,chi$B))
 #X-squared = 2.8152e-30, 
 #df= 1, p-value = 1
 
+
 chi1 <- read.csv("TCHCData/chi_square1.csv")
 chi1$A <- as.factor(chi1$A)
 chi1$B <- as.factor(chi1$B)

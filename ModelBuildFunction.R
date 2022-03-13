@@ -46,6 +46,7 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   RFpredictprob <- as.data.frame(forestprob)
   RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
   results[["forestprob >= 0.5"]] <- RFpredict1
+  results[["RF"]] <- forest
   ## Estimate New Random Effects and Errors using GLMER
   options(warn = -1)
   
@@ -63,6 +64,7 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
                      control = glmerControl(tolPwrss=1e-3))
   }
   results[["model summary"]] <- summary(lmefit)
+
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
     return("GLMM did not converge")
@@ -71,7 +73,8 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
     test.preds <- predict(forest,testdata)
     results[["test.preds"]] <- test.preds
     
-    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    testdata1 <- cbind(testdata,random)
+    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NA,type="response")<.5,0,1)
     results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     #results[["aaaaa"]] <- lmefit
     RFtrain.preds <- predict(forest,traindata)
@@ -151,6 +154,7 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
     results[["forestprob >= 0.5"]] <- RFpredict1
+    results[["RF"]] <- forest
     if(glmControl == "maxfun"){
       lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                                       collapse="~"), random, sep=""))),
@@ -173,6 +177,8 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
       # Extract random effects to make the new adjusted target
       logit <- forestprob #rf機率
       logit2 <- exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
+      results[["logit"]] <- logit
+      results[["logit2"]] <- logit2
       # logit ()
       #population level effects
       AllEffects <- (logit+logit2)/2 #average them =>paper上的qit
@@ -207,7 +213,9 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     train.preds <- ifelse(predict(lmefit,traindata1,type="response")<.5,0,1)
     results[["train.preds"]] <- train.preds
     results[["test.preds"]] <- test.preds
-    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    
+    testdata1 <- cbind(testdata,random)
+    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
     results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     
     t1 <- table(traindata[,ncol(traindata)],train.preds)
@@ -281,6 +289,7 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
     forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
         Predictors), collapse = "~")),data = data, method = "class")
     forestprob <- predict(forest, type = "prob")[, 2]
+    results[["RF"]] <- forest
     ## Estimate New Random Effects and Errors using BLMER
     if (glmControl == "maxfun"){
       lmefit <-tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName), 
@@ -302,6 +311,8 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
       # Extract random effects to make the new adjusted target
       logit <- forestprob
       logit2 <- exp(predict(lmefit, re.form = NA)) / (1 + exp(predict(lmefit, re.form = NA)))
+      results[["logit"]] <- logit
+      results[["logit2"]] <- logit2
       #population level effects
       AllEffects <- (logit + logit2) / 2 #average them
       #split function h3
@@ -355,7 +366,8 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    testdata1 <- cbind(testdata,random)
+    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
     results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
     lme.testacc <- (t2[1]+t2[4]) / sum(t2)
@@ -418,6 +430,7 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
     results[["forestprob >= 0.5"]] <- RFpredict1
+    results[["RF"]] <- forest
     if (glmControl == "maxfun"){
       lmefit <- tryCatch(bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                                       collapse="~"), random, sep=""))),
@@ -441,6 +454,8 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
       # Extract random effects to make the new adjusted target
       logit <- forestprob #rf機率
       logit2 <- exp(predict(lmefit,re.form=NA))/(1+exp(predict(lmefit,re.form=NA))) 
+      results[["logit"]] <- logit
+      results[["logit2"]] <- logit2
       # logit ()
       #population level effects
       AllEffects <- (logit+logit2)/2 #average them =>paper上的qit
@@ -490,7 +505,8 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    test.lme.preds <- ifelse(predict(lmefit,testdata,re.form=NULL,type="response")<.5,0,1)
+    testdata1 <- cbind(testdata,random)
+    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
     results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
     lme.testacc <- (t2[1]+t2[4]) / sum(t2)
