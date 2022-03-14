@@ -64,7 +64,8 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
                      control = glmerControl(tolPwrss=1e-3))
   }
   results[["model summary"]] <- summary(lmefit)
-
+  results[["model"]] <- lmefit
+  
   #if GLMM did not converge, produce NAs for accuracy statistics
   if(class(lmefit)[1]=="character"){
     return("GLMM did not converge")
@@ -184,8 +185,12 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
       AllEffects <- (logit+logit2)/2 #average them =>paper上的qit
       
       #h1 update
-      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects >0.5,1,0)
       
+      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects >0.5,1,0)
+      if (any(is.na(AdjustedTarget))){
+        AdjustedTarget[which(is.na(AdjustedTarget))] <- 1
+      }
+     
     }else{ 
       ContinueCondition <- FALSE 
     
@@ -316,6 +321,9 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
       #population level effects
       AllEffects <- (logit + logit2) / 2 #average them
       #split function h3
+      if (any(is.nan(AllEffects))){
+        AdjustedTarget[which(is.nan(AllEffects))] <- 1
+      }
       for (k in 1:length(AllEffects)) {
         if (as.numeric(Target[k]) + AllEffects[k] - 1 < .5) {
           AdjustedTarget[k] = 0
