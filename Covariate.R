@@ -99,3 +99,61 @@ covdf <- covdf[,c(1:14,16,15)]
 write.csv(covdf,"TCHCData/yesCOV+MAP.csv")
 dim(covdf)3
 
+
+
+#### 有沒有糖尿病####
+#參考欄位 demographic
+#1-6. Diabetes	CV_risk_DM
+#2-9. 糖尿病	DM =>以這個為參考變數
+uDE <- read_csv("TCHCData/uDE.csv")
+uDE <- uDE[,-1]
+ude.proc <- uDE[,c("MRN","CV_risk_DM","DM")]
+table(ude.proc$CV_risk_DM)# TRUE 444 NA 2362
+table(ude.proc$DM)#1無1980 2有574 3不詳68 
+sum(is.na(ude.proc$DM))#NA 184
+table(ude.proc$CV_risk_DM,ude.proc$DM)
+ude.proc <- ude.proc[,-which(colnames(ude.proc) %in% "CV_risk_DM")] 
+# 如果是NA 取代成3
+ude.proc[which(is.na(ude.proc$DM)),2] <- 3
+table(ude.proc$DM)
+Diabetes <- ude.proc
+write.csv(Diabetes,"TCHCData/COV_Diabetes.csv")
+library(visdat)
+library(ggplot2)
+vis_miss(df, show_perc = F) + coord_flip()
+#### 用藥種類數 ####
+#參考資料 Visit Treatment
+#每種藥物先標記成有沒有用
+#再sum 起來 變成用藥數量
+cVT <- read_csv("TCHCData/cVT.csv")
+cVT <- cVT[,-c(1,2)]
+Drug <- cVT[,c(5:19)]
+colN<-colnames(Drug)
+Drug <- Drug[,-c(grep("_DD$",colN),grep("_Unit$",colN))]
+Drug <- cbind(cVT[,c(1,2,4)],Drug)
+list(table(Drug$CCB),sum(table(Drug$CCB)),sum(is.na(Drug$CCB)))
+list(table(Drug$ACEI_ARB),sum(table(Drug$ACEI_ARB)),sum(is.na(Drug$ACEI_ARB)))
+list(table(Drug$Diuretics),sum(table(Drug$Diuretics)),sum(is.na(Drug$Diuretics)))
+list(table(Drug$Beta_blockers),sum(table(Drug$Beta_blockers)),sum(is.na(Drug$Beta_blockers)))
+list(table(Drug$Alpha_blockers),sum(table(Drug$Alpha_blockers)),sum(is.na(Drug$Alpha_blockers)))
+Drug_Binary <- Drug
+for(r in 1:nrow(Drug_Binary)){
+  for(c in 4:ncol(Drug_Binary)){
+    if (is.na(Drug_Binary[r,c])){
+      Drug_Binary[r,c] <- 0
+    }else{
+      Drug_Binary[r,c] <- 1
+    }
+  }
+}
+for (x in 1 : nrow(Drug_Binary)){
+  Drug_Binary[x,"Drug_conut"] <- sum(Drug_Binary[x,c(4:8)])
+}
+table(Drug_Binary$Drug_conut)
+
+Drug_sum <- Drug_Binary
+Drug_sum <- Drug_sum[,c(1,2,3,9)]
+write.csv(Drug_sum,"TCHCData/COV_DrugCount.csv")
+
+
+

@@ -27,6 +27,7 @@ addCov.22.2 <- PlusCov(data = addCov.22.1$AddCov.df, Covlist = CovD ,
                        IDname = "Mrn_Vis", Cov = c("CCB"),
                        Yname = "dip")
 A <- addCov.22.2$AddCov.df #761 * 14
+write.csv(A , "TCHCData/addCOV_NoImp.csv")
 table(A$visit_HBP_Dmode,A$dip)
 
 #### cov imputation & na plot ####
