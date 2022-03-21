@@ -78,6 +78,7 @@ covdf["hos"] <- str_extract(covdf$MRN,"[A-Z]+")
 covdf["HOS"] <- ifelse(covdf$hos=="CGMHLK",1,0)
 covdf <- covdf[,c(1:12,14,15,13)]
 write.csv(covdf,"TCHCData/yesCOVplusHOS.csv")
+#BY CASE的樣本數多 所以不按照是不是長庚 按照北中南校正
 
 ####MAP平均動脈壓 變數 MAP = 2/3舒張dia + 1/3收縮sys####
 #### 後面切割時間的時候參數要改
