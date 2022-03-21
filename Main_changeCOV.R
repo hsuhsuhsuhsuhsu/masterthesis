@@ -35,6 +35,7 @@ vis_miss(df, show_perc = F) + coord_flip()
 write.cscv(df,"TCHCData/COV_change_noimp.csv")
 dim(df)
 #### data ####
+# time split
 reCol.AM <- c("HBP_d_PM_systolic","HBP_d_PM_diastolic")
 reCol.PM <- c("HBP_d_AM_systolic","HBP_d_AM_diastolic")
 data <- df
@@ -59,6 +60,7 @@ write.csv(AMPM,"TCHCData/COV_change_data.csv")
 #complete data
 cmplt.cov <- AMPM[which(complete.cases(AMPM)),]#666 *13
 write.csv(cmplt.cov,"TCHCData/COVchange_cmplt_data.csv")
+
 #### model Build ####
 ########### NO COV ###########
 ########## With COV ###########
