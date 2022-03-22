@@ -240,7 +240,9 @@ TrainTest <- function(data = NULL, VisitOrCase = NULL,
 #return: 資料集
 TypeChange <- function(data = NULL, variable = NULL, type = NULL){
   A <- paste0("as.",type)
-  data[,variable] <-  eval(parse(text = A))(data[,variable])
+  for (i in variable){
+    data[,variable] <-  eval(parse(text = A))(data[,variable])
+  }
   return(data)
 }
 
