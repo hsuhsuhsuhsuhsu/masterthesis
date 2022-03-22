@@ -584,7 +584,7 @@ V1V2H2$`CM of Train data`
 V1V2H2$`CM of Test data`
 
 #### V12 V3####
-TT.22.V12V3<- TrainTest(data = timeSplit.22, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
+TT.22.V12V3<- TrainTest(data = timeSplit.hos, VisitOrCase = "Visit", nfixed = T, Train = 1:2,
                         Test = 3, seed = NULL, removeCategory = NULL, Trainper = 0.8)
 
 Train.V12V3 <- TT.22.V12V3$`Training set`
@@ -592,6 +592,8 @@ Test.V12V3 <-TT.22.V12V3$`Test set`
 Train.V12V3_uncomplete <- Train.V12V3 %>% group_by(MRN) %>% filter(n()!=4)
 Train.V12V3 <- Train.V12V3[-which(Train.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
 Test.V12V3 <- Test.V12V3[-which(Test.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),]
+write.csv(Train.V12V3,"TCHCData/VISIT_NOcov_hos_V12Train.csv")
+write.csv(Test.V12V3,"TCHCData/VISIT_NOcov_hos_V3Test.csv")
 #加醫院變數 去跑
 #### model Building ####
 V12Train <- Train.V12V3 #324
@@ -693,6 +695,8 @@ Test.V12V3 <- Test.V12V3[-which(Test.V12V3$MRN %in% Train.V12V3_uncomplete$MRN),
 #從V12V3接續
 Train.V1V2 <- Train.V12V3[which(Train.V12V3$visit==1),]#162
 Test.V1V2 <- Train.V12V3[which(Train.V12V3$visit==2),]#162
+write.csv(Train.V1V2,"TCHCData/VISIT_NOcov_hos_V1Train.csv")
+write.csv(Test.V1V2,"TCHCData/VISIT_NOcov_hos_V2Test.csv")
 ds.Train.V1V2 <- DataScale(data = Train.V1V2,NumVar = c("sys", "dia" ))
 ds.Test.V1V2 <- DataScale(data = Test.V1V2,NumVar = c("sys", "dia" ))
 
