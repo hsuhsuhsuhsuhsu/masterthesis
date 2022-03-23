@@ -3,9 +3,12 @@
 source("DataProcFunctions.r")
 source("ModelBuildFunction.r")
 source("Train_Test_file_check.r")
+library(randomForest)
 #set parameter
 formula1 = dip ~ sbp+dbp+time+Gender+Age+HR+Drug_conut+DM+visit+HOS
 formula2 = dip ~ sbp+dbp+time+visit+HOS
+forRF1 = factor(dip) ~ sbp+dbp+time+Gender+Age+HR+Drug_conut+DM+visit+HOS
+forRF2 = factor(dip) ~ sbp+dbp+time+visit+HOS
 seed = 123
 ####data read####
 colnames(CCTr)
@@ -14,17 +17,53 @@ data <- list(a = CCTr, b = CCTe, c = CNTr,
              g = VNTr.1, h = VNTe.2, i = VCTr.12,
              j = VCTe.3, k = VCTr.1, l = VCTe.2 )
 #### model Build ####
-########### CASE ############
+######################## CASE ############
 ########### NO COV ###########
+CN <- RF(traindata = CNTr, testdata = CNTe,
+         formula = forRF2,classwt = c("0"= 1.5,"1" = 1))
+CN$`CM of Train data`
+CN$`Train acc sen spe`#0.77272727 0.99120235 0.02020202
+CN$`CM of Test data`
+CN$`Test acc sen spe`#0.7657658 1.0000000 0.0000000
 
+
+CN.BM1 <- BiMMforest1(traindata = CNTr, testdata = CNTe,
+                      formula = formula2,
+                      random = "+(1|MRN)",
+                      seed = seed, glmControl = "maxfun")
+CN.BM1$`model summary`
+CN.BM1$`CM of Train data`
+CN.BM1$`Train acc sen spe`
+CN.BM1$`CM of Test data`
+CN.BM1$`Test acc sen spe`
+CN.BM1$`lme.CM of Test data`
+CN.BM1$`lme.Test acc sen spe`
 ########## With COV ###########
+CC <- RF(traindata = CCTr, testdata = CCTe,
+                formula = forRF1)
+CC$`CM of Train data`
+CC$`Train acc sen spe`
+CC$`CM of Test data`
+CC$`Test acc sen spe`
+
+CC.BM1 <- BiMMforest1(traindata = CCTr, testdata = CCTe,
+                      formula = formula1,
+                      random = "+(1|MRN)",
+                      seed = seed, glmControl = "maxfun")
+CC.BM1$`model summary`
+CC.BM1$`CM of Train data`
+CC.BM1$`Train acc sen spe`
+CC.BM1$`CM of Test data`
+CC.BM1$`Test acc sen spe`
+CC.BM1$`lme.CM of Test data`
+CC.BM1$`lme.Test acc sen spe`
 #
-########### VISIT ############
-########### NO COV ###########
-########### V12 V3 ###########
-########### V1 V2 ###########
-########## With COV ###########
-########### V12 V3 ###########
+######################## VISIT ############
+############### NO COV #####
+##### V12 V3 ###########
+##### V1 V2 ###########
+############### With COV ####
+##### V12 V3 ###########
 VC.12.3  <- BiMMforest1(traindata = VCTr.12, testdata = VCTe.3,
                          formula = formula1,
                          random = "+(1|MRN)",
@@ -36,7 +75,7 @@ VC.12.3$`CM of Test data`
 VC.12.3$`Test acc sen spe`#0.7605634 0.9339623 0.2500000
 VC.12.3$`lme.CM of Test data`
 VC.12.3$`lme.Test acc sen spe`#0.69014085 0.90566038 0.05555556
-########### V1 V2 ###########
+##### V1 V2 ###########
 VC.1.2  <- BiMMforest1(traindata = VCTr.1, testdata = VCTe.2,
                         formula = formula1,
                         random = "+(1|MRN)",
