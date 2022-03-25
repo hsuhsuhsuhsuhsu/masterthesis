@@ -1,8 +1,7 @@
 #### library setup ####
-library(rpart)
+#library(rpart)
 library(blme)
 library(randomForest)
-
 #### BiMMforest1 ####
 #作用:一次BIMMRF
 #參數: traindata=>訓練資料 testdata=>測試資料 seed=>隨機種子
