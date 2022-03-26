@@ -170,8 +170,9 @@ DF <- DF[,-1]
 del <- which(colnames(DF)%in% c("MRN","Mrn_Vis","dipping.status","visit","hos"))
 DF <- DF[,-del]#1048*67
 aa <- DF[,c(1:9,67)]
-comp <- DF[which(complete.cases(DF)),]
+comp <- DF[which(complete.cases(DF)),]#368*67
 rr <- randomForest(factor(dip)~.,data = comp, method = "class")
 rr$confusion
 rr$call
 rr$importance
+table(comp$Coffee,comp$dip)
