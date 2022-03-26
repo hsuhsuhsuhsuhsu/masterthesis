@@ -2,6 +2,7 @@
 #library(rpart)
 library(blme)
 library(randomForest)
+library(caret)
 #### BiMMforest1 ####
 #作用:一次BIMMRF
 #參數: traindata=>訓練資料 testdata=>測試資料 seed=>隨機種子
@@ -544,7 +545,8 @@ RF <- function (traindata = NULL, testdata = NULL,
   train1acc <- CM.train[4]/(CM.train[2]+CM.train[4])
   results[["CM of Train data"]] <- CM.train
   results[["Train acc sen spe"]]<- c(trainacc,train1acc,train0acc)
-  
+  results[["Var importance"]] <- importance(rf.train)
+  varImpPlot(rf.train)
   rf.test <- predict(rf.train,testdata)
   CM.te <- table(real = testdata[,ncol(testdata)], pred = rf.test)
   testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)
@@ -552,6 +554,7 @@ RF <- function (traindata = NULL, testdata = NULL,
   test1acc <- CM.te[4]/(CM.te[2]+CM.te[4])
   results[["CM of Test data"]] <- CM.te
   results[["Test acc sen spe"]]<- c(testacc,test1acc,test0acc)
+  
   return(results)
 }
   

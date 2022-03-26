@@ -9,6 +9,8 @@ formula1 = dip ~ sbp+dbp+time+Gender+Age+HR+Drug_conut+DM+visit+HOS
 formula2 = dip ~ sbp+dbp+time+visit+HOS
 forRF1 = factor(dip) ~ sbp+dbp+time+Gender+Age+HR+Drug_conut+DM+visit+HOS
 forRF2 = factor(dip) ~ sbp+dbp+time+visit+HOS
+forcaseRF1 = factor(dip) ~ sbp+dbp+time+Gender+Age+HR+Drug_conut+DM+HOS
+forcaseRF2 = factor(dip) ~ sbp+dbp+time+HOS
 seed = 123
 ####data read####
 colnames(CCTr)
@@ -20,12 +22,16 @@ data <- list(a = CCTr, b = CCTe, c = CNTr,
 ######################## CASE ############
 ########### NO COV ###########
 CN <- RF(traindata = CNTr, testdata = CNTe,
-         formula = forRF2,classwt = c("0"= 1.5,"1" = 1))
+         formula = forcaseRF2)
 CN$`CM of Train data`
 CN$`Train acc sen spe`#0.77272727 0.99120235 0.02020202
 CN$`CM of Test data`
 CN$`Test acc sen spe`#0.7657658 1.0000000 0.0000000
+table(CNTr$dip)
+CN$`Var importance`
 
+#w0 <- nrow(CNTr)/(2*table(CNTr$dip)[1])
+#w1 <- nrow(CNTr)/(2*table(CNTr$dip)[2])
 
 CN.BM1 <- BiMMforest1(traindata = CNTr, testdata = CNTe,
                       formula = formula2,
@@ -40,12 +46,17 @@ CN.BM1$`lme.CM of Test data`
 CN.BM1$`lme.Test acc sen spe`
 ########## With COV ###########
 CC <- RF(traindata = CCTr, testdata = CCTe,
-                formula = forRF1)
+                formula = forcaseRF1, classwt=c("0"=2.05,"1"=0.661))
 CC$`CM of Train data`
 CC$`Train acc sen spe`
 CC$`CM of Test data`
 CC$`Test acc sen spe`
-
+CC$RF
+CC$`Var importance`
+#dim(CCTr)
+#table(CCTr$dip)
+#w0 <- nrow(CCTr)/(2*table(CCTr$dip)[1])
+#w1 <- nrow(CCTr)/(2*table(CCTr$dip)[2])
 CC.BM1 <- BiMMforest1(traindata = CCTr, testdata = CCTe,
                       formula = formula1,
                       random = "+(1|MRN)",
