@@ -149,6 +149,7 @@ y.col <- which(colnames(data.30)%in% "dip")
 data.301 <- data.30[,c(1:(y.col-1),(y.col+1):ncol(data.30),y.col)]
 dim(data.301)#1048*72
 write.csv(data.301,"TCHCData/COV_NA_less30.csv")
+write.csv(mydata,"TCHCData/COV_Case_ALL.csv")
 ##### naplot ####
 library(visdat)
 library(ggplot2)
