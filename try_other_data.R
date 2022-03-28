@@ -164,15 +164,143 @@ p1 <- vis_miss(df1, show_perc = F) + coord_flip()
 gridExtra::marrangeGrob(list(p1), top = "",
                         nrow = 1, ncol = 1)
 #### try rf var importance####
+library(randomForest)
 DF <- read.csv("TCHCData/COV_NA_less30.csv")
 DF <- DF[,-1]
+DF <- DF[,-which(colnames(DF)%in% c("BH","BW"))]
+DF <- DF[,-which(colnames(DF)%in% c("office_peri_L_sys","office_peri_R_sys",
+  "office_peri_L_dia","office_peri_R_dia",
+  "office_central_sys","office_central_dia",
+  "office_peri_L_remark","office_peri_R_remark",
+  "office_central_remark"))]
+
 #去掉不用的變數 全放進隨機森林 給他挑重要性
 del <- which(colnames(DF)%in% c("MRN","Mrn_Vis","dipping.status","visit","hos"))
-DF <- DF[,-del]#1048*67
-aa <- DF[,c(1:9,67)]
-comp <- DF[which(complete.cases(DF)),]#368*67
+DF <- DF[,-del]#1048*65
+#aa <- DF[,c(1:9,67)]
+comp <- DF[which(complete.cases(DF)),]#368*65
+
 rr <- randomForest(factor(dip)~.,data = comp, method = "class")
 rr$confusion
-rr$call
+rr
 rr$importance
-table(comp$Coffee,comp$dip)
+
+tr <- sample(1:nrow(comp),size = nrow(comp)*0.8)
+Tr <- comp[tr,]
+te <- comp[-tr,]
+rr1 <- randomForest(factor(dip)~.,data = Tr
+                    , method = "class",mtry = 10)
+rr1
+rr1$importance
+pr <- predict(rr1,te)
+table(te$dip,pr)
+
+
+library(caret)#for RF only mtry can be tuned by caret
+#reasons :its effect on the final accuracy and that it must be found empirically for a dataset.
+# Random Search
+seed = 23
+x <- Tr
+dataset = Tr
+metric <- "Accuracy"
+control <- trainControl(method="repeatedcv",
+                        number=10, repeats=3,
+                        search="random")
+set.seed(seed)
+mtry <- sqrt(ncol(x))
+rf_random <- train(factor(dip)~., data=dataset,
+                   method="rf", metric=metric,
+                   tuneLength=15, trControl=control)
+print(rf_random)#mtry = 8
+plot(rf_random)
+
+#Grid Search
+control <- trainControl(method="repeatedcv",
+                        number=10, repeats=3,
+                        search="grid")
+set.seed(seed)
+tunegrid <- expand.grid(.mtry=c(1:15))
+rf_gridsearch <- train(factor(dip)~., data=dataset,
+                       method="rf", metric=metric,
+                       tuneGrid=tunegrid, trControl=control)
+print(rf_gridsearch)#mtry = 5
+plot(rf_gridsearch)
+
+#mtry = 5
+rr2 <- randomForest(factor(dip)~.,data = Tr,
+                    method = "class",mtry = 5)
+rr2#OOB estimate of  error rate:  4.42%
+rr2$importance
+pr2 <- predict(rr2,te)
+table(te$dip,pr2)
+
+#mtry = 8
+rr3 <- randomForest(factor(dip)~.,data = Tr,
+                    method = "class",mtry = 8)
+rr3#OOB estimate of  error rate: 5.1%
+pr3 <- predict(rr3,te)
+table(te$dip,pr3)
+
+
+#mtry = 5 變數重要性前10名+原本的變數
+var.10 <- c("BMI","office_peri_L_sys","HR",
+            "office_peri_L_dia","Age","Waist",
+            "anti_HP","sbp","dbp","Walk_TM_week","Drug_conut","HOS",
+            "Gender","DM","time","dip")
+
+CC1 <- DF[,which(colnames(DF) %in% var.10)]#1048*16
+
+p <- vis_miss(CC1, show_perc = F) + coord_flip()
+gridExtra::marrangeGrob(list(p), top = "",
+                        nrow = 1, ncol = 1)
+CC1.cmp <- CC1[which(complete.cases(CC1)),]#764*16
+tr1 <- sample(1:nrow(CC1.cmp),size = nrow(CC1.cmp)*0.8)
+Tr1 <- CC1.cmp[tr1,]#611
+te1 <- CC1.cmp[-tr1,]#153
+table(Tr1$dip)
+table(CC1.cmp$dip)
+table(te1$dip)
+set.seed(23)
+rr4 <- randomForest(factor(dip)~.,data = Tr1 ,
+                    method = "class",mtry = 8)
+rr4#OOB estimate of  error rate: 7.69%
+rr4$importance
+pr4 <- predict(rr4,te1)
+table(te1$dip,pr4)
+#pr4
+#    0   1
+#0  25   7
+#1   2 119
+write.csv(Tr1,"TCHCData/select_Tr.csv")
+write.csv(te1,"TCHCData/select_Te.csv")
+
+str(CC1.cmp)
+CC1.cmp$Walk_TM_week<-as.factor(CC1.cmp$Walk_TM_week)
+CC1.cmp$HOS<-as.factor(CC1.cmp$HOS)
+CC1.cmp$Drug_conut<-as.factor(CC1.cmp$Drug_conut)
+CC1.cmp$Gender<-as.factor(CC1.cmp$Gender)
+tr2 <- sample(1:nrow(CC1.cmp),size = nrow(CC1.cmp)*0.8)
+Tr2 <- CC1.cmp[tr2,]#611
+te2 <- CC1.cmp[-tr2,]#153
+rr4 <- randomForest(factor(dip)~.,data = Tr2 ,
+                    method = "class",mtry = 8)
+rr4#OOB estimate of  error rate: 7.69%
+rr4$importance
+pr4 <- predict(rr4,te2)
+table(te2$dip,pr4)
+
+
+
+#Grid Search
+seed = 23
+dataset = Tr1
+metric <- "Accuracy"
+control <- trainControl(method="repeatedcv",
+                        number=10, repeats=3, search="grid")
+set.seed(seed)
+tunegrid <- expand.grid(.mtry=c(1:15))
+rf_gridsearch <- train(factor(dip)~., data=dataset,
+                       method="rf", metric=metric,
+                       tuneGrid=tunegrid, trControl=control)
+print(rf_gridsearch)#mtry = 13
+plot(rf_gridsearch)
