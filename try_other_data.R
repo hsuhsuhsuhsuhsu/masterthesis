@@ -1,3 +1,4 @@
+#### CCtr CCte####
 CCTr <- read.csv("TCHCData/CASE_COV_hos_Train.csv")#838
 CCTr <- CCTr[,-1]
 CCTe <- read.csv("TCHCData/CASE_COV_hos_Test.csv")#210
@@ -168,11 +169,11 @@ library(randomForest)
 DF <- read.csv("TCHCData/COV_NA_less30.csv")
 DF <- DF[,-1]
 DF <- DF[,-which(colnames(DF)%in% c("BH","BW"))]
-DF <- DF[,-which(colnames(DF)%in% c("office_peri_L_sys","office_peri_R_sys",
-  "office_peri_L_dia","office_peri_R_dia",
-  "office_central_sys","office_central_dia",
-  "office_peri_L_remark","office_peri_R_remark",
-  "office_central_remark"))]
+#DF <- DF[,-which(colnames(DF)%in% c("office_peri_L_sys","office_peri_R_sys",
+#  "office_peri_L_dia","office_peri_R_dia",
+#  "office_central_sys","office_central_dia",
+#  "office_peri_L_remark","office_peri_R_remark",
+#  "office_central_remark"))]
 
 #去掉不用的變數 全放進隨機森林 給他挑重要性
 del <- which(colnames(DF)%in% c("MRN","Mrn_Vis","dipping.status","visit","hos"))
@@ -195,7 +196,7 @@ rr1$importance
 pr <- predict(rr1,te)
 table(te$dip,pr)
 
-
+#### random /grid search mtry + 測試 ####
 library(caret)#for RF only mtry can be tuned by caret
 #reasons :its effect on the final accuracy and that it must be found empirically for a dataset.
 # Random Search
@@ -304,3 +305,110 @@ rf_gridsearch <- train(factor(dip)~., data=dataset,
                        tuneGrid=tunegrid, trControl=control)
 print(rf_gridsearch)#mtry = 13
 plot(rf_gridsearch)
+#### 把所有資料集 加上這些變數####
+df <- read.csv("TCHCData/COV_NA_less30.csv")
+var <- c("BMI","office_peri_L_sys","HR",
+            "office_peri_L_dia","Age","Waist",
+            "anti_HP","sbp","dbp","Walk_TM_week","Drug_conut","HOS",
+            "Gender","DM","time","dip")
+ndf <- df[,which(colnames(df) %in% var)] 
+write.csv(ndf,"TCHCData/CASE_COV_select_wNA.csv")
+dim(ndf)
+colnames(ndf)
+#### Visit ####
+VCTr.12 <- read.csv("TCHCData/VISIT_COV_hos_V12Train.csv")#284
+VCTr.12 <- VCTr.12[,-1]
+VCTe.3 <- read.csv("TCHCData/VISIT_COV_hos_V3Test.csv")#142
+VCTe.3 <- VCTe.3[,-1]
+
+mydata <- rbind(VCTr.12,VCTe.3)
+
+
+dim(mydata)
+dim(try.de)
+m1 <- merge(mydata,try.de,by = "MRN",all.x = T)
+dim(m1)
+m2 <- merge(m1,try.vt,by = "Mrn_Vis",all.x = T)
+dim(m2)
+m3 <- merge(m2,try.vs,by = "Mrn_Vis",all.x = T)
+dim(m3)
+m4 <- merge(m3,try.fh,by = "MRN",all.x = T)
+dim(m4)
+mydata <- m4
+mydata <- mydata[,-c(1,76,92)]
+colnames(mydata)[2] <- "MRN"
+dim(mydata)
+
+cou = 0
+cc = NULL
+for (c in 1:ncol(mydata)) {
+  new <- mydata
+  per <- nrow(mydata)*30/100#128
+  if(sum(is.na(mydata[,c])) > per){
+    #print(colnames(mydata)[c])
+    cn <- colnames(mydata)[c]
+    cou =cou+1
+    cc <- c(cc,cn)
+  }
+}
+print(cou)
+
+Visit_na30 <- which(colnames(mydata)%in%cc)
+V.30 <- mydata[,-Visit_na30]
+
+V.30 <- V.30[,-which(colnames(V.30)%in% c("BH","BW"))]
+
+del <- which(colnames(V.30)%in% c("MRN","Mrn_Vis","dipping.status","hos"))
+V.30 <- V.30[,-del]
+dim(V.30)#426*51
+colnames(V.30)
+which(colnames(V.30)%in% "dip")
+V.30 <- V.30[,c(1:10,12:51,11)]
+Vcomp <- V.30[which(complete.cases(V.30)),]#330*51
+
+VV <- randomForest(factor(dip)~.,data = aa
+                   , method = "class")
+VV$confusion
+VV
+VV$importance
+aa <- Vcomp
+str(aa)
+x <- c(HR,sbp,dbp,Waist,BMI,Age)
+x1 <- c(visit,Eco_child,T_pain,Drug_conut)
+aa$visit <- as.factor(aa$visit)
+aa$Eco_child <- as.factor(aa$Eco_child)
+aa$T_pain <- as.factor(aa$T_pain)
+aa$Drug_conut <- as.factor(aa$Drug_conut)
+aa$BMI <- as.numeric(aa$BMI)
+aa$Waist <- as.numeric(aa$Waist)
+aa$Walk_TM_week <- as.factor(aa$Walk_TM_week)
+var <- c("BMI","office_peri_L_sys","HR",
+         "office_peri_L_dia","Age","Waist",
+         "anti_HP","sbp","dbp","Walk_TM_week","Drug_conut","HOS",
+         "Gender","DM","time","dip")
+
+var1 <- c("MRN","Mrn_Vis","time","HR","sbp","dbp","visit",
+          "Waist","Eco_child","Drug_conut",
+          "Age","BMI","T_pain","HOS","dip","Gender","DM")
+
+nmd <- mydata[,which(colnames(mydata) %in% var1)]
+nmd <- nmd[,c(1:12,14:17,13)]
+
+c <- nmd[which(complete.cases(nmd)),]
+c1 <-c[which(c$visit %in% 1:2),]
+c2 <-c[which(c$visit %in% 3),] 
+VV <- randomForest(factor(dip)~.,data = c1
+                   , method = "class")
+VV
+pr <- predict(VV,c2)
+table(c2$dip,pr)
+plot(VV)
+p <- vis_miss(nmd, show_perc = F) + coord_flip()
+gridExtra::marrangeGrob(list(p), top = "",
+                        nrow = 1, ncol = 1)
+write.csv(nmd,"TCHCData/Visit_COV_select_wNA.csv")
+colnames(nmd)
+dim(nmd)
+
+#### imputation ####
+
