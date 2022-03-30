@@ -307,7 +307,7 @@ print(rf_gridsearch)#mtry = 13
 plot(rf_gridsearch)
 #### 把所有資料集 加上這些變數####
 df <- read.csv("TCHCData/COV_NA_less30.csv")
-var <- c("BMI","office_peri_L_sys","HR",
+var <- c("MRN","BMI","office_peri_L_sys","HR",
             "office_peri_L_dia","Age","Waist",
             "anti_HP","sbp","dbp","Walk_TM_week","Drug_conut","HOS",
             "Gender","DM","time","dip")
@@ -411,4 +411,46 @@ colnames(nmd)
 dim(nmd)
 
 #### imputation ####
+CC <- read.csv("TCHCData/CASE_COV_select_wNA.csv")
+CC<- CC[,-1]
+p <- vis_miss(CC, show_perc = F) + coord_flip()
+gridExtra::marrangeGrob(list(p), top = "",
+                        nrow = 1, ncol = 1)
 
+tmp <- data.frame(CC[,1])
+df <- CC[,-1]
+colnames(df)
+df$sbp <- as.numeric(df$sbp)
+df$dbp <- as.numeric(df$dbp)
+df$HR <- as.numeric(df$HR)
+df$BMI <- as.numeric(df$BMI)
+df$Waist <- as.numeric(df$Waist)
+df$office_peri_L_sys <- as.numeric(df$office_peri_L_sys)
+df$office_peri_L_dia <- as.numeric(df$office_peri_L_dia)
+
+df$Gender <- as.factor(df$Gender)
+df$Drug_conut <- as.factor(df$Drug_conut)
+df$DM <- as.factor(df$DM)
+df$HOS <- as.factor(df$HOS)
+df$dip <- as.factor(df$dip)
+df$time <- as.factor(df$time)
+df$Walk_TM_week <- as.factor(df$Walk_TM_week)
+df$anti_HP <- as.factor(df$anti_HP)
+str(df)
+RF.impute.HH <- missForest(df,verbose=T)#iter =8 
+rfimp <- RF.impute.HH$ximp
+vis_miss(rfimp, show_perc = F) + coord_flip()
+rfimp.proc <- cbind(tmp,rfimp)#727*14
+colnames(rfimp.proc)[1]<-"MRN"
+write.csv(rfimp.proc,file = "TCHCData/CASE_COV_select_RFimp.csv ")
+
+source("DataProcFunctions.r")
+d <- TrainTest(data = rfimp.proc, VisitOrCase = "Case",
+                      nfixed = T, Train = NULL,
+                      Test = NULL, seed = NULL,
+                      removeCategory = NULL, Trainper = 0.8)
+d1 <- d$`Training set`
+d2 <- d$`Test set`
+write.csv(d1,"TCHCData/CASE_COV_select_Train.csv")#838
+
+write.csv(d2,"TCHCData/CASE_COV_select_Test.csv")#210

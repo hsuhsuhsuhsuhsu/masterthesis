@@ -534,8 +534,10 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
 
 #### Random Forest ####
 RF <- function (traindata = NULL, testdata = NULL,
-             formula = "factor(y)~x",classwt = NULL){
+             formula = "factor(y)~x",classwt = NULL,
+             seed = NULL){
   results <- NULL
+  set.seed(seed)
   rf.train <- randomForest(formula,
                data = traindata, method = "class",classwt = classwt)
   results[["RF"]] <- rf.train
@@ -546,7 +548,6 @@ RF <- function (traindata = NULL, testdata = NULL,
   results[["CM of Train data"]] <- CM.train
   results[["Train acc sen spe"]]<- c(trainacc,train1acc,train0acc)
   results[["Var importance"]] <- importance(rf.train)
-  varImpPlot(rf.train)
   rf.test <- predict(rf.train,testdata)
   CM.te <- table(real = testdata[,ncol(testdata)], pred = rf.test)
   testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)

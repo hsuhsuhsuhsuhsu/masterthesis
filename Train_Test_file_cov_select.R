@@ -30,7 +30,7 @@ VCTe.2 <- read.csv("TCHCData/VISIT_COV_select_V2Test.csv")#142
 VCTe.2<- VCTe.2[,-1]
 
 ####set class of each variable ####
-str(CCTr)
+#str(CCTr)
 CCTr$sbp <- as.numeric(CCTr$sbp)
 CCTr$dbp <- as.numeric(CCTr$dbp)
 CCTr$HR <- as.numeric(CCTr$HR)
@@ -47,7 +47,7 @@ CCTr$DM <- factor(CCTr$DM,levels=c(1:3))
 CCTr$Walk_TM_week <- factor(CCTr$Walk_TM_week,levels=c(0:7))
 CCTr$anti_HP <- factor(CCTr$anti_HP,levels=c(1:13))
 
-str(CCTe)
+#str(CCTe)
 CCTe$sbp <- as.numeric(CCTe$sbp)
 CCTe$dbp <- as.numeric(CCTe$dbp)
 CCTe$HR <- as.numeric(CCTe$HR)
@@ -76,7 +76,7 @@ CNTr$dbp <- as.numeric(CNTr$dbp)
 #CNTr$dip <- as.factor(CNTr$dip)
 CNTr$MRN <- as.factor(CNTr$MRN)
 CNTr$HOS <- as.factor(CNTr$HOS)
-str(CNTr)
+#str(CNTr)
 
 colnames(CNTe)[4] <- "sbp"
 colnames(CNTe)[5] <- "dbp"
@@ -86,7 +86,7 @@ CNTe$dbp <- as.numeric(CNTe$dbp)
 #CNTe$dip <- as.factor(CNTe$dip)
 CNTe$MRN <- as.factor(CNTe$MRN)
 CNTe$HOS <- as.factor(CNTe$HOS)
-str(CNTe)
+#str(CNTe)
 
 colnames(VNTr.12)[4] <- "sbp"
 colnames(VNTr.12)[5] <- "dbp"
@@ -96,7 +96,7 @@ VNTr.12$dbp <- as.numeric(VNTr.12$dbp)
 #VNTr.12$dip <- as.factor(VNTr.12$dip)
 VNTr.12$MRN <- as.factor(VNTr.12$MRN)
 VNTr.12$HOS <- as.factor(VNTr.12$HOS)
-str(VNTr.12)
+#str(VNTr.12)
 
 colnames(VNTe.3)[4] <- "sbp"
 colnames(VNTe.3)[5] <- "dbp"
@@ -106,7 +106,7 @@ VNTe.3$dbp <- as.numeric(VNTe.3$dbp)
 #VNTe.3$dip <- as.factor(VNTe.3$dip)
 VNTe.3$MRN <- as.factor(VNTe.3$MRN)
 VNTe.3$HOS <- as.factor(VNTe.3$HOS)
-str(VNTe.3)
+#str(VNTe.3)
 
 colnames(VNTr.1)[4] <- "sbp"
 colnames(VNTr.1)[5] <- "dbp"
@@ -116,7 +116,7 @@ VNTr.1$dbp <- as.numeric(VNTr.1$dbp)
 #VNTr.1$dip <- as.factor(VNTr.1$dip)
 VNTr.1$MRN <- as.factor(VNTr.1$MRN)
 VNTr.1$HOS <- as.factor(VNTr.1$HOS)
-str(VNTr.1)
+#str(VNTr.1)
 
 colnames(VNTe.2)[4] <- "sbp"
 colnames(VNTe.2)[5] <- "dbp"
@@ -126,10 +126,10 @@ VNTe.2$dbp <- as.numeric(VNTe.2$dbp)
 #VNTe.2$dip <- as.factor(VNTe.2$dip)
 VNTe.2$MRN <- as.factor(VNTe.2$MRN)
 VNTe.2$HOS <- as.factor(VNTe.2$HOS)
-str(VNTe.2)
+#str(VNTe.2)
 
-str(VCTr.12)
-colnames(VCTr.12)
+#str(VCTr.12)
+#colnames(VCTr.12)
 VCTr.12$MRN <- as.factor(VCTr.12$MRN)
 VCTr.12$visit <- factor(VCTr.12$visit,levels=c(1:3))
 VCTr.12$sbp <- as.numeric(VCTr.12$sbp)
@@ -144,8 +144,53 @@ VCTr.12$Waist <- as.numeric(VCTr.12$Waist)
 VCTr.12$Eco_child<- factor(VCTr.12$Eco_child,levels=c(1:4))
 VCTr.12$T_pain<- factor(VCTr.12$T_pain,levels=c(1:3))
 
+#str(VCTe.3)
+#colnames(VCTe.3)
+VCTe.3$MRN <- as.factor(VCTe.3$MRN)
+VCTe.3$visit <- factor(VCTe.3$visit,levels=c(1:3))
+VCTe.3$sbp <- as.numeric(VCTe.3$sbp)
+VCTe.3$dbp <- as.numeric(VCTe.3$dbp)
+VCTe.3$Gender <- as.factor(VCTe.3$Gender)
+VCTe.3$HR <- as.numeric(VCTe.3$HR)
+VCTe.3$Drug_conut <- factor(VCTe.3$Drug_conut,levels=c(0:5))
+VCTe.3$DM <- factor(VCTe.3$DM,levels=c(1:3))
+VCTe.3$HOS <- factor(VCTe.3$HOS,levels=c(1:3))
+VCTe.3$BMI <- as.numeric(VCTe.3$BMI)
+VCTe.3$Waist <- as.numeric(VCTe.3$Waist)
+VCTe.3$Eco_child<- factor(VCTe.3$Eco_child,levels=c(1:4))
+VCTe.3$T_pain<- factor(VCTe.3$T_pain,levels=c(1:3))
 
+#str(VCTr.1)
+#colnames(VCTr.1)
+VCTr.1$MRN <- as.factor(VCTr.1$MRN)
+VCTr.1$visit <- factor(VCTr.1$visit,levels=c(1:3))
+VCTr.1$sbp <- as.numeric(VCTr.1$sbp)
+VCTr.1$dbp <- as.numeric(VCTr.1$dbp)
+VCTr.1$Gender <- as.factor(VCTr.1$Gender)
+VCTr.1$HR <- as.numeric(VCTr.1$HR)
+VCTr.1$Drug_conut <- factor(VCTr.1$Drug_conut,levels=c(0:5))
+VCTr.1$DM <- factor(VCTr.1$DM,levels=c(1:3))
+VCTr.1$HOS <- factor(VCTr.1$HOS,levels=c(1:3))
+VCTr.1$BMI <- as.numeric(VCTr.1$BMI)
+VCTr.1$Waist <- as.numeric(VCTr.1$Waist)
+VCTr.1$Eco_child<- factor(VCTr.1$Eco_child,levels=c(1:4))
+VCTr.1$T_pain<- factor(VCTr.1$T_pain,levels=c(1:3))
 
+#str(VCTe.2)
+#colnames(VCTe.2)
+VCTe.2$MRN <- as.factor(VCTe.2$MRN)
+VCTe.2$visit <- factor(VCTe.2$visit,levels=c(1:3))
+VCTe.2$sbp <- as.numeric(VCTe.2$sbp)
+VCTe.2$dbp <- as.numeric(VCTe.2$dbp)
+VCTe.2$Gender <- as.factor(VCTe.2$Gender)
+VCTe.2$HR <- as.numeric(VCTe.2$HR)
+VCTe.2$Drug_conut <- factor(VCTe.2$Drug_conut,levels=c(0:5))
+VCTe.2$DM <- factor(VCTe.2$DM,levels=c(1:3))
+VCTe.2$HOS <- factor(VCTe.2$HOS,levels=c(1:3))
+VCTe.2$BMI <- as.numeric(VCTe.2$BMI)
+VCTe.2$Waist <- as.numeric(VCTe.2$Waist)
+VCTe.2$Eco_child<- factor(VCTe.2$Eco_child,levels=c(1:4))
+VCTe.2$T_pain<- factor(VCTe.2$T_pain,levels=c(1:3))
 
 
 
