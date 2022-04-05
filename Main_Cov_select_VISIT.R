@@ -159,22 +159,34 @@ VN3.RF$`CM of Test data`
 VN3.RF$`Test acc sen spe`#0.6975309 0.8559322 0.2727273
 
 
-
-colnames(VCTr.1)
-VCTR1 <- DataScale(data = VCTr.1, NumVar = c("sbp", "dbp", "Age", "BMI", "HR", "Waist"),
-                      Yname = "dip")
-tr <- VCTR1$scale.df
-VCTE1 <- DataScale(data = VCTe.2, NumVar = c("sbp", "dbp", "Age", "BMI", "HR", "Waist"),
-                   Yname = "dip")
-te <- VCTE1$scale.df
-View(tr)
-VC2 <- BiMMforest1(traindata = tr, testdata = VCTe.2,
+VC2 <- BiMMforest1(traindata = VCTr.1 , testdata = VCTe.2 ,
                    formula = F5, random = "+(1|MRN)",
-                   seed = seed, glmControl = "optimx")
+                   seed = seed, glmControl = "tolPwrss")
 VC2$`model summary`
 VC2$model
 VC2$`Train acc sen spe`
-#unable to evaluate scaled gradient
-#Hessian is numerically singular: parameters are not uniquely determined
+VC2$`Test acc sen spe`
+VC2$`lme.Test acc sen spe`
+
+
+VC2.H1 <- BiMMforestH1(traindata = VCTr.1 , testdata = VCTe.2 ,
+                       formula = F5, random = "+(1|MRN)",
+                       seed = seed, glmControl = "tolPwrss")
+
+VC2.H2 <- BiMMforestH2(traindata = VCTr.1 , testdata = VCTe.2 ,
+                       formula = F5, random = "+(1|MRN)",
+                       seed = seed, glmControl = "tolPwrss")
+
+VC2.H3 <- BiMMforestH3(traindata = VCTr.1 , testdata = VCTe.2 ,
+                       formula = F5, random = "+(1|MRN)",
+                       seed = seed, glmControl = "tolPwrss")
+
+VC2.RF <- RF(traindata = VCTr.1, testdata = VCTe.2,
+             formula = F7, classwt = NULL,seed = seed)
+VC2.RF$RF
+VC2.RF$`CM of Train data`
+VC2.RF$`Train acc sen spe`#0.9577465 1.0000000 0.7857143
+VC2.RF$`CM of Test data`
+VC2.RF$`Test acc sen spe`#0.7887324 0.9181818 0.3437500
 
 

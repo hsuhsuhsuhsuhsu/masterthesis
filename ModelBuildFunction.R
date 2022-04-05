@@ -61,11 +61,11 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   }else if (glmControl == "tolPwrss"){
     lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                            collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(optimizer ="Nelder_Mead",tolPwrss=1e-3))
+                     control = glmerControl(optCtrl=list(maxfun=200000),tolPwrss=0.000001))
   }else if (glmControl == "optimx"){
     lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                            collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=1e-3))
+                     control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=0.000001))
   }
   
   
@@ -330,6 +330,7 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
       if (any(is.nan(AllEffects))){
         AdjustedTarget[which(is.nan(AllEffects))] <- 1
       }
+    
       for (k in 1:length(AllEffects)) {
         if (as.numeric(Target[k]) + AllEffects[k] - 1 < .5) {
           AdjustedTarget[k] = 0
