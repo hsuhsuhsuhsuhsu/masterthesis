@@ -206,7 +206,17 @@ auc(factor(E$dip),factor(CC.rf.15$`test pred`,ordered = TRUE))
 ###
 ###
 ###
-CN.1 <- BiMMforest1(traindata = D, testdata = E,
+
+W <- as.data.frame(rbind(CNTr,CNTe))
+View(W)
+W <- W[,-c(1,2,3,6,8)]
+set.seed(123)
+idx <- sample(1:nrow(W),0.8*nrow(W))
+G <- W[idx,]#881
+H <- W[-idx,]#221
+
+
+CN.1 <- BiMMforest1(traindata = CNTr, testdata = CNTe,
                     formula = F2, random = "+(1|time)",
                     seed = seed, glmControl = "maxfun")
 CN.1$`model summary`
@@ -218,40 +228,39 @@ CN.1$`lme.CM of Test data`
 CN.1$`lme.Test acc sen spe`# 0.795 1 0
 
 
-CN.H1 <- BiMMforestH1(traindata = D, testdata = E,
+CN.H1 <- BiMMforestH1(traindata = CNTr, testdata = CNTe,
                       formula = F2, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
 #"all of the binary outcomes are the same"
 
-CN.H2 <- BiMMforestH2(traindata = D, testdata = E,
+CN.H2 <- BiMMforestH2(traindata = CNTr, testdata = CNTe,
                       formula = F2, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
-CN.H2$iter#1000
-CN.H2$RF
+CN.H2$iter#100
+CN.H2$RF#OOB estimate of  error rate: 22.84%
 CN.H2$`model summary`
 CN.H2$`CM of Train data`
-CN.H2$`Train acc sen spe`
+CN.H2$`Train acc sen spe`#0.775 1 0
 CN.H2$`CM of Test data`
-CN.H2$`Test acc sen spe`
+CN.H2$`Test acc sen spe`#0.69819820 0.90000000 0.03846154
 CN.H2$`lme.CM of Test data`
-CN.H2$`lme.Test acc sen spe`
+CN.H2$`lme.Test acc sen spe`#0.765 1 0
 
 
-
-CN.H3 <- BiMMforestH3(traindata = D, testdata = E,
+CN.H3 <- BiMMforestH3(traindata = CNTr, testdata = CNTe,
                       formula = F2, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
 CN.H3$iter#100
 CN.H3$RF
 CN.H3$`model summary`
 CN.H3$`CM of Train data`
-CN.H3$`Train acc sen spe`
+CN.H3$`Train acc sen spe`#0.775 1 0
 CN.H3$`CM of Test data`
-CN.H3$`Test acc sen spe`
+CN.H3$`Test acc sen spe`#0.69819820 0.90000000 0.03846154
 CN.H3$`lme.CM of Test data`
-CN.H3$`lme.Test acc sen spe`
+CN.H3$`lme.Test acc sen spe`#0.765 1 0
 
-CN.rf <- RF(traindata = D, testdata = E,
+CN.rf <- RF(traindata = CNTr, testdata = CNTe,
             formula = F4, classwt = NULL,seed = seed)
 CN.rf$`CM of Train data`
 CN.rf$`Train acc sen spe`#0.6885442 0.8622848 0.1306533
@@ -259,6 +268,14 @@ CN.rf$`CM of Test data`
 CN.rf$`Test acc sen spe`#0.7333333 0.8802395 0.1627907
 CN.rf$`Var importance`
 CN.rf$RF
+
+CCN.rf <- RF(traindata = G, testdata = H,
+            formula = F4, classwt = NULL,seed = seed)
+CCN.rf$RF
+CCN.rf$`CM of Train data`
+CCN.rf$`Train acc sen spe`#0.75028377 0.95857988 0.06341463
+CCN.rf$`CM of Test data`
+CCN.rf$`Test acc sen spe`#0.76470588 0.94318182 0.06666667
 
 auc(as.factor(E$dip),factor(CN.rf$`test pred`,ordered = TRUE))#Area under the curve: 0.8256
 #AUC = 0.5215

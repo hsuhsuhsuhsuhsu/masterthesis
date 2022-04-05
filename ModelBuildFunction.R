@@ -61,8 +61,14 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   }else if (glmControl == "tolPwrss"){
     lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                            collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(tolPwrss=1e-3))
+                     control = glmerControl(optimizer ="Nelder_Mead",tolPwrss=1e-3))
+  }else if (glmControl == "optimx"){
+    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                           collapse="~"),random,sep=""))),data=data,family=binomial,
+                     control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=1e-3))
   }
+  
+  
   results[["model summary"]] <- summary(lmefit)
   results[["model"]] <- lmefit
   
