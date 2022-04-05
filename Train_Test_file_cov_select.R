@@ -194,3 +194,44 @@ VCTe.2$T_pain<- factor(VCTe.2$T_pain,levels=c(1:3))
 
 
 
+
+a <- read.csv("TCHCData/CASE_COV_select_RFimp.csv")
+a <- a[,-c(1,2)]
+set.seed(123)
+idx <- sample(1:nrow(a),0.8*nrow(a))
+D <- a[idx,]
+E <- a[-idx,]
+
+D$sbp <- as.numeric(D$sbp)
+D$dbp <- as.numeric(D$dbp)
+D$HR <- as.numeric(D$HR)
+D$BMI <- as.numeric(D$BMI)
+D$Waist <- as.numeric(D$Waist)
+D$office_peri_L_sys <- as.numeric(D$office_peri_L_sys)
+D$office_peri_L_dia <- as.numeric(D$office_peri_L_dia)
+D$HR <- as.numeric(D$HR)
+D$HOS <- factor(D$HOS,levels=c(1:3))
+D$Gender <- as.factor(D$Gender)
+D$Drug_conut <- factor(D$Drug_conut,levels=c(0:5))
+D$DM <- factor(D$DM,levels=c(1:3))
+D$Walk_TM_week <- factor(D$Walk_TM_week,levels=c(0:7))
+D$anti_HP <- factor(D$anti_HP,levels=c(1:13))
+
+
+
+E$sbp <- as.numeric(E$sbp)
+E$dbp <- as.numeric(E$dbp)
+E$HR <- as.numeric(E$HR)
+E$BMI <- as.numeric(E$BMI)
+E$Waist <- as.numeric(E$Waist)
+E$office_peri_L_sys <- as.numeric(E$office_peri_L_sys)
+E$office_peri_L_dia <- as.numeric(E$office_peri_L_dia)
+E$HR <- as.numeric(E$HR)
+
+E$HOS <- factor(E$HOS,levels=c(1:3))
+E$Gender <- as.factor(E$Gender)
+E$Drug_conut <- factor(E$Drug_conut,levels=c(0:5))
+E$DM <- factor(E$DM,levels=c(1:3))
+E$Walk_TM_week <- factor(E$Walk_TM_week,levels=c(0:7))
+E$anti_HP <- factor(E$anti_HP,levels=c(1:13))
+

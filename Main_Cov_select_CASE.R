@@ -33,11 +33,11 @@ CCC.1 <- BiMMforest1(traindata = D, testdata = E,
                     seed = seed, glmControl = "maxfun")
 CCC.1$`model summary`
 CCC.1$`CM of Train data`
-CCC.1$`Train acc sen spe`#0.9272076 0.9624413 0.8140704
+CCC.1$`Train acc sen spe`#0.9260143 0.9752705 0.7591623
 CCC.1$`CM of Test data`
-CCC.1$`Test acc sen spe`#0.9238095 1.0000000 0.6279070
+CCC.1$`Test acc sen spe`#0.9190476 0.9937107 0.6862745
 CCC.1$`lme.CM of Test data`
-CCC.1$`lme.Test acc sen spe`#0.6714286 0.7664671 0.3023256
+CCC.1$`lme.Test acc sen spe`#0.6714286 0.7798742 0.3333333
 
 auc(factor(E$dip),factor(CCC.1$test.preds,ordered = TRUE))#Area under the curve: 0.5238
 #Area under the curve: 0.8488
@@ -66,11 +66,11 @@ CCC.H1$iter#1000
 CCC.H1$RF#OB estimate of  error rate: 4.42
 CCC.H1$`model summary`
 CCC.H1$`CM of Train data`
-CCC.H1$`Train acc sen spe`# 0.8926014 0.9796557 0.6130653
+CCC.H1$`Train acc sen spe`#0.8973747 0.9891808 0.5863874
 CCC.H1$`CM of Test data`
-CCC.H1$`Test acc sen spe`#0.7952381 1.0000000 0.0000000
+CCC.H1$`Test acc sen spe`#0.76190476 1.00000000 0.01960784
 CCC.H1$`lme.CM of Test data`
-CCC.H1$`lme.Test acc sen spe`#0.7047619 0.8443114 0.1627907
+CCC.H1$`lme.Test acc sen spe`#0.7142857 0.8616352 0.2549020
 CCC.H1$`RF OOBerror`
 
 
@@ -89,6 +89,19 @@ CC.H2$`lme.CM of Test data`
 CC.H2$`lme.Test acc sen spe`#0.6714286 0.7440476 0.3809524
 CC.H2$`RF OOBerror`
 
+CCC.H2 <- BiMMforestH2(traindata = D, testdata =E,
+                      formula = F1, random = "+(1|time)",
+                      seed = seed, glmControl = "maxfun")
+CCC.H2$RF
+CCC.H2$`model summary`
+CCC.H2$`CM of Train data`
+CCC.H2$`Train acc sen spe`#0.9176611 0.9675425 0.7486911
+CCC.H2$`CM of Test data`
+CCC.H2$`Test acc sen spe`#0.8857143 0.9433962 0.7058824
+CCC.H2$`lme.CM of Test data`
+CCC.H2$`lme.Test acc sen spe`#0.6857143 0.7987421 0.3333333
+
+
 CC.H3 <- BiMMforestH3(traindata = CCTr, testdata = CCTe,
                       formula = F1, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
@@ -106,21 +119,37 @@ CC.H3$`RF OOBerror`
 CC.H3$test.preds
 CC.H3$test.lme.preds
 
+CCC.H3 <- BiMMforestH3(traindata = D, testdata = E,
+                      formula = F1, random = "+(1|time)",
+                      seed = seed, glmControl = "maxfun")
+
+CCC.H3$RF
+CCC.H3$`model summary`
+CCC.H3$`CM of Train data`
+CCC.H3$`Train acc sen spe`#0.9176611 0.9675425 0.7486911
+CCC.H3$`CM of Test data`
+CCC.H3$`Test acc sen spe`#0.8857143 0.9433962 0.7058824
+CCC.H3$`lme.CM of Test data`
+CCC.H3$`lme.Test acc sen spe`#0.6857143 0.7987421 0.3333333
+
+
 CC.rf <- RF(traindata = CCTr, testdata = CCTe,
                   formula = F3,seed = 23)
 CC.rf$`CM of Train data`
-CC.rf$`Train acc sen spe`#0.9057279 1.0000000 0.5863874
-CC.rf$`CM of Test data`#0.9677804 1.0000000 0.8650000
-CC.rf$`Test acc sen spe`#0.9095238 1.0000000 0.6274510
-CC.rf$`Var importance`#0.81428571 1.00000000 0.07142857
+CC.rf$`Train acc sen spe`#0.9677804 1.0000000 0.8650000
+CC.rf$`CM of Test data`
+CC.rf$`Test acc sen spe`#0.81428571 1.00000000 0.07142857
+CC.rf$`Var importance`
 CC.rf$RF
 
 
 a <- read.csv("TCHCData/CASE_COV_select_RFimp.csv")
 a <- a[,-c(1,2)]
+set.seed(123)
 idx <- sample(1:nrow(a),0.8*nrow(a))
 D <- a[idx,]
 E <- a[-idx,]
+
 CC1.rf <- RF(traindata = D, testdata = E,
             formula = F3,seed = 123)
 CC1.rf$`CM of Train data`
@@ -167,10 +196,16 @@ CC.rf.15$`CM of Test data`
 CC.rf.15$`Test acc sen spe`#0.947619 1.000000 0.744186
 CC.rf.15$`Var importance`
 
+table(D$dip)# 0=191 1=647
+table(E$dip)# 0=51 1=159
+
 #Area under the curve: 0.8721
 auc(factor(E$dip),factor(CC.rf.15$`test pred`,ordered = TRUE))
 ###
-
+###
+###
+###
+###
 CN.1 <- BiMMforest1(traindata = D, testdata = E,
                     formula = F2, random = "+(1|time)",
                     seed = seed, glmControl = "maxfun")

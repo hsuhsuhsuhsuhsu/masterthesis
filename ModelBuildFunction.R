@@ -125,7 +125,7 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
   ErrorTolerance = 0.006
-  MaxIterations = 1000 
+  MaxIterations = 100
   
   Predictors <- paste(attr(terms(formula),"term.labels"),collapse="+")
   TargetName <- formula[[2]]
@@ -408,7 +408,7 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
   ErrorTolerance = 0.006
-  MaxIterations = 1000 
+  MaxIterations = 100
   
   Predictors <- paste(attr(terms(formula),"term.labels"),collapse="+")
   TargetName <- formula[[2]]
