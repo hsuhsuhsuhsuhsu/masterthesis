@@ -3,6 +3,7 @@
 library(blme)
 library(randomForest)
 library(caret)
+library(optimx)
 #### BiMMforest1 ####
 #作用:一次BIMMRF
 #參數: traindata=>訓練資料 testdata=>測試資料 seed=>隨機種子
@@ -168,11 +169,14 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
                                 data=data,family=binomial,
                                 control=glmerControl(optCtrl=list(maxfun=20000))),
                          error=function(cond)"skip")
-    }else if(glmControl == "tolPwrss"){
-    # Estimate New Random Effects and Errors using BLMER
-    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                           collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(tolPwrss=1e-3))
+    }else if (glmControl == "tolPwrss"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(optCtrl=list(maxfun=200000),tolPwrss=0.000001))
+    }else if (glmControl == "optimx"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=0.000001))
     }
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
@@ -309,10 +313,14 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
                                family = binomial,
                                control = glmerControl(optCtrl = list(maxfun = 20000))),
                         error = function(cond)"skip")
-    }else if(glmControl == "tolPwrss"){
+    }else if (glmControl == "tolPwrss"){
       lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
                                              collapse="~"),random,sep=""))),data=data,family=binomial,
-                       control = glmerControl(tolPwrss=1e-3))
+                       control = glmerControl(optCtrl=list(maxfun=200000),tolPwrss=0.000001))
+    }else if (glmControl == "optimx"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=0.000001))
     }
     # Get the likelihood to check on convergence
     if (!(class(lmefit)[1] == "character")) {
@@ -330,18 +338,21 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
       if (any(is.nan(AllEffects))){
         AdjustedTarget[which(is.nan(AllEffects))] <- 1
       }
-    
-      for (k in 1:length(AllEffects)) {
-        if (as.numeric(Target[k]) + AllEffects[k] - 1 < .5) {
-          AdjustedTarget[k] = 0
-        }else if (as.numeric(Target[k]) + AllEffects[k] - 1 > 1.5) {
-          AdjustedTarget[k] = 1
-        }else{
-          #generate random probability coin flip based on AllEffects (q notation in paper)
-          set.seed(seed)
-          AdjustedTarget[k] <- rbinom(1, 1, AllEffects[k])
+      #h2 update
+      else{
+        for (k in 1:length(AllEffects)) {
+          if (as.numeric(Target[k]) + AllEffects[k] - 1 < .5) {
+            AdjustedTarget[k] = 0
+          }else if (as.numeric(Target[k]) + AllEffects[k] - 1 > 1.5) {
+            AdjustedTarget[k] = 1
+          }else{
+            #generate random probability coin flip based on AllEffects (q notation in paper)
+            set.seed(seed)
+            AdjustedTarget[k] <- rbinom(1, 1, AllEffects[k])
+          }
         }
       }
+      
     }else{
       ContinueCondition <- FALSE
     }
@@ -452,12 +463,14 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
                                 data=data,family=binomial,
                                 control=glmerControl(optCtrl=list(maxfun=20000))),
                          error=function(cond)"skip")
-    }else if(glmControl == "tolPwrss"){
-    # Estimate New Random Effects and Errors using BLMER
-    
-    lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
-                                           collapse="~"),random,sep=""))),data=data,family=binomial,
-                     control = glmerControl(tolPwrss=1e-3))
+    }else if (glmControl == "tolPwrss"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(optCtrl=list(maxfun=200000),tolPwrss=0.000001))
+    }else if (glmControl == "optimx"){
+      lmefit <- bglmer(formula(c(paste(paste(c(toString(TargetName),"forestprob"),
+                                             collapse="~"),random,sep=""))),data=data,family=binomial,
+                       control = glmerControl(optimizer ='optimx', optCtrl=list(method='L-BFGS-B'),tolPwrss=0.000001))
     }
     # Get the likelihood to check on convergence
     if(!(class(lmefit)[1]=="character")){
@@ -475,8 +488,14 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
       #population level effects
       AllEffects <- (logit+logit2)/2 #average them =>paper上的qit
       
+      if (any(is.nan(AllEffects))){
+        AdjustedTarget[which(is.nan(AllEffects))] <- 1
+      }
       #h2 update
-      AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects < 1.5,0,1)
+      else{
+        AdjustedTarget <- ifelse(as.numeric(Target) + AllEffects < 1.5,0,1)
+      }
+      
       
     }else{ 
       ContinueCondition <- FALSE 

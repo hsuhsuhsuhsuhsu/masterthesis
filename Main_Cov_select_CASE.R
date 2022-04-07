@@ -7,8 +7,8 @@ F2 <- dip~sbp+dbp+time+HOS
 F3 <- factor(dip)~sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia
 F4 <- factor(dip)~sbp+dbp+time+HOS
 seed = 123
-
-
+dim(CCTr)#838 *17
+dim(CCTe)#210 * 17
 CC.1 <- BiMMforest1(traindata = CCTr, testdata = CCTe,
                       formula = F1, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
@@ -329,5 +329,24 @@ E$Drug_conut <- factor(E$Drug_conut,levels=c(0:5))
 E$DM <- factor(E$DM,levels=c(1:3))
 E$Walk_TM_week <- factor(E$Walk_TM_week,levels=c(0:7))
 E$anti_HP <- factor(E$anti_HP,levels=c(1:13))
+
+
+C <- read.csv("TCHCData/CASE_COV_select_wNA.csv")
+C <- arrange(C,age)
+C <- C[,-1]
+library(visdat)
+library(ggplot2)
+p <- vis_miss(C, show_perc = F) + coord_flip()
+gridExtra::marrangeGrob(list(p), top = "",
+                        nrow = 1, ncol = 1)
+
+V <- read.csv("TCHCData/Visit_COV_select_wNA.csv")
+V <- V[,-1]
+V <- V[,-which(colnames(V)%in%"T_pain")]
+p <- vis_miss(V, show_perc = F) + coord_flip()
+gridExtra::marrangeGrob(list(p), top = "",
+                        nrow = 1, ncol = 1)
+S <- read.csv("TCHCData/COV_change_noimp.csv")
+S <- S[,-1]
 
 
