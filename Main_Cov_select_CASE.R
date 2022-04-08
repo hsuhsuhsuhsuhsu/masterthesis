@@ -11,7 +11,7 @@ dim(CCTr)#838 *17
 dim(CCTe)#210 * 17
 dim(CNTr)#880
 dim(CNTe)#222
-880+222
+
 CC.1 <- BiMMforest1(traindata = CCTr, testdata = CCTe,
                       formula = F1, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
