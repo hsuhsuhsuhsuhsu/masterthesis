@@ -7,6 +7,10 @@ F5 <- dip~visit+sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMI+Waist+Eco_child
 F6 <- dip~visit+sbp+dbp+time+HOS
 F7 <- factor(dip)~visit+sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMI+Waist+Eco_child+T_pain
 F8 <- factor(dip)~visit+sbp+dbp+time+HOS
+F9 <- dip~sbp+dbp+time+HOS
+F10 <- factor(dip)~sbp+dbp+time+HOS
+F11 <- dip~sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMI+Waist+Eco_child+T_pain
+
 seed = 123
 
 VC3 <- BiMMforest1(traindata = VCTr.12, testdata = VCTe.3,
@@ -176,7 +180,6 @@ VC2$`Test acc sen spe`# 0.7887324 0.9181818 0.3437500
 VC2$`lme.CM of Test data`
 VC2$`lme.Test acc sen spe`#0.6338028 0.7727273 0.1562500
 
-
 dsVC2 <- BiMMforest1(traindata = I , testdata = VCTe.2 ,
                    formula = F5, random = "+(1|MRN)",
                    seed = seed, glmControl = "tolPwrss")
@@ -314,23 +317,53 @@ gridExtra::marrangeGrob(list(p1), top = "",
 
 
 
-
+levels(VNTr.1$MRN)
+levels(VNTe.2$MRN)
 VN2 <- BiMMforest1(traindata = VNTr.1 , testdata = VNTe.2 ,
-                   formula = F6, random = "+(1|MRN)",
+                   formula = F9, random = "+(1|MRN)",
                    seed = seed, glmControl = "tolPwrss")
+VN2$RF
+VN2$`model summary`
+VN2$`CM of Train data`
+VN2$`Train acc sen spe`#1 1 1
+VN2$`Test acc sen spe`
+VN2$`lme.CM of Test data`#0.7592593 0.9672131 0.1250000
+VN2$`lme.Test acc sen spe`
+
 
 VN2.H1 <- BiMMforestH1(traindata = VNTr.1 , testdata = VNTe.2 ,
-                       formula = F6, random = "+(1|MRN)",
+                       formula = F9, random = "+(1|MRN)",
                        seed = seed, glmControl = "tolPwrss")
+#"all of the binary outcomes are the same"
 
 VN2.H2 <- BiMMforestH2(traindata = VNTr.1 , testdata = VNTe.2 ,
-                       formula = F6, random = "+(1|MRN)",
+                       formula = F9, random = "+(1|MRN)",
                        seed = seed, glmControl = "tolPwrss")
+VN2.H2$RF
+VN2.H2$`model summary`
+VN2.H2$`CM of Train data`#1 1 1
+VN2.H2$`Train acc sen spe`
+VN2.H2$`CM of Test data`
+VN2.H2$`Test acc sen spe`#0.7592593 0.9672131 0.1250000
+
+
 
 VN2.H3 <- BiMMforestH3(traindata = VNTr.1 , testdata = VNTe.2 ,
-                       formula = F6, random = "+(1|MRN)",
+                       formula = F9, random = "+(1|MRN)",
                        seed = seed, glmControl = "tolPwrss")
+VN2.H3$RF
+VN2.H3$`model summary`
+VN2.H3$`CM of Train data`
+VN2.H3$`Train acc sen spe`#1 1 1
+VN2.H3$`CM of Test data`
+VN2.H3$`Test acc sen spe`#0.7592593 0.9672131 0.1250000
+
+
 
 VN2.RF <- RF(traindata = VNTr.1, testdata = VNTe.2,
-             formula = F8, classwt = NULL,seed = seed)
+             formula = F10, classwt = NULL,seed = seed)
 
+VN2.RF$`CM of Train data`
+VN2.RF$`Train acc sen spe`#0.7901235 0.9318182 0.1666667
+VN2.RF$`CM of Test data`
+VN2.RF$`Test acc sen spe`#0.7407407 0.9262295 0.1750000
