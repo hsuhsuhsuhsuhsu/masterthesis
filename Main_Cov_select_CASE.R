@@ -12,6 +12,49 @@ dim(CCTe)#210 * 17
 dim(CNTr)#880
 dim(CNTe)#222
 
+table(CCTe$dip)
+table(CCTr$dip)
+
+
+install.packages("devtools")
+devtools::install_github("ncordon/imbalance")
+library("imbalance")
+A <- CCTr[which(CCTr$dip %in% 0),]
+n <- nrow(CCTr)-nrow(A)*2
+str(A)
+B <- CCTr
+B$Gender <- as.numeric(B$Gender)
+B$Drug_conut <- as.numeric(B$Drug_conut)
+B$DM <- as.numeric(B$DM)
+B$HOS <- as.numeric(B$HOS)
+B$Walk_TM_week <- as.numeric(B$Walk_TM_week)
+B$anti_HP <- as.numeric(B$anti_HP)
+B["ID"] <- rep(1:419, each = 2) 
+B <- B[,c(18,2:17)]
+t <- mwmote(B, numInstances = n,classAttr = "dip")
+imbalanceRatio(B,classAttr = "dip")
+re <- rbind(B,t)
+
+re$sbp <- as.numeric(re$sbp)
+re$dbp <- as.numeric(re$dbp)
+re$HR <- as.numeric(re$HR)
+re$BMI <- as.numeric(re$BMI)
+re$Waist <- as.numeric(re$Waist)
+re$office_peri_L_sys <- as.numeric(re$office_peri_L_sys)
+re$office_peri_L_dia <- as.numeric(re$office_peri_L_dia)
+re$HR <- as.numeric(re$HR)
+
+re$HOS <- factor(re$HOS,levels=c(1:3))
+re$Gender <- as.factor(re$Gender)
+re$Drug_conut <- factor(re$Drug_conut,levels=c(0:5))
+re$DM <- factor(re$DM,levels=c(1:3))
+re$Walk_TM_week <- factor(re$Walk_TM_week,levels=c(0:7))
+re$anti_HP <- factor(re$anti_HP,levels=c(1:13))
+
+
+re.rf <- RF(traindata = re, testdata = CCTe,
+            formula = F3,seed = 23)
+any(is.na(re))
 CC.1 <- BiMMforest1(traindata = CCTr, testdata = CCTe,
                       formula = F1, random = "+(1|time)",
                       seed = seed, glmControl = "maxfun")
@@ -144,7 +187,60 @@ CC.rf$`CM of Test data`
 CC.rf$`Test acc sen spe`#0.81428571 1.00000000 0.07142857
 CC.rf$`Var importance`
 CC.rf$RF
+del <- which(colnames(CCTr)%in% c("office_peri_L_sys","office_peri_L_dia"))
+del2 <- which(colnames(CCTe)%in% c("office_peri_L_sys","office_peri_L_dia"))
 
+t1 <- CCTr[,-c(del)]
+t2 <- CCTe[,-c(del2)]
+FF <- factor(dip)~sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMI+Waist+Walk_TM_week+anti_HP
+
+CW <- RF(traindata = t1, testdata = t2,
+            formula = FF,seed = 23,
+         classwt = c("0" = 2.095,"1" = 0.65))
+CW
+w0 <- nrow(CCTr)/(2*length(which(CCTr$dip %in% 0)))
+w1 <- nrow(CCTr)/(2*length(which(CCTr$dip %in% 1)))
+
+
+table(t1$dip)
+sam <- CCTr[which(CCTr$dip %in% 0),]
+reidx <- sample(1:200,438,replace = T)
+rere <- sam[reidx,]
+re1 <- rbind(CCTr,rere)
+re1 <- re1[,-c(15,16)]
+re1RF <- RF(traindata = re1, testdata = t2,
+            formula = FF,seed = 23,
+            classwt = c("0" = 2.095,"1" = 0.65))
+table(t2$dip)
+
+sam2 <- t2[which(t2$dip %in% 0),]
+reidx2 <- sample(1:42,126,replace = T)
+rere2 <- sam2[reidx2,]
+re2 <- rbind(t2,rere2)
+
+re2RF <- RF(traindata = re1, testdata = re2,
+            formula = FF,seed = 23,
+            classwt = c("0" = 2.095,"1" = 0.65))
+
+R1 <- randomForest(FF,data = re1, method = "class")
+R1T <- predict(R1,re2)
+table(real = re2$dip ,pred = R1T)
+table(re1$dip)
+table(re2$dip)
+
+View(CCTr)
+library(ggplot2)
+ggplot(CCTr, aes(x = 1:nrow(CCTr), y=BMI*BMI*BMI, col = as.factor(dip)))+
+  geom_point()
+
+AA <- CCTr
+AA["BMII"]<- AA$BMI*AA$BMI*AA$BMI
+FA <- factor(dip)~sbp+dbp+Gender+Age+HR+Drug_conut+DM+time+HOS+BMII+Waist+Walk_TM_week+anti_HP
+BB <- CCTe
+BB["BMII"]<- BB$BMI*BB$BMI*BB$BMI
+BB <- BB[,c(1:16,18,17)]
+BMIRF <- RF(traindata = AA, testdata = BB,
+            formula = FA,seed = 23,)
 
 a <- read.csv("TCHCData/CASE_COV_select_RFimp.csv")
 a <- a[,-c(1,2)]

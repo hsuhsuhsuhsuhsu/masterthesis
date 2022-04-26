@@ -196,11 +196,13 @@ VCTe.2$T_pain<- factor(VCTe.2$T_pain,levels=c(1:3))
 
 
 a <- read.csv("TCHCData/CASE_COV_select_RFimp.csv")
-a <- a[,-c(1,2)]
+#a <- a[,-c(1,2)]
 set.seed(123)
 idx <- sample(1:nrow(a),0.8*nrow(a))
 D <- a[idx,]
 E <- a[-idx,]
+write.csv(D,"D.csv")
+write.csv(E,"E.csv")
 
 D$sbp <- as.numeric(D$sbp)
 D$dbp <- as.numeric(D$dbp)
