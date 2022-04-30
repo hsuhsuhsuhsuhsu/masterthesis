@@ -111,6 +111,8 @@ classwt = NULL
 glmControl = "maxfun"
 random = "+(1|time)"
 
+names(dataList)
+
 #ttm: train_test_match, first=train index in dataList, sec = testing index...
 ttm <- list(c(2, 1), c(4, 3), 
             c(6, 7), c(5, 8),
@@ -186,3 +188,8 @@ resultSets$`BIM: 6`
 resultSets$`RF: 5`$`Test acc sen spe`
 resultSets$`RF: 5`$`Train acc sen spe`
 #
+d <- resultSets$`RF: 1`$`test pred`
+getwd()
+
+e <- read.csv("Div/CASE_COV_select_wNA_1p1r_Test.csv")
+table(e[,"dip"],d)

@@ -576,12 +576,12 @@ RF <- function (traindata = NULL, testdata = NULL,
   results[["Var importance"]] <- importance(rf.train)
   rf.test <- predict(rf.train,testdata)
   results[["test pred"]] <- rf.test
-  CM.te <- table(real = testdata[,ncol(testdata)], pred = rf.test)
-  testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)
-  test0acc <- CM.te[1]/(CM.te[1]+CM.te[3])
-  test1acc <- CM.te[4]/(CM.te[2]+CM.te[4])
-  results[["CM of Test data"]] <- CM.te
-  results[["Test acc sen spe"]]<- c(testacc,test1acc,test0acc)
+  #CM.te <- table(real = testdata[,"dip"], pred = rf.test)
+  #testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)
+  #test0acc <- CM.te[1]/(CM.te[1]+CM.te[3])
+  #test1acc <- CM.te[4]/(CM.te[2]+CM.te[4])
+  #results[["CM of Test data"]] <- CM.te
+  #results[["Test acc sen spe"]]<- c(testacc,test1acc,test0acc)
   
   return(results)
 }
