@@ -13,7 +13,7 @@ library(optimx)
 #隨機森林判成1數量 / 混合模型的結果
 BiMMforest1<-function(traindata = NULL, testdata = NULL,
                       formula = NULL, random = "+(1|MRN)",
-                      seed = NULL, glmControl = "maxfun"){
+                      seed = NULL, glmControl = "maxfun",...){
   results <- NULL
   data=traindata
   initialRandomEffects=rep(0,length(data[,1]))#起始都是0
@@ -41,7 +41,7 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
   set.seed(seed)
   table(AdjustedTarget)
   forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
-                         data = data, method = "class")
+                         data = data, method = "class",...)
   
   forestprob <- predict(forest, type = "prob")[, 2]
   RFpredictprob <- as.data.frame(forestprob)
@@ -107,12 +107,12 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
-    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
-    lme.test0acc <- t2[1]/(t2[1]+t2[3])
-    lme.test1acc <- t2[4]/(t2[2]+t2[4])
-    results[["lme.CM of Test data"]] <- t2
-    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
+    #t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    #lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    #lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    #lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    #results[["lme.CM of Test data"]] <- t2
+    #results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     return(results)
   }
 } 
@@ -127,7 +127,7 @@ BiMMforest1<-function(traindata = NULL, testdata = NULL,
 #程式運行時間
 BiMMforestH1<-function(traindata = NULL, testdata = NULL,
                        formula = NULL, random = "+(1|MRN)",
-                       seed = NULL, glmControl = "maxfun"){
+                       seed = NULL, glmControl = "maxfun",...){
   results <- NULL
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
@@ -155,9 +155,8 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     print(iterations)
     #build tree
     set.seed(seed)
-    forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
-                                           Predictors),collapse = "~")),
-                           data = data, method = "class")
+    forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors),collapse = "~")),
+                           data = data, method = "class",...)
     forestprob <- predict(forest,type="prob")[,2]
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
@@ -230,8 +229,8 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     results[["test.preds"]] <- test.preds
     
     testdata1 <- cbind(testdata,random)
-    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
-    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    #test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
+    #results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
     
     t1 <- table(traindata[,ncol(traindata)],train.preds)
     trainacc <- (t1[1]+t1[4]) / sum(t1)
@@ -247,12 +246,12 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
-    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
-    lme.test0acc <- t2[1]/(t2[1]+t2[3])
-    lme.test1acc <- t2[4]/(t2[2]+t2[4])
-    results[["lme.CM of Test data"]] <- t2
-    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
+    #t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    #lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    #lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    #lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    #results[["lme.CM of Test data"]] <- t2
+    #results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
@@ -273,7 +272,7 @@ BiMMforestH1<-function(traindata = NULL, testdata = NULL,
 #程式運行時間
 BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
                          formula = NULL, random = "+(1|MRN)",
-                         seed = NULL, glmControl = "maxfun" ) {
+                         seed = NULL, glmControl = "maxfun" ,...) {
   results <- NULL
   #set up variables for Bimm method
   data = traindata
@@ -301,8 +300,7 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
     print(iterations)
     #build tree
     set.seed(seed)
-    forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
-        Predictors), collapse = "~")),data = data, method = "class")
+    forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",Predictors), collapse = "~")),data = data, method = "class",...)
     forestprob <- predict(forest, type = "prob")[, 2]
     results[["RF"]] <- forest
     ## Estimate New Random Effects and Errors using BLMER
@@ -392,15 +390,15 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    testdata1 <- cbind(testdata,random)
-    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
-    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
-    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
-    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
-    lme.test0acc <- t2[1]/(t2[1]+t2[3])
-    lme.test1acc <- t2[4]/(t2[2]+t2[4])
-    results[["lme.CM of Test data"]] <- t2
-    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
+    #testdata1 <- cbind(testdata,random)
+    #test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
+    #results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    #t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    #lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    #lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    #lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    #results[["lme.CM of Test data"]] <- t2
+    #results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
@@ -421,7 +419,7 @@ BiMMforestH3 <- function(traindata = NULL, testdata = NULL,
 #程式運行時間
 BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
                        formula = NULL, random = "+(1|MRN)",
-                       seed = NULL,glmControl = "maxfun"){
+                       seed = NULL,glmControl = "maxfun",...){
   results <- NULL
   data = traindata
   initialRandomEffects = rep(0,length(data[,1]))
@@ -451,7 +449,7 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
     set.seed(seed)
     forest <- randomForest(formula(paste(c("factor(AdjustedTarget)",
                                            Predictors),collapse = "~")),
-                           data = data, method = "class")
+                           data = data, method = "class",...)
     forestprob <- predict(forest,type="prob")[,2]
     RFpredictprob <- as.data.frame(forestprob)
     RFpredict1 <- length(RFpredictprob[forestprob>=0.5,])
@@ -539,15 +537,15 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
     results[["CM of Test data"]] <- t4
     results[["Test acc sen spe"]] <- c(testacc,test1acc,test0acc)
     
-    testdata1 <- cbind(testdata,random)
-    test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
-    results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
-    t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
-    lme.testacc <- (t2[1]+t2[4]) / sum(t2)
-    lme.test0acc <- t2[1]/(t2[1]+t2[3])
-    lme.test1acc <- t2[4]/(t2[2]+t2[4])
-    results[["lme.CM of Test data"]] <- t2
-    results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
+    #testdata1 <- cbind(testdata,random)
+    #test.lme.preds <- ifelse(predict(lmefit,testdata1,re.form=NULL,type="response")<.5,0,1)
+    #results[["test.lme.preds"]] <- test.lme.preds[1:nrow(testdata)]
+    #t2 <-table(testdata[,ncol(testdata)],test.lme.preds[1:nrow(testdata)])
+    #lme.testacc <- (t2[1]+t2[4]) / sum(t2)
+    #lme.test0acc <- t2[1]/(t2[1]+t2[3])
+    #lme.test1acc <- t2[4]/(t2[2]+t2[4])
+    #results[["lme.CM of Test data"]] <- t2
+    #results[["lme.Test acc sen spe"]] <- c(lme.testacc,lme.test1acc,lme.test0acc)
     #return train and test confusion matrices, 
     # iterations, and RF OOBER
     RfOober <- mean(forest$err.rate[,1])
@@ -560,12 +558,12 @@ BiMMforestH2 <- function(traindata = NULL, testdata = NULL,
 
 #### Random Forest ####
 RF <- function (traindata = NULL, testdata = NULL,
-             formula = "factor(y)~x",classwt = NULL,
-             seed = NULL,mtry = sqrt(ncol(traindata))){
+             formula = "factor(y)~x",
+             seed = NULL,...){
   results <- NULL
   set.seed(seed)
   rf.train <- randomForest(formula,
-               data = traindata, method = "class",classwt = classwt,mtry = mtry)
+               data = traindata, method = "class",...)
   results[["RF"]] <- rf.train
   CM.train <- table(real = rf.train$y,pred = rf.train$predicted)
   trainacc <- (CM.train[1]+CM.train[4]) / sum(CM.train)
@@ -576,12 +574,12 @@ RF <- function (traindata = NULL, testdata = NULL,
   results[["Var importance"]] <- importance(rf.train)
   rf.test <- predict(rf.train,testdata)
   results[["test pred"]] <- rf.test
-  #CM.te <- table(real = testdata[,"dip"], pred = rf.test)
-  #testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)
-  #test0acc <- CM.te[1]/(CM.te[1]+CM.te[3])
-  #test1acc <- CM.te[4]/(CM.te[2]+CM.te[4])
-  #results[["CM of Test data"]] <- CM.te
-  #results[["Test acc sen spe"]]<- c(testacc,test1acc,test0acc)
+  CM.te <- table(real = testdata[,"dip"], pred = rf.test)
+  testacc <- (CM.te[1]+CM.te[4]) / sum(CM.te)
+  test0acc <- CM.te[1]/(CM.te[1]+CM.te[3])
+  test1acc <- CM.te[4]/(CM.te[2]+CM.te[4])
+  results[["CM of Test data"]] <- CM.te
+  results[["Test acc sen spe"]]<- c(testacc,test1acc,test0acc)
   
   return(results)
 }

@@ -450,3 +450,55 @@ S <- read.csv("TCHCData/COV_change_noimp.csv")
 S <- S[,-1]
 
 
+
+
+
+#DC1=>train EC1=>Test
+colnames(DC1)
+DC1 <- DC1[,c(1:12,14:21,13)]
+EC1 <- EC1[,c(1:12,14:21,13)]
+
+FF1 <- dip~sbp+dbp+Age+HR+Drug_conut+time+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3
+seed = 123
+co <- BiMMforest1(traindata = DC1, testdata = EC1,
+                    formula = FF1, random = "+(1|time)",
+                    seed = seed, glmControl = "maxfun",sampsize = c(200,110))
+co$`model summary`
+co$`CM of Train data`
+co$`Train acc sen spe`#0.9522673 0.9733542 0.8850000
+co$`CM of Test data`
+co$`Test acc sen spe`#0.6380952 0.7083333 0.3571429
+
+
+co.1 <- BiMMforestH1(traindata = DC1, testdata = EC1,
+                  formula = FF1, random = "+(1|time)",
+                  seed = seed, glmControl = "maxfun",sampsize = c(100,100),mtry=18)
+
+co.1$`model summary`
+co.1$`CM of Train data`
+co.1$`Train acc sen spe`#0.8603819 0.9764890 0.4900000
+co.1$`CM of Test data`
+co.1$`Test acc sen spe`#0.7476190 0.8630952 0.2857143
+
+co.2 <- BiMMforestH2(traindata = DC1, testdata = EC1,
+                     formula = FF1, random = "+(1|time)",
+                     seed = seed, glmControl = "maxfun",sampsize = c(200,110),mtry=18)
+
+co.2$`model summary`
+co.2$`CM of Train data`
+co.2$`Train acc sen spe`#0.7398568 0.8573668 0.3650000
+co.2$`CM of Test data`
+co.2$`Test acc sen spe`#0.6190476 0.6726190 0.4047619
+
+co.3 <- BiMMforestH3(traindata = DC1, testdata = EC1,
+                     formula = FF1, random = "+(1|time)",
+                     seed = seed, glmControl = "maxfun",sampsize = c(200,110),mtry=18)
+co.3$`model summary`
+co.3$`CM of Train data`
+co.3$`Train acc sen spe`#0.7386635 0.8401254 0.4150000
+co.3$`CM of Test data`
+co.3$`Test acc sen spe`#0.6476190 0.7023810 0.4285714
+
+
+
+
