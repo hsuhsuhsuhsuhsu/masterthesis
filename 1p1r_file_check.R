@@ -4,6 +4,7 @@ setwd("Div/")
 CC1RTr <- read.csv("CASE_COV_select_wNA_1p1r_Train.csv")
 CC1RTr <- CC1RTr[,-c(1,2)]#419*18
 
+
 CC1RTe <- read.csv("CASE_COV_select_wNA_1p1r_Test.csv")
 CC1RTe <- CC1RTe[,-c(1,2)]#105*18
 

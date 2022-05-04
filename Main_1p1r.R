@@ -1,16 +1,47 @@
 getwd()
 setwd("C:/Users/hsu/Desktop/master")
 source("1p1r_file_check.r")
+source("dummyTest.r")
 setwd("C:/Users/hsu/Desktop/master")
 source("DataProcFunctions.r")
 source("ModelBuildFunction.r")
 
 #1p1r 
 #CC => train= dm1tr test=dm1te
+#set order of column(dip at last)
 colnames(dm1tr)
 seed=123
 str(dm1tr)
 dm1tr <- dm1tr[,c(1:13,15:22,14)]
+
+#logistic
+ lo <- glm(factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3,
+             data=dm1tr,family = "binomial")
+summary(lo)
+table(dm1tr$dip)
+1-(98/(321+98))
+321/(321+98)
+probabilities <- lo %>% predict(dm1te, type = "response")
+predicted.classes <- ifelse(probabilities > 0.7661098,1 , 0)
+cm <- table(real = dm1te$dip, pred = predicted.classes)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+16*15
+
+library(car)
+vif(lo)
+
+colnames(dm1tr)
+numdf <- dm1tr[,c(1:6,8,9,12,13)]
+a <- cor(numdf)
+View(a)
+
+#SVM
+
+#XGB=>other file
+
 FF1 <- factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3
 p <- RF(traindata = dm1tr, testdata = dm1te,
         formula = FF1,sampsize = c(98,80))
@@ -21,8 +52,9 @@ p$`Train acc sen spe`
 p$`CM of Test data`
 p$`Test acc sen spe`
 
+set.seed(123)
 pr1 <- randomForest(factor(dip)~.,data = dm1tr, method = "class",
-                    sampsize = c(98,80))
+                    sampsize = c(98,78))
 pr1$confusion
 
 se <- predict(pr1,dm1te)
