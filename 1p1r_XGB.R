@@ -24,13 +24,14 @@ folds[1]
 
 xgb_train = xgb.DMatrix(data = tr_dat, label =tr_label )
 xgb_test = xgb.DMatrix(data = te_dat, label = te_label)
-
-
-xg <- xgboost(data = xgb_train,max.depth = 3,
-              eta = 0.05, nround =1000,
+table(train$dip)
+98/321
+xg <- xgboost(data = xgb_train,max.depth = 8,
+              eta = 0.01, nround =1000,
               min_child_weight = 5,
               colsample_bytree = 0.5,
-              subsample = 0.8, 
+              subsample = 0.8,
+              scale_pos_weight = 0.30529 ,
               objective = "binary:logistic")
 
 xgpred <- predict(xg, newdata = xgb_test)
@@ -45,7 +46,7 @@ acc <- (cm[1]+cm[4]) / sum(cm)
 sen <- cm[4] / (cm[2]+cm[4])
 spe <- cm[1] / (cm[1]+cm[3])
 print(paste(acc,sen,spe))
-
+#0.723809523809524 0.878048780487805 0.173913043478261
 
 #set up the cross-validated hyper-parameter search
 xgb_grid_1 = expand.grid(

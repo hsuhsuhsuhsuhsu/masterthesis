@@ -41,7 +41,7 @@ View(a)
 #SVM
 
 #XGB=>other file
-
+library(randomForest)
 FF1 <- factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3
 p <- RF(traindata = dm1tr, testdata = dm1te,
         formula = FF1,sampsize = c(98,80))
@@ -58,10 +58,13 @@ pr1 <- randomForest(factor(dip)~.,data = dm1tr, method = "class",
 pr1$confusion
 
 se <- predict(pr1,dm1te)
-table(re = dm1te$dip,se)
-spe = 7/23#0.3
-sen = 65/82#0.79
-acc = 72/(23+82)#0.68
+cm <- table(re = dm1te$dip,se)
+table(test$dip)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+
 
 
 
