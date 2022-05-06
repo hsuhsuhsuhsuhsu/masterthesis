@@ -35,7 +35,9 @@ xg <- xgboost(data = xgb_train,max.depth = 8,
               objective = "binary:logistic")
 
 xgpred <- predict(xg, newdata = xgb_test)
-
+xgclass <- ifelse(xgpred>0.4,1,0)
+xgpr <- as.data.frame(xgpred)
+colnames(xgpr)<-"xgpr1"
 log = capture.output(res <- CrossTable(y = as.numeric(xgpred > 0.4),
                                        x = test$dip,
                                        prop.chisq = F))

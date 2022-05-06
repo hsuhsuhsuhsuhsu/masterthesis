@@ -15,6 +15,7 @@ str(dm1tr)
 dm1tr <- dm1tr[,c(1:13,15:22,14)]
 
 #logistic
+library(dplyr)
  lo <- glm(factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3,
              data=dm1tr,family = "binomial")
 summary(lo)
@@ -29,7 +30,8 @@ sen <- cm[4] / (cm[2]+cm[4])
 spe <- cm[1] / (cm[1]+cm[3])
 print(paste(acc,sen,spe))
 16*15
-
+lopr <- as.data.frame(probabilities)
+colnames(lopr)<-"lopr1"
 library(car)
 vif(lo)
 
@@ -57,7 +59,11 @@ pr1 <- randomForest(factor(dip)~.,data = dm1tr, method = "class",
                     sampsize = c(98,78))
 pr1$confusion
 
-se <- predict(pr1,dm1te)
+se <- predict(pr1,dm1te,type = "prob")
+rfc <- ifelse(se > 0.5,1,0)
+rfpr <-data.frame(se)
+colnames(rfpr) <- c("rfpr0","rfpr1")
+
 cm <- table(re = dm1te$dip,se)
 table(test$dip)
 acc <- (cm[1]+cm[4]) / sum(cm)
@@ -67,8 +73,124 @@ print(paste(acc,sen,spe))
 
 
 
+ESB <- cbind(rfpr,lopr,xgpr)
+ESB["lopr0"] <- 1-ESB[,3]
+ESB["xgpr0"] <- 1-ESB[,4]
+#lo => 0.7661098 xg=>0.4 rf=>0.5
+loc <- as.data.frame(predicted.classes)
+colnames(loc) <- "loca"
+rf <- as.data.frame(rfc)
+colnames(rf)<-c("rfc0","rfc1")
+xgc <- as.data.frame(xgclass)
+colnames(xgc)<-c("xgc1")
+
+ESC.c <- cbind(rf,loc,xgc)
+
+getwd()
+setwd("C:/Users/hsu/Desktop/master")
+write.csv(ESC.c,"ensclass.csv",row.names = F)
+write.csv(ESB,"ENSprob.csv",row.names = F)
+View(Un)
+Un <- ESC.c
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(2:4)]==1)){
+    Un[i,"union"] <- "1"
+  }else{
+    Un[i,"union"] <- "0"
+  }
+}#RF XGB LoG聯集(任一個是1結果就是1)
+Un <- cbind(ra,Un)
+colnames(Un)[1]<-"real"
+ra <- as.data.frame(dm1te$dip)
+table(re = Un$real,pr= Un$union)
+cm <- table(re = Un$real,pr= Un$union)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.733333333333333 0.890243902439024 0.173913043478261"
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(3:5)]==0)){
+    Un[i,"union0"] <- "0"
+  }else{
+    Un[i,"union0"] <- "1"
+  }
+}#RF XGB LoG聯集(任一個是0結果就是0)
+table(re = Un$real,pr= Un$union0)
+cm <- table(re = Un$real,pr= Un$union0)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.561904761904762 0.548780487804878 0.608695652173913"
+for(i in 1:(nrow(Un))){
+  if (sum(Un[i,c(3:5)])>=2){
+    Un[i,"major"] <- "1"
+  }else{
+    Un[i,"major"] <- "0"
+  }
+}#RF XGB LoG多數決
+table(re = Un$real,pr= Un$major)
+Un <- cbind(Un,bim)
+cm <- table(re = Un$real,pr= Un$major)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.685714285714286 0.804878048780488 0.260869565217391"
+
+Un$bimcrow1 <- as.numeric(Un$bimcrow1)-1
+Un$bimcrow2 <- as.numeric(Un$bimcrow2)-1
+for(i in 1:(nrow(Un))){
+  if (sum(Un[i,c(5,9,10)])>=2){
+    Un[i,"majorXB"] <- "1"
+  }else{
+    Un[i,"majorXB"] <- "0"
+  }
+}#XGB BIMMH1多數決
+table(re = Un$real,pr= Un$majorXB)
+cm <- table(re = Un$real,pr= Un$majorXB)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.695238095238095 0.865853658536585 0.0869565217391304"
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(5,9,10)]==0)){
+    Un[i,"unionXB"] <- "0"
+  }else{
+    Un[i,"unionXB"] <- "1"
+  }
+}#XGB BIMMH1聯集(任一個是0結果就是0)
+table(re = Un$real,pr= Un$unionXB)
+cm <- table(re = Un$real,pr= Un$unionXB)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.647619047619048 0.75609756097561 0.260869565217391"
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(5,9,10)]==1)){
+    Un[i,"unionXB1"] <- "1"
+  }else{
+    Un[i,"unionXB1"] <- "0"
+  }
+}#XGB BIMMH1聯集(任一個是1結果就是1)
+table(re = Un$real,pr= Un$unionXB1)
+cm <- table(re = Un$real,pr= Un$unionXB1)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.761904761904762 0.975609756097561 0"
 
 
+
+
+
+write.csv(Un,"allesb.csv",row.names = F)
 
 #VC1=>2 => train=dm1 test= dm2
 str(dm1)

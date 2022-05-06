@@ -472,13 +472,21 @@ co$`Test acc sen spe`#0.6380952 0.7083333 0.3571429
 
 co.1 <- BiMMforestH1(traindata = DC1, testdata = EC1,
                   formula = FF1, random = "+(1|time)",
-                  seed = seed, glmControl = "maxfun",sampsize = c(100,100),mtry=18)
+                  seed = seed, glmControl = "maxfun",sampsize = c(100,110),mtry=18)
 
 co.1$`model summary`
+co.1$test.preds
 co.1$`CM of Train data`
 co.1$`Train acc sen spe`#0.8603819 0.9764890 0.4900000
 co.1$`CM of Test data`
 co.1$`Test acc sen spe`#0.7476190 0.8630952 0.2857143
+
+bimc <- as.data.frame(co.1$test.preds)
+b <- as.data.frame(bimc[seq(2,210,2),])
+a <- as.data.frame(bimc[seq(1,210,2),])
+bim <- cbind(a,b)
+colnames(bim)<-c("bimcrow1","bimcrow2")
+
 
 co.2 <- BiMMforestH2(traindata = DC1, testdata = EC1,
                      formula = FF1, random = "+(1|time)",
