@@ -189,7 +189,6 @@ print(paste(acc,sen,spe))
 
 
 
-
 write.csv(Un,"allesb.csv",row.names = F)
 
 #VC1=>2 => train=dm1 test= dm2
