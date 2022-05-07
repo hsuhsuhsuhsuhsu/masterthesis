@@ -294,19 +294,26 @@ spe <- cm[1] / (cm[1]+cm[3])
 print(paste(acc,sen,spe))
 #"0.676190476190476 0.75609756097561 0.391304347826087"
 
-
-
-
-
-
 write.csv(Un,"allesb.csv",row.names = F)
 
+#CC => train= dm1tr test=dm1te
+library(e1071)#useless
+svmfit=svm(formula = FF1, data=dm1tr, kernel="radial",  gamma=0.5, cost=0.1)
+table(svmfit$fitted,dm1tr$dip)
+summary(svmfit)
+ypred=predict(svmfit,dm1te)
+table(predict=ypred, truth=dm1te$dip)
 
+FF1 <- factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3
 
-
-
-
-
+tune.model = tune(svm,
+                  factor(dip)~sbp_d+dbp_d+sbp_n+dbp_n+Age+HR+Drug_conut+BMI+Waist+Walk_TM_week+anti_HP+office_peri_L_sys+office_peri_L_dia+Gender_1+Gender_2+DM_1+DM_2+DM_3+HOS_1+HOS_2+HOS_3,
+                  data=dm1tr,
+                  kernel="radial", # RBF kernel function
+                  range=list(cost=10^(-1:2), gamma=c(.5,1,2))# 調參數的最主要一行
+)
+summary(tune.model)
+#best parameters cost=0.1 gamma=0.5
 
 
 #VC1=>2 => train=dm1 test= dm2
