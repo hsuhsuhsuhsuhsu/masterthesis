@@ -187,9 +187,127 @@ print(paste(acc,sen,spe))
 #"0.761904761904762 0.975609756097561 0"
 
 
+View(Un)
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(4,5)]==1)){
+    Un[i,"unionXL"] <- "1"
+  }else{
+    Un[i,"unionXL"] <- "0"
+  }
+}#XGB Logistic聯集(任一個是1結果就是1)
+table(re = Un$real,pr= Un$unionXL)
+cm <- table(re = Un$real,pr= Un$unionXL)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.733333333333333 0.890243902439024 0.173913043478261"
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(4,5)]==0)){
+    Un[i,"unionXL0"] <- "0"
+  }else{
+    Un[i,"unionXL0"] <- "1"
+  }
+}#XGB Logistic聯集(任一個是0結果就是0)
+table(re = Un$real,pr= Un$unionXL0)
+cm <- table(re = Un$real,pr= Un$unionXL0)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.571428571428571 0.597560975609756 0.478260869565217"
+
+
+table(L=Un[,4],X=Un[,5])
+#     X
+#L    0  1
+#0   13 31
+#1    0 61
+
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(3,4)]==0)){
+    Un[i,"uRL0"] <- "0"
+  }else{
+    Un[i,"uRL0"] <- "1"
+  }
+}#RF Logistic聯集(任一個是0結果就是0)
+table(re = Un$real,pr= Un$uRL0)
+cm <- table(re = Un$real,pr= Un$uRL0)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.561904761904762 0.548780487804878 0.608695652173913"
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(3,4)]==1)){
+    Un[i,"uRL1"] <- "1"
+  }else{
+    Un[i,"uRL1"] <- "0"
+  }
+}#RF Logistic聯集(任一個是1結果就是1)
+table(re = Un$real,pr= Un$uRL1)
+cm <- table(re = Un$real,pr= Un$uRL1)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.685714285714286 0.804878048780488 0.260869565217391"
+table(R=Un[,3],L=Un[,4])
+#     L
+#R    0  1
+#0   22  7
+#1   22 54
+
+
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(3,5)]==1)){
+    Un[i,"uRX1"] <- "1"
+  }else{
+    Un[i,"uRX1"] <- "0"
+  }
+}#RF XGB聯集(任一個是1結果就是1)
+table(re = Un$real,pr= Un$uRX1)
+cm <- table(re = Un$real,pr= Un$uRX1)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.733333333333333 0.890243902439024 0.173913043478261"
+
+for(i in 1:(nrow(Un))){
+  if (any(Un[i,c(3,5)]==0)){
+    Un[i,"uRX0"] <- "0"
+  }else{
+    Un[i,"uRX0"] <- "1"
+  }
+}#RF XGB聯集(任一個是0結果就是0)
+table(re = Un$real,pr= Un$uRX0)
+cm <- table(re = Un$real,pr= Un$uRX0)
+acc <- (cm[1]+cm[4]) / sum(cm)
+sen <- cm[4] / (cm[2]+cm[4])
+spe <- cm[1] / (cm[1]+cm[3])
+print(paste(acc,sen,spe))
+#"0.676190476190476 0.75609756097561 0.391304347826087"
+
+
+
+
 
 
 write.csv(Un,"allesb.csv",row.names = F)
+
+
+
+
+
+
+
+
 
 #VC1=>2 => train=dm1 test= dm2
 str(dm1)
