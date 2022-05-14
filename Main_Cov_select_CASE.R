@@ -507,6 +507,8 @@ co.3$`Train acc sen spe`#0.7386635 0.8401254 0.4150000
 co.3$`CM of Test data`
 co.3$`Test acc sen spe`#0.6476190 0.7023810 0.4285714
 
-
-
+#訓練=>CNTr 測試=>CNTe
+#模型 bimm1 h1 h2 h3 RF
+#要社mtry 跟sampsize
+#formula2 4
 
