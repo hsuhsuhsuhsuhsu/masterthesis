@@ -511,4 +511,70 @@ co.3$`Test acc sen spe`#0.6476190 0.7023810 0.4285714
 #模型 bimm1 h1 h2 h3 RF
 #要社mtry 跟sampsize
 #formula2 4
+#訓練=>CNTr 測試=>CNTe
+str(CNTr)
+#模型 bimm1 h1 h2 h3 RF
 
+
+#要社mtry(一棵樹丟幾個變數) 跟sampsize
+#formula 2 4
+dim(CNTr)
+table(CNTr$dip)
+newCNTr <- rbind(CNTr, dplyr::filter(CNTr, dip == 0))
+
+table(newCNTr$dip)
+
+newCNTr2<- rbind(newCNTr, dplyr::filter(CNTr, dip == 0))
+table(newCNTr2$dip)
+
+bimm1_mtry2_samp198198 <- BiMMforestH3(traindata = CNTr, testdata = CNTe,
+                                       formula = F2, random = "+(1|time)",
+                                       seed = 123, glmControl = "maxfun",
+                                       sampsize = c(198,198),
+                                       mtry=4)#0.5360360 0.6176471 0.2692308
+
+
+bimm1_mtry2_samp198198$`Train acc sen spe`
+bimm1_mtry2_samp198198$`Test acc sen spe`
+
+(tb <- bimm1_mtry2_samp198198$`CM of Train data`)
+acc = 682 / (198+682)
+sen = 682 / 682+0
+spe = 0
+
+bimm1_mtry2_samp198198$`CM of Test data`
+
+
+
+bimm3 <- BiMMforestH1(traindata = CNTr, testdata = CNTe,
+                      formula = F2, random = "+(1|time)",
+                      seed = 123, glmControl = "maxfun",
+                      sampsize = c(198,198),
+                      mtry=4)
+bimm3$`Train acc sen spe`
+bimm3$`Test acc sen spe`
+
+
+
+bimm4 <- BiMMforest1(traindata = CNTr, testdata = CNTe,
+                     formula = F2, random = "+(1|time)",
+                     seed = 123, glmControl = "maxfun",
+                     sampsize = c(198,198),
+                     mtry=4)
+
+bimm4$`Train acc sen spe`
+bimm4$`Test acc sen spe`
+
+colnames(CNTr)
+rr <- RF(traindata = CNTr, testdata = CNTe,
+         formula = F2, classwt = NULL, seed = 123)
+
+rr <- RF(traindata = CNTr, testdata = CNTe,
+         formula = F4, seed = 123, sampsize = c(198, 198))
+
+rr$`Train acc sen spe`
+rr$`Test acc sen spe`
+rr$`CM of Train data`
+
+rr$`CM of Test data`
+rr$RF
