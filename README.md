@@ -32,18 +32,24 @@ predict. Predict nocturnal blood pressure drop.
 
 <b>Keywords: Nocturnal dipping、Machine learning、Repeated measure、Random Forest、Binary Mixed Model Forest</b>
 
-## Data Sets
+<!--## Data Sets
 
 <div>
 
   <img src="圖片1.png" style="width:40% ;float:left"> 
   
   
-</div>
+</div>-->
 
 ## Work Flow
 <div>
 
   <img src="flow2.png"> 
-  
+  Data preprocessing including<br> 
+  1.Data Cleaning<br>
+  2.
+  3.
+  4.
+  5.
+  6.
 </div>
