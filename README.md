@@ -1,5 +1,7 @@
+<link rel="stylesheet" href="/github_img/myCSS.css">
 
 # Machine learning classification models for nocturnal dipping of blood pressure
+
 
 ## Abstract
   In recent years, home blood pressure monitoring (HBPM) is the most recommended
@@ -31,4 +33,17 @@ predict. Predict nocturnal blood pressure drop.
 <b>Keywords: Nocturnal dipping、Machine learning、Repeated measure、Random Forest、Binary Mixed Model Forest</b>
 
 ## Data Sets
-## Flow Chart
+
+<div>
+
+  <img src="圖片1.png" style="width:40% ;float:left"> 
+  
+  
+</div>
+
+## Work Flow
+<div>
+
+  <img src="flow2.png"> 
+  
+</div>
