@@ -69,5 +69,5 @@ predict. Predict nocturnal blood pressure drop.
   When the predict rule is "Visit 1 predict new patients", we include all people in Visit 1.<br>
   And when it comes to "Visit 1 predict Visit 2" or "Visit 1 & 2 predict Visit 3", we only include those who have all 3 visits.
 
-  <img src="flow2.png"> 
+  <img src="PICfile/flow2.png"> 
 </div>
