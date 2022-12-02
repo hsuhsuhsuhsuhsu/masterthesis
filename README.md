@@ -38,18 +38,36 @@ predict. Predict nocturnal blood pressure drop.
 
   <img src="圖片1.png" style="width:40% ;float:left"> 
   
+ 
   
 </div>-->
 
 ## Work Flow
 <div>
+    There are many datasets in TCHCD database including Demographics, Blood pressure measurements, Vital Signs, Treatment, etc.<br>
+  And the Blood pressure measurements,Vital Signs, Treatment datasets were repeated measures every few months.
+  
+  Data preprocessing including :
+  
+<b>1.Data cleaning</b><br>
+  For each dataset, we delete duplicate data or all data with missing value.<br>
+  For demographics, we delete material with unreasonable birthday, date of visit, or missing value.<br>
+  And for repeated measures datasets, we renumber the variable “visit” according to the time sequence.
+
+<b>2.Data merge</b><br>
+  After cleaning the data, we merged all datasets into one big dataset and it including all variables in database.
+
+<b>3.Variable selecting</b><br>
+  Trying to figure out what variables are more important in this research, after excluding variables that missing values are more than 30%, we use Random Forest to   cauclate the variable importance.<br>
+  And depends on missing pattern, different predict rule would select different variables.
+
+<b>4.Data imputation</b><br>
+  We use "missForest" method to impute missing values in dataset, and made the dataset more complete in order to modeling and analyzing the data.
+
+<b>5.Data Split</b><br>
+  According to the predict rules in the flow charts, we split data into Training Set and Test Set.<br>
+  When the predict rule is "Visit 1 predict new patients", we include all people in Visit 1.<br>
+  And when it comes to "Visit 1 predict Visit 2" or "Visit 1 & 2 predict Visit 3", we only include those who have all 3 visits.
 
   <img src="flow2.png"> 
-  Data preprocessing including<br> 
-  1.Data Cleaning<br>
-  2.
-  3.
-  4.
-  5.
-  6.
 </div>
